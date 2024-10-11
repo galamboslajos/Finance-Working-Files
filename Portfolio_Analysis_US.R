@@ -76,6 +76,8 @@ daily_cov_matrix <- cov(returns_xts, use = "complete.obs")
 # Annualize the covariance matrix by multiplying by 252 (trading days)
 annual_cov_matrix <- daily_cov_matrix * 252
 
+###### Until Here things are fine, but I do not trust the following part entirely ######
+
 # Function to calculate portfolio returns and risk
 portfolio_stats <- function(weights, mean_returns, cov_matrix) {
   port_return <- sum(weights * mean_returns)
