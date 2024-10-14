@@ -1,0 +1,297 @@
+---
+title: "Turkey and Exchange Rate Overview"
+author: "Lajos Galambos"
+format: html
+---
+
+# Turkish Lira
+
+The Turkish Lira has experienced serious devaluation in the last decade. Much of its devaluation (against major currencies) has been paralleled with the recent macroeconomic struggles of Turkey. Sky high inflation, global shocks, inappropriate economic policies, and political interference made the problems especially acute.
+
+The Economist (a newspaper) in an article shed some light on Turkey's way out from the crisis ([Turkey’s long hard struggle with inflation](https://www.economist.com/europe/2024/10/10/turkeys-long-hard-struggle-with-inflation)). After mixed policy choices of the Turkish Central Bank, interest rates are high now, and the Economist claims that consumer prices are increasing in slower pace. The new monetary toolkit seems to be effective.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+library(quantmod)
+library(ggplot2)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Get the Exchange Rate Data
+symbol <- "TRY=X"
+
+# 10 years historical data
+start_date <- Sys.Date() - 365.25 * 10  # 10 years ago
+end_date <- Sys.Date()  # today
+
+# Get exchange rate data
+getSymbols(symbol, src = "yahoo", from = start_date, to = end_date)
+exchange_rate <- Cl(get(symbol))
+
+exchange_rate_df <- data.frame(Date = index(exchange_rate), Close = as.numeric(exchange_rate))
+```
+
+## Interest Rates in Turkey and in the US
+
+### Figure 1:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Plot exchange rate data
+ggplot(exchange_rate_df, aes(x = Date, y = Close)) +
+  geom_line(color = "#1c61b6") +
+  ggtitle("USD/TRY Exchange Rate (Last 10 Years)") +
+  xlab("Date") +
+  ylab("Exchange Rate") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, color = "#666666", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "#666666", size = 12),
+        axis.title.y = element_text(color = "#666666", size = 12),
+        panel.border = element_rect(fill = NA, color = "#666666", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"),
+        panel.grid.minor = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Create a ratio
+first_exchange_rate<- exchange_rate_df$Close[1]
+last_exchange_rate <- tail(exchange_rate_df$Close, n = 1)
+ratio <- last_exchange_rate / first_exchange_rate
+print(first_exchange_rate)
+print(last_exchange_rate)
+print(ratio)
+```
+
+Figure 1 shows the historical exchange rate of 1 US Dollar in Turkish Lira units. It is clear that the Lira's devaluation was severe, for 1 Turkish Lira you could receive 15 times less USD dollars in 2024 than in 2014. Data is taken from [finance.yahoo.com](https://finance.yahoo.com/quote/TRY=X/).
+
+|                                              |                         |
+|----------------------------------------------|-------------------------|
+| 2024 Exchange Rate Level                     | 2.2703 (TRY for 1 USD)  |
+| 2014 Exchange Rate Level                     | 34.2743 (TRY for 1 USD) |
+| Ratio of Recent and Old Exchange Rate Levels | 15.0964                 |
+
+: Ratio of recent and old exchange rate
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Interest Rate Data TURKEY
+symbol <- "IRSTCI01TRM156N"
+# IRSTCI01TRM156N represents the monthly national short-term interbank interest rate for Turkey. 
+
+# Define start and end dates
+start_date <- "2014-01-01"  # start of 2014
+end_date <- Sys.Date()  # today
+
+# Get interest rate data
+getSymbols(symbol, src = "FRED", from = start_date, to = end_date)
+interest_rate <- get(symbol)
+
+# Convert to data frame for ggplot2
+interest_rate_df <- data.frame(Date = index(interest_rate), InterestRate = as.numeric(interest_rate))
+```
+
+### Figure 2:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Plot interest rate data TURKEY
+ggplot(interest_rate_df, aes(x = Date, y = InterestRate)) +
+  geom_line(color = "#1c61b6") +
+  ggtitle("Turkey Interest Rate (Since 2014)") +
+  xlab("Date") +
+  ylab("Interest Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, color = "#666666", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "#666666", size = 12),
+        axis.title.y = element_text(color = "#666666", size = 12),
+        panel.border = element_rect(fill = NA, color = "#666666", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"),
+        panel.grid.minor = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"))
+```
+
+Figure 2 shows historical interest rates (short term, policy rate) in percentages for Turkey. The data contains numerous missing observations. Monetary policy in Turkey had reversal in strategy amid the COVID pandemic, recently got back again to the high interest rate environment. Data is taken from the [Federal Reserve Economic Data](https://fred.stlouisfed.org/series/IRSTCI01TRM156N).
+
+### Figure 3:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Interest Rate Data US
+symbol_US <- "IRSTCI01USM156N"
+
+# Define start and end dates
+start_date_US <- "2014-01-01"  # start of 2014
+end_date_US <- Sys.Date()  # today
+
+# Get interest rate data
+getSymbols(symbol_US, src = "FRED", from = start_date_US, to = end_date_US)
+interest_rate_US <- get(symbol_US)
+
+# Convert to data frame for ggplot2
+interest_rate_df_US <- data.frame(Date = index(interest_rate_US), InterestRate = as.numeric(interest_rate_US))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Plot interest rate data
+ggplot(interest_rate_df_US, aes(x = Date, y = InterestRate)) +
+  geom_line(color = "#1c61b6") +
+  ggtitle("US Interest Rate (Since 2014)") +
+  xlab("Date") +
+  ylab("Interest Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, color = "#666666", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "#666666", size = 12),
+        axis.title.y = element_text(color = "#666666", size = 12),
+        panel.border = element_rect(fill = NA, color = "#666666", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"),
+        panel.grid.minor = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"))
+
+```
+
+Figure 3 shows historical interest rates (short term, policy rate) in percentages for the US. Monetary policy in the US remained consistent with its objectives and applied tools, for rising consumer prices interest rates stayed high. Data is taken from the [Federal Reserve Economic Data](https://fred.stlouisfed.org/series/IRSTCI01USM156N).
+
+It is clear the interest rate in Turkey has been consistently higher than in the US. The high interest rate environment in Turkey is a result of the recent economic downturns. The US has a more stable economy and can afford to keep interest rates lower.
+
+To see the differences in percentage points clearer, Figure 4 plots the difference between the two interest rates.
+
+### Figure 4:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Difference Plot 
+# Merge the two data frames by Date
+merged_df <- merge(interest_rate_df, interest_rate_df_US, by = "Date", suffixes = c("_TR", "_US"))
+
+merged_df$InterestRate_Diff <- merged_df$InterestRate_TR - merged_df$InterestRate_US
+
+# Plot the difference in interest rates
+ggplot(merged_df, aes(x = Date, y = InterestRate_Diff)) +
+  geom_line(color = "#1c61b6") +
+  ggtitle("Difference in Interest Rates (Turkey - US, Since 2014)") +
+  xlab("Date") +
+  ylab("Interest Rate Difference (% points)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, color = "#666666", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "#666666", size = 12),
+        axis.title.y = element_text(color = "#666666", size = 12),
+        panel.border = element_rect(fill = NA, color = "#666666", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"),
+        panel.grid.minor = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"))
+```
+
+Early Period (2014-2019): The difference in interest rates appears relatively stable in the first few years. Turkey's short-term interest rates were consistently higher than the U.S.'s by around 10-12 percentage points, reflecting Turkey's higher inflation and risk profile.
+
+Post-2019 Volatility: From around 2019 onward, the gap becomes more volatile. Large increases and subsequent drops suggest significant changes in Turkish interest rates, which likely coincide with: Central Bank of Turkey interventions:
+
+A response to economic pressures such as inflation and currency depreciation. U.S. Federal Reserve policy shifts: Stable U.S. rates with gradual adjustments, but the volatility here is mostly due to Turkish monetary policy.
+
+Recent Data: The sharp jumps and changes around 2020-2023 suggest a period of significant economic adjustments in Turkey, which may be related to political factors, inflationary pressures, and efforts to stabilize the Turkish lira.
+
+## Inflation in Turkey and in the US
+
+### Figure 5: 
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Inflation Data TURKEY
+symbol_inflation_TR <- "TURCPALTT01CTGYM"
+
+start_date_inflation_TR <- "2014-01-01"  # start of 2014
+end_date_inflation_TR <- Sys.Date()  # today
+
+# Get inflation rate data
+getSymbols(symbol_inflation_TR, src = "FRED", from = start_date_inflation_TR, to = end_date_inflation_TR)
+inflation_rate_TR <- get(symbol_inflation_TR)
+
+# Convert to data frame for ggplot2
+inflation_rate_df_TR <- data.frame(Date = index(inflation_rate_TR), InflationRate = as.numeric(inflation_rate_TR))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Plot inflation rate data
+ggplot(inflation_rate_df_TR, aes(x = Date, y = InflationRate)) +
+  geom_line(color = "#1c61b6") +
+  ggtitle("Turkey Inflation Rate (Since 2014)") +
+  xlab("Date") +
+  ylab("Inflation Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, color = "#666666", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "#666666", size = 12),
+        axis.title.y = element_text(color = "#666666", size = 12),
+        panel.border = element_rect(fill = NA, color = "#666666", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"),
+        panel.grid.minor = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"))
+```
+
+Figure 4 shows Consumer Price Index change Total for Turkey. In the post-Covid period consumer prices truly skyrocketed, prices increased up to 85% compared to the same month over one year. Data is taken from the [Federal Reserve Economic Data](https://fred.stlouisfed.org/series/TURCPALTT01CTGYM).
+
+### Figure 6: 
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Inflation Data US
+symbol_inflation_US <- "USACPALTT01CTGYM"
+
+start_date_inflation_US <- "2014-01-01"  # start of 2014
+end_date_inflation_US <- Sys.Date()  # today
+
+# Get inflation rate data
+getSymbols(symbol_inflation_US, src = "FRED", from = start_date_inflation_US, to = end_date_inflation_US)
+inflation_rate_US <- get(symbol_inflation_US)
+
+# Convert to data frame for ggplot2
+inflation_rate_df_US <- data.frame(Date = index(inflation_rate_US), InflationRate = as.numeric(inflation_rate_US))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Plot inflation rate data
+ggplot(inflation_rate_df_US, aes(x = Date, y = InflationRate)) +
+  geom_line(color = "#1c61b6") +
+  ggtitle("US Inflation Rate (Since 2014)") +
+  xlab("Date") +
+  ylab("Inflation Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, color = "#666666", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "#666666", size = 12),
+        axis.title.y = element_text(color = "#666666", size = 12),
+        panel.border = element_rect(fill = NA, color = "#666666", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"),
+        panel.grid.minor = element_line(size = 0.2, linetype = 'solid', color = "#cccccc"))
+```
