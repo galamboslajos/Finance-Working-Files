@@ -21,7 +21,7 @@ from scipy.optimize import minimize
 
 I take an overview of well-known stockmarket indicies from different countries. I want to see the overall risk-return pattern of major stockmarkets. I take data from the year 2000 up until 2024. I plot average annual returns against avarage annual volatilities. 
 
-
+### Downloading the indicies with the help of y.finance (yf.download)
 ```python
 indices = {
     'S&P 500': '^GSPC',
@@ -58,6 +58,9 @@ for name, ticker in indices.items():
     data[name] = yf.download(ticker, start='2000-01-01', end='2024-01-01')['Adj Close']
 ```
 
+### Computing Returns and Volatility 
+
+First, there are two empty dictionaries created for Returns and Std_dev, which than filled with the help of a for loop (takes the computation of returns and stdev through the enterie series) and stores in new columns dedicated for Returns and Std_dev.
 
 ```python
 returns = {}
