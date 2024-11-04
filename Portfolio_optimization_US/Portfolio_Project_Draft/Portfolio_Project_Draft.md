@@ -752,7 +752,7 @@ This visualization provides a useful summary for identifying potential diversifi
 
 
 
-# Portfolio Optimization for 40 US Stocks (no contraints on the number of assets in the portfolio BUT no short selling condition applied)
+# Portfolio Optimization for 40 US Stocks (no constraints on the number of assets in the portfolio BUT no short selling condition applied)
 
 
 ```python
@@ -772,13 +772,14 @@ prices_df = pd.DataFrame(data)
 
 ### Important assumption about the risk free! Change it if it has changed!
 
-It might be a bit repetitive 
+It might be a bit repetitive, but I want to make sure that the steps are staightforward and transparent. The return series can be checked here too, to avoid errors.
+
+The risk free is an important input for computing the Sharpe ratio: the excess returns are defined as returns above the the risk-free returns.
 
 ```python
 # Set the risk-free rate
 risk_free_rate = 0.03
 
-# Calculate annual returns and standard deviation (volatility)
 annual_returns = prices_df.resample('Y').last().pct_change().dropna()
 mean_annual_returns = annual_returns.mean()
 annual_cov_matrix = annual_returns.cov()
@@ -788,6 +789,9 @@ annual_cov_matrix = annual_returns.cov()
 # "Uncomment" if want to check!
 ```
 
+### The main variables of portfolio optimization is defined
+
+Returns, Risk (Covariance matrix), and the Sharpe ratio are the key inputs for portfolio analysis.
 
 ```python
 def portfolio_performance(weights, mean_returns, cov_matrix, risk_free_rate=0.03):
