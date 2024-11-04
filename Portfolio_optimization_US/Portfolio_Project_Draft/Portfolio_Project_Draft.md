@@ -324,11 +324,11 @@ slope = reg.coef_[0]
 
 print(f"Slope of the fitted line: {slope:.4f}")
 ```
+The fitted slope only serves demonstrational purposes to show the average positive relationship between risks and returns. We see that in the last 24 year, US stockmarkets experienced average annual returns of 6.6% - 7.3 % - 11.3% (depending on which market index are we talking about) with average annual volatilites of 14.6% - 17.9% - 25.6% (respectively). 
 
     Slope of the fitted line: 0.6894
 
-
-The fitted slope only serves demonstrational purposes to show the average positive relationship between risks and returns. We see that in the last 24 year, US stockmarkets experienced average annual returns of 6.6% - 7.3 % - 11.3% (depending on which market index are we talking about) with average annual volatilites of 14.6% - 17.9% - 25.6% (respectively). 
+A simplistic understanding of the relationship of the annualized average risks and returns for the sample of global stockmarket indicies is that 1 % point increase of risk is associated with 0.69 % point increase in returns (on average).
 
 ## Portfolio Optimization of US Stock Portfolio 
 
@@ -679,10 +679,10 @@ slope = reg.coef_[0]
 
 print(f"Slope of the fitted line: {slope:.4f}")
 ```
+A simplistic understanding of the relationship (slope result) of the annualized average risks and returns for the sample of 40 US Stocks is that 1 % point increase of risk is associated with 0.73 % point increase in returns (on average). 
 
     Slope of the fitted line: 0.7293
 
-A simplistic understanding of the relationship of the annualized average risks and returns for the sample of 40 US Stocks is that 1 % point increase of risk is associated with 0.73 % point increase in returns (on average). 
 
 ```python
 # Create a DataFrame to store annual returns
