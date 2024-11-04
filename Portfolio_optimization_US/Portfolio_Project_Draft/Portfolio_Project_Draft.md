@@ -352,6 +352,8 @@ for ticker in tickers:
 
 ### Computing key variables: Returns, Volatities, and annualizing them
 
+The prices time series is resampled to a yearly frequency using 'Y'. This takes the last available price within each year, and ffill() ensures any missing data is filled by carrying the last observed value forward.
+
 ```python
 returns_std_list = []
 
@@ -360,17 +362,13 @@ for ticker, prices in data.items():
     mean_annual_return = annual_returns.mean()
     std_dev = annual_returns.std()
     
-    # Append to list
     returns_std_list.append({
         'Ticker': ticker,
         'Annual Return': mean_annual_return,
         'Standard Deviation': std_dev
     })
 
-# Convert list to DataFrame
 returns_std_df = pd.DataFrame(returns_std_list)
-
-# Display the DataFrame
 returns_std_df
 ```
 
@@ -646,7 +644,7 @@ returns_std_df
 </div>
 
 
-
+### Scatter Plot for Annualized Average Returns and Volatilities for the sample of 40 US Stocks
 
 ```python
 plt.figure(figsize=(14, 8))
@@ -668,19 +666,15 @@ plt.show()
 ![png](output_14_0.png)
     
 
-
+### Relationship Analysis of Annualized Average Risks and Retunrs for the sample of 40 US Stocks
 
 ```python
 from sklearn.linear_model import LinearRegression
 
-# Prepare the data for linear regression
 X = returns_std_df['Standard Deviation'].values.reshape(-1, 1)
 y = returns_std_df['Annual Return'].values
 
-# Perform linear regression
 reg = LinearRegression().fit(X, y)
-
-# Get the slope of the fitted line
 slope = reg.coef_[0]
 
 print(f"Slope of the fitted line: {slope:.4f}")
@@ -688,7 +682,7 @@ print(f"Slope of the fitted line: {slope:.4f}")
 
     Slope of the fitted line: 0.7293
 
-
+A simplistic understanding of the relationship of the annualized average risks and returns for the sample of 40 US Stocks is that 1 % point increase of risk is associated with 0.73 % point increase in returns (on average). 
 
 ```python
 # Create a DataFrame to store annual returns
