@@ -75,7 +75,7 @@ returns_df = pd.DataFrame.from_dict(returns, orient='index', columns=['Return'])
 std_devs_df = pd.DataFrame.from_dict(std_devs, orient='index', columns=['StdDev'])
 ```
 
-### Plotting the y~x, the average returns of stockmarket against their avarage volatility
+### Plotting the y~x, the average annualized returns of stockmarket (y) against their avarage annualized volatility (x)
 
 ```python
 plt.figure(figsize=(14, 8))
@@ -96,7 +96,7 @@ plt.show()
 ![png](output_6_0.png)
     
 
-
+### Creating a tabe that containst the indicies, average annualized returns, and average annualized volatility
 
 ```python
 # Combine returns and standard deviations into a single DataFrame
@@ -334,63 +334,8 @@ The fitted slope only serves demonstrational purposes to show the average positi
 
 In this section, I take a sample of 40 stocks from the largest US public firms, I take a timeframe of the last 10 years, I take returns, volatility, which I annualize. I perform a portfolio optimisiation in the mean-variance dimension: I create Minimum Variance Portfolio, Max Return Portfolio, and Tangency Portfolio (that maximizes the Sharpe Ratio). I plot the Efficiency Frontier, the Capital Market Line and extract the weights and key statistics of each optimised portfolio.
 
-### Methodology
-First, Daily Returns are calculated as follows: 
-\begin{equation}
-r_{t,i} = \frac{P_{t,i} - P_{t-1,i}}{P_{t-1,i}}
-\end{equation}
 
-Using these daily returns, I computed the annualized returns and volatilities for each stock (252 represents the number of trading days in a year):
-
-\begin{equation}
-\mu_i = \bar{r_i} \times 252, \quad \sigma_i = \sigma_{\text{daily},i} \times \sqrt{252}
-\end{equation}
-
-
-Second, Covariance Matrix and Portfolio Performance:
-The covariance matrix of the stock returns was computed to account for the relationships between stocks:
-
-\begin{equation}
-\Sigma_{ij} = \text{Cov}(r_i, r_j)
-\end{equation}
-
-Given the returns, volatilities, and covariance matrix, the portfolio's expected return and volatility were calculated as:
-
-\begin{equation}
-\mu_p = \sum_{i=1}^{n} w_i \mu_i, \quad \sigma_p = \sqrt{\mathbf{w}^T \Sigma \mathbf{w}}
-\end{equation}
-
-Third, Portfolio Optimization:
-I performed optimization for three types of portfolios:
-
-Minimum Variance Portfolio: This portfolio minimizes the overall portfolio risk (volatility) subject to the constraint that the sum of the portfolio weights equals 1. The objective is to minimize:
-
-\begin{equation}
-\text{Minimize: } \sigma_p = \sqrt{\mathbf{w}^T \Sigma \mathbf{w}}
-\end{equation}
-
-Tangency Portfolio (Maximum Sharpe Ratio Portfolio): 
-The tangency portfolio maximizes the Sharpe ratio, defined as:
-
-\begin{equation}
-\text{Sharpe Ratio} = \frac{\mu_p - r_f}{\sigma_p}
-\end{equation}
-
-This portfolio represents the optimal mix of risky assets.
-
-Maximum Return Portfolio: The portfolio that assigns all weights to the stock with the highest expected return.
-
-Fourth, Efficient Frontier and Capital Market Line (CML): 
-I generate a large number of random portfolios to visualize the efficient frontier, which represents the set of portfolios offering the maximum return for a given level of risk. The portfolios are scattered along this curve, and key portfolios such as the minimum variance and tangency portfolios are highlighted.
-
-The Capital Market Line (CML) is the straight line that originates from the risk-free rate and is tangent to the efficient frontier at the tangency portfolio. It is calculated as:
-
-\begin{equation}
-E(R_p) = r_f + \frac{E(R_m) - r_f}{\sigma_m} \times \sigma_p
-\end{equation}
-
-
-
+### Downloading the sample of US Stocks using yf.download
 
 ```python
 tickers = [
@@ -405,58 +350,13 @@ for ticker in tickers:
     data[ticker] = yf.download(ticker, start='2014-01-01', end='2024-01-01')['Adj Close']
 ```
 
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-
-
+### Computing key variables: Returns, Volatities, and annualizing them
 
 ```python
-# Create a list to store annual returns and standard deviations
 returns_std_list = []
 
 for ticker, prices in data.items():
-    # Calculate annual returns
     annual_returns = prices.resample('Y').ffill().pct_change().dropna()
-    
-    # Calculate mean annual return and standard deviation
     mean_annual_return = annual_returns.mean()
     std_dev = annual_returns.std()
     
