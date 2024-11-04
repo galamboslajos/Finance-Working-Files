@@ -303,6 +303,9 @@ summary_df
 </div>
 
 
+## What is the relationship of returns and risks for the sample of stockmarkets worldwide?
+
+Fitting a linear line to the scatter might inidcate the direction of the relationship (and the strength of it). Althought the sample size is very small, still, it can help to imagine the nature of the relationship. 
 
 
 ```python
