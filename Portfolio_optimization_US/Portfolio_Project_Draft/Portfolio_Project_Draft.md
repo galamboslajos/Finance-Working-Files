@@ -75,6 +75,7 @@ returns_df = pd.DataFrame.from_dict(returns, orient='index', columns=['Return'])
 std_devs_df = pd.DataFrame.from_dict(std_devs, orient='index', columns=['StdDev'])
 ```
 
+### Plotting the y~x, the average returns of stockmarket against their avarage volatility
 
 ```python
 plt.figure(figsize=(14, 8))
