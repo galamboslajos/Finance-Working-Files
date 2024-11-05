@@ -802,7 +802,7 @@ def portfolio_performance(weights, mean_returns, cov_matrix, risk_free_rate=0.03
 
 ```
 
-### A simlation of 10.000 portfolios (with randomly assugned weigts) begin
+### A simlation of 10.000 portfolios (with randomly assigned weights) begin
 
 The simulation is also recored, so we can call the optimized specific portfolios (based on return, risk, or Sharpe-ratio) later. It is crucial to record them so we can also extract the weights of optimized portfolios. When locating the Min.Risk, Max.Return and Tangency Portfolios one can also see a preliminary display of key portfolio metrics. It is important to note that at this part of the optimization there are no constraints on the number of assets included in each portfolio. Each portfolios included some positive fraction of EACH asset!
 
