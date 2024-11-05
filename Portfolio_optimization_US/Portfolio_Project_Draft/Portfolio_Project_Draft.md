@@ -331,7 +331,7 @@ The fitted slope only serves demonstrational purposes to show the average positi
 
 A simplistic understanding of the relationship of the annualized average risks and returns for the sample of global stockmarket indicies is that 1 % point increase of risk is associated with 0.69 % point increase in returns (on average).
 
-## Portfolio Optimization of US Stock Portfolio 
+## Portfolio Optimization of US Stock Portfolio 🇺🇸📈$
 
 In this section, I take a sample of 40 stocks from the largest US public firms, I take a timeframe of the last 10 years, I take returns, volatility, which I annualize. I perform a portfolio optimisiation in the mean-variance dimension: I create Minimum Variance Portfolio, Max Return Portfolio, and Tangency Portfolio (that maximizes the Sharpe Ratio). I plot the Efficiency Frontier, the Capital Market Line and extract the weights and key statistics of each optimised portfolio.
 
