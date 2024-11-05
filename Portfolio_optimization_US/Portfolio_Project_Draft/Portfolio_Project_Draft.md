@@ -752,7 +752,7 @@ This visualization provides a useful summary for identifying potential diversifi
 
 
 
-# Portfolio Optimization for 40 US Stocks (no constraints on the number of assets in the portfolio BUT no short selling condition applied)
+## Portfolio Optimization for 40 US Stocks (no constraints on the number of assets in the portfolio BUT no short selling condition applied)
 
 
 ```python
