@@ -802,29 +802,28 @@ def portfolio_performance(weights, mean_returns, cov_matrix, risk_free_rate=0.03
 
 ```
 
+### A simlation of 10.000 portfolios (with randomly assugned weigts) begin
+
+The simulation is also recored, so we can call the optimized specific portfolios (based on return, risk, or Sharpe-ratio) later. It is crucial to record them so we can also extract the weights of optimized portfolios. When locating the Min.Risk, Max.Return and Tangency Portfolios one can also see a preliminary display of key portfolio metrics. It is important to note that at this part of the optimization there are no constraints on the number of assets included in each portfolio. Each portfolios included some positive fraction of EACH asset!
 
 ```python
-# Number of portfolios to simulate
+# Simulation with randomly assigned weights
 num_portfolios = 10000
 
-# Store portfolio metrics
 results = np.zeros((3, num_portfolios))
 weights_record = []
 
 for i in range(num_portfolios):
-    # Randomly assign weights and normalize
     weights = np.random.random(len(mean_annual_returns))
     weights /= np.sum(weights)
     weights_record.append(weights)
     
-    # Calculate portfolio metrics
     portfolio_return, portfolio_std_dev, portfolio_sharpe = portfolio_performance(weights, mean_annual_returns, annual_cov_matrix, risk_free_rate)
     
     results[0, i] = portfolio_return
     results[1, i] = portfolio_std_dev
     results[2, i] = portfolio_sharpe
 
-# Convert results to DataFrame for analysis
 results_df = pd.DataFrame(results.T, columns=['Return', 'Volatility', 'Sharpe Ratio'])
 ```
 
@@ -839,28 +838,9 @@ max_sharpe_portfolio = results_df.loc[max_sharpe_idx]
 min_vol_portfolio = results_df.loc[min_vol_idx]
 max_return_portfolio = results_df.loc[max_return_idx]
 
-max_sharpe_portfolio, min_vol_portfolio, max_return_portfolio
-
+# max_sharpe_portfolio, min_vol_portfolio, max_return_portfolio
+# "Uncomment" these lines to see the preliminary metrics of portfolios! They will be displayed later also.
 ```
-
-
-
-
-    (Return          0.187916
-     Volatility      0.111467
-     Sharpe Ratio    1.416712
-     Name: 3563, dtype: float64,
-     Return          0.164351
-     Volatility      0.107138
-     Sharpe Ratio    1.254000
-     Name: 4525, dtype: float64,
-     Return          0.244518
-     Volatility      0.196991
-     Sharpe Ratio    1.088973
-     Name: 4188, dtype: float64)
-
-
-
 
 ```python
 # Plotting
@@ -883,7 +863,6 @@ plt.plot(cml_x, cml_y, color='orange', linestyle='--', linewidth=2, label='Capit
 
 plt.legend()
 plt.show()
-
 ```
 
 
@@ -891,15 +870,17 @@ plt.show()
 ![png](output_25_0.png)
     
 
-
+### Extracting the weights and summarising the key metrics of each optimized portfolio
 
 ```python
-# Convert weights to percentages for readability
+min_vol_weights = weights_record[min_vol_idx]
+max_sharpe_weights = weights_record[max_sharpe_idx]
+max_return_weights = weights_record[max_return_idx]
+
 min_vol_weights_pct = min_vol_weights * 100
 max_sharpe_weights_pct = max_sharpe_weights * 100
 max_return_weights_pct = max_return_weights * 100
 
-# Create DataFrame for weights
 weights_summary_df = pd.DataFrame({
     'Company': tickers,
     'Min Variance Weight (%)': min_vol_weights_pct,
@@ -908,7 +889,6 @@ weights_summary_df = pd.DataFrame({
 })
 
 weights_summary_df
-
 ```
 
 
@@ -1227,7 +1207,19 @@ weights_summary_df
 
 
 ```python
-# Create summary for overall portfolio metrics
+# Portfolio Metrics
+min_vol_return = min_vol_portfolio['Return']
+min_vol_std_dev = min_vol_portfolio['Volatility']
+min_vol_sharpe = min_vol_portfolio['Sharpe Ratio']
+
+max_sharpe_return = max_sharpe_portfolio['Return']
+max_sharpe_std_dev = max_sharpe_portfolio['Volatility']
+max_sharpe_sharpe = max_sharpe_portfolio['Sharpe Ratio']
+
+max_return_return = max_return_portfolio['Return']
+max_return_std_dev = max_return_portfolio['Volatility']
+max_return_sharpe = max_return_portfolio['Sharpe Ratio']
+
 portfolio_summary_df = pd.DataFrame({
     'Portfolio': ['Minimum Variance', 'Tangency (Max Sharpe)', 'Maximum Return'],
     'Return': [min_vol_return, max_sharpe_return, max_return_return],
@@ -1236,7 +1228,6 @@ portfolio_summary_df = pd.DataFrame({
 })
 
 portfolio_summary_df
-
 ```
 
 
@@ -1340,38 +1331,6 @@ plt.legend()
 plt.grid(True)
 plt.show()
 ```
-
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-    [*********************100%***********************]  1 of 1 completed
-
-
-
     
 ![png](output_28_1.png)
     
