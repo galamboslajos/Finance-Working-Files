@@ -1,0 +1,158 @@
+---
+title: "Seasonality"
+author: "Lajos Galambos"
+format: html
+---
+
+## McDonald's (MCD) seasonality analysis
+
+I hold MCD stock in my portfolio. Recently, it has made significant gains, and I am interested in understanding the seasonality of its returns. I will analyze the average monthly returns of MCD stock over the past 10 years to identify any seasonal patterns.
+
+```{r}
+#| echo: false
+#| output: false
+#| message: false
+#| warning: false
+#install.packages("tidyquant")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+library(tidyquant)
+library(dplyr)
+library(ggplot2)
+```
+
+I take data from Yahoo Finance for McDonald's (MCD) stock from March 10, 2000, to March 10, 2025. I calculate the monthly returns and group them by month to compute the average monthly return for each month.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+ticker <- "MCD"
+start_date <- "2000-03-10"
+end_date <- "2025-03-10"
+
+mcd_data <- tq_get(ticker, from = start_date, to = end_date)
+
+mcd_data <- mcd_data %>%
+  mutate(Return = adjusted / lag(adjusted) - 1) %>%
+  mutate(Year = format(date, "%Y"),
+         Month = format(date, "%m")) 
+
+monthly_seasonality <- mcd_data %>%
+  group_by(Month) %>%
+  summarise(Average_Return = mean(Return, na.rm = TRUE) * 100)
+
+monthly_seasonality$Month <- factor(monthly_seasonality$Month, 
+                                    levels = sprintf("%02d", 1:12), 
+                                    labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
+ggplot(monthly_seasonality, aes(x = Month, y = Average_Return)) +
+  geom_bar(stat = "identity", fill = "blue", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "McDonald's (MCD) Monthly Seasonality (Avg. Monthly Return)",
+       x = "Month",
+       y = "Average Monthly Return (%)") +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12))
+```
+I also create a heatmap to visualize the seasonality of MCD stock over the past 10 years.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+seasonality_matrix <- mcd_data %>%
+  group_by(Year, Month) %>%
+  summarise(Average_Return = mean(Return, na.rm = TRUE) * 100) %>%
+  ungroup()
+
+seasonality_matrix$Month <- factor(seasonality_matrix$Month, 
+                                   levels = sprintf("%02d", 1:12), 
+                                   labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
+seasonality_matrix$Year <- factor(seasonality_matrix$Year, levels = rev(unique(seasonality_matrix$Year)))
+
+ggplot(seasonality_matrix, aes(x = Month, y = Year, fill = Average_Return)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "red", mid = "white", high = "green", midpoint = 0) +
+  labs(title = "McDonald's (MCD) Seasonality Matrix (Avg. Monthly Return %)",
+       x = "Month",
+       y = "Year",
+       fill = "Avg Return (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 9),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+
+Finally, lets count the number of positive and negative monthly returns for each month to see if there is a pattern in the number of positive and negative months for each month.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+if (!requireNamespace("gt", quietly = TRUE)) install.packages("gt")
+
+library(gt)
+library(dplyr)
+library(tidyr)
+
+positive_negative_counts <- mcd_data %>%
+  group_by(Year, Month) %>%
+  summarise(Avg_Return = mean(Return, na.rm = TRUE) * 100) %>%
+  ungroup() %>%
+  mutate(Result = ifelse(Avg_Return > 0, "Positive", "Negative")) %>%
+  group_by(Month, Result) %>%
+  summarise(Count = n()) %>%
+  tidyr::spread(Result, Count, fill = 0) %>%
+  mutate(Total = Positive + Negative,
+         Positive_Percentage = round((Positive / Total), 2))
+
+positive_negative_counts$Month <- factor(positive_negative_counts$Month, 
+                                         levels = sprintf("%02d", 1:12), 
+                                         labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
+positive_negative_counts %>%
+  gt() %>%
+  tab_header(
+    title = "Historical Monthly Returns: Positive vs. Negative"
+  ) %>%
+  fmt_number(
+    columns = c(Positive, Negative, Total),
+    decimals = 0
+  ) %>%
+  fmt_percent(
+    columns = Positive_Percentage,
+    decimals = 0
+  ) %>%
+  data_color(
+    columns = Positive_Percentage,
+    colors = scales::col_numeric(
+      palette = c("red", "yellow", "green"),
+      domain = c(min(positive_negative_counts$Positive_Percentage), max(positive_negative_counts$Positive_Percentage))
+    )
+  ) %>%
+  cols_label(
+    Month = "Month",
+    Positive = "Positive Months",
+    Negative = "Negative Months",
+    Total = "Total Years",
+    Positive_Percentage = "Positive %"
+  ) %>%
+  tab_options(
+    table.font.size = px(14),
+    heading.title.font.size = px(18),
+    column_labels.font.weight = "bold"
+  )
+```
+## Remarks 
+
+November has the highest percentage of positive months (96%), making it the most consistently strong month. June has the lowest percentage of positive months (32%), indicating it is the weakest. April (76%), March (69%), and July (68%) show strong positive trends, while January (48%), May (52%), and December (52%) are more balanced. This data highlights seasonal trends in historical market performance.
+
+
