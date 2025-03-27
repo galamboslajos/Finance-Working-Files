@@ -1,0 +1,73 @@
+---
+title: "Monte Carlo Simulation for Portfolio Forcasting"
+author: "Lajos Galambos"
+format: html
+---
+
+
+```{r}
+library(tidyverse)
+
+df <- read_csv("portfolio_returns.csv")
+
+returns <- df %>%
+  filter(Portfolio != 0) %>%
+  mutate(Portfolio = Portfolio / 100)  
+
+mu <- mean(returns$Portfolio)
+sigma <- sd(returns$Portfolio)
+```
+
+
+
+```{r}
+n_days <- 30        # Number of trading days (e.g. 1 year)
+n_simulations <- 100 # Number of Monte Carlo simulations
+initial_value <- 100  # Starting portfolio value
+
+set.seed(42)  
+sim_matrix <- replicate(n_simulations, {
+  daily_returns <- rnorm(n_days, mean = mu, sd = sigma)
+  cumprod(1 + daily_returns) * initial_value
+})
+
+matplot(sim_matrix, type = 'l', lty = 1, col = rgb(0, 0, 1, alpha = 0.1),
+        main = "Monte Carlo Simulation of Portfolio",
+        xlab = "Days", ylab = "Portfolio Value")
+abline(h = initial_value, col = "red", lty = 2)
+```
+
+
+
+```{r}
+hist(sim_matrix[n_days, ], breaks = 50, col = "skyblue",
+     main = "Distribution of Final Portfolio Values",
+     xlab = "Portfolio Value")
+
+```
+
+
+```{r}
+mean(sim_matrix[n_days, ])               # Expected final value
+sd(sim_matrix[n_days, ])                 # Standard deviation
+quantile(sim_matrix[n_days, ], c(0.05, 0.95))  # 90% confidence interval
+mean(sim_matrix[n_days, ] < initial_value)     # Probability of loss
+```
+
+```{r}
+final_values <- sim_matrix[n_days, ]
+returns_from_initial <- (final_values - initial_value) / initial_value
+
+z_95 <- qnorm(0.05)  
+var_parametric <- - (mu * n_days + z_95 * sigma * sqrt(n_days)) * initial_value
+cat("Parametric 1-year VaR (95%):", round(var_parametric, 2), "\n")
+
+# Historical Monte Carlo VaR (empirical)
+VaR_95 <- quantile(returns_from_initial, 0.05) * initial_value
+cat("Monte Carlo 1-year VaR (95%):", round(-VaR_95, 2), "\n")
+
+# 99% confidence
+VaR_99 <- quantile(returns_from_initial, 0.01) * initial_value
+cat("Monte Carlo 1-year VaR (99%):", round(-VaR_99, 2), "\n")
+```
+
