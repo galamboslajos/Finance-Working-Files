@@ -1,0 +1,127 @@
+---
+title: "Growth vs Value 2025"
+author: "Lajos Galambos"
+format: html
+---
+
+So far in 2025, value stocks have outperformed growth stocks, especially during the February–March correction, indicating a potential **rotation toward more defensive** or income-oriented equities. This comes in the broader context of a market environment characterized by rising uncertainties amid Trump's tariffs and consequence expectations of an economic slowdown.
+
+## Growth vs Value Stocks
+
+**Growth Stocks:**
+These are companies expected to grow revenues and earnings at a faster rate than the market average. They typically reinvest profits instead of paying high dividends. Prices often **reflect future potential more than current fundamentals**. (TSLA, AMZN, AAPL, NVDA, ...)
+
+**Value Stocks:**
+These are companies that appear underpriced relative to their fundamentals (earnings, dividends, book value). Often **mature businesses**, they may pay steady dividends and trade at lower price-to-earnings (P/E) or price-to-book ratios. (MCD, JMP, WMT, ...)
+
+## Data
+
+To compare the performance of U.S. growth and value stocks year-to-date (YTD), we use two broad market exchange-traded funds (ETFs): IUSG (iShares Core S&P U.S. Growth ETF) and IUSV (iShares Core S&P U.S. Value ETF). These ETFs serve as proxies for large-cap growth and value segments of the U.S. equity market.
+
+The approach involves collecting adjusted closing prices for both ETFs from the beginning of the year (January 1, 2025) through March 27, 2025. To allow for an intuitive comparison, both price series are normalized to a base value of 100 at the start of the observation period. This way, relative performance can be visualized on a common scale regardless of their initial price levels.
+
+The resulting time series are plotted to illustrate how each style — growth versus value — has evolved over the year, highlighting performance divergence or convergence between the two investment strategies
+
+```{r}
+#| echo: false
+#| warning: false
+#| messahe: false
+
+library(quantmod)
+library(ggplot2)
+library(reshape2)
+
+tickers <- c("IUSG", "IUSV")
+start_date <- as.Date("2025-01-01")
+end_date <- as.Date("2025-03-27")
+getSymbols(tickers, src = "yahoo", from = start_date, to = end_date, auto.assign = TRUE)
+
+prices <- merge(Ad(IUSG), Ad(IUSV))
+colnames(prices) <- c("Growth", "Value")
+normalized <- sweep(prices, 2, as.numeric(prices[1, ]), "/") * 100
+
+df <- data.frame(Date = index(normalized), coredata(normalized))
+df_long <- melt(df, id.vars = "Date", variable.name = "Style", value.name = "Index")
+
+ggplot(df_long, aes(x = Date, y = Index, color = Style)) +
+  geom_line(size = 1.2) +
+  labs(title = "US Growth vs Value Stocks (YTD, Normalized to 100)",
+       x = "Date", y = "Index Value", color = "Style") +
+  scale_color_manual(values = c("Growth" = "blue", "Value" = "red")) +
+  theme_minimal(base_size = 14)
+```
+## The Global Picture 
+
+To provide a broader context, we can extend the analysis to include major stock indices from other regions. This allows us to compare the performance of U.S. growth and value stocks with other global benchmarks, such as the S&P 500 (USA), DAX (Germany), and Nikkei 225 (Japan).
+
+The outflow of capital from US investments is part of an overall defensive strategy, as investors seek to diversify their portfolios and **reduce exposure to U.S. market risks**. This trend is reflected in the relative performance of U.S. equities compared to other major global indices.
+
+```{r}
+#| echo: false
+#| warning: false
+#| messahe: false
+#| 
+tickers <- c("SPY", "EWG", "EWY", "EWJ")  # USA, Germany, South Korea, Japan
+start_date <- as.Date("2025-01-01")
+end_date <- as.Date("2025-03-27")
+
+getSymbols(tickers, src = "yahoo", from = start_date, to = end_date, auto.assign = TRUE)
+
+prices <- merge(Ad(SPY), Ad(EWG), Ad(EWY), Ad(EWJ))
+colnames(prices) <- c("USA", "Germany", "South_Korea", "Japan")
+
+normalized <- sweep(prices, 2, as.numeric(prices[1, ]), "/") * 100
+
+df <- data.frame(Date = index(normalized), coredata(normalized))
+df_long <- melt(df, id.vars = "Date", variable.name = "Country", value.name = "Index")
+
+df_long$Country <- factor(df_long$Country, levels = c("USA", "Germany", "South_Korea", "Japan"))
+
+ggplot(df_long, aes(x = Date, y = Index, color = Country)) +
+  geom_line(size = 1.2) +
+  labs(title = "Global Stock Indices (YTD, Normalized to 100)",
+       x = "Date", y = "Index Value", color = "Market") +
+  scale_color_manual(values = c(
+    "USA" = "blue",
+    "Germany" = "darkgreen",
+    "South_Korea" = "purple",
+    "Japan" = "orange"
+  )) +
+  theme_minimal(base_size = 14)
+```
+## US Dollar and Gold
+
+The shift in demand for US assets are visible in the **depreciating US Dollar** (UUP) and the **rising Gold prices** (GLD). The Dollar Index (UUP) is a measure of the value of the US dollar relative to a basket of foreign currencies, while Gold (GLD) is a traditional **safe-haven asset** that tends to appreciate during times of economic uncertainty.
+
+```{r}
+#| echo: false
+#| warning: false
+#| messahe: false
+
+tickers <- c("GLD", "UUP")
+start_date <- as.Date("2025-01-01")
+end_date <- as.Date("2025-03-27")
+
+getSymbols(tickers, src = "yahoo", from = start_date, to = end_date, auto.assign = TRUE)
+
+prices <- merge(Ad(GLD), Ad(UUP))
+colnames(prices) <- c("Gold", "DollarIndex")  # <-- Avoids space in name!
+
+normalized <- sweep(prices, 2, as.numeric(prices[1, ]), "/") * 100
+
+df <- data.frame(Date = index(normalized), coredata(normalized))
+df_long <- melt(df, id.vars = "Date", variable.name = "Asset", value.name = "Index")
+
+df_long$Asset <- factor(df_long$Asset, levels = c("Gold", "DollarIndex"))
+
+ggplot(df_long, aes(x = Date, y = Index, color = Asset)) +
+  geom_line(size = 1.2) +
+  labs(title = "Gold vs Dollar Index (YTD, Normalized to 100)",
+       x = "Date", y = "Index Value", color = "Asset") +
+  scale_color_manual(values = c("Gold" = "goldenrod", "DollarIndex" = "darkblue")) +
+  theme_minimal(base_size = 14)
+```
+## Conclusion
+
+The performance of U.S. growth and value stocks in 2025 reflects a broader market environment characterized by rising uncertainties and a potential rotation toward more defensive or income-oriented equities. The outperformance of value stocks compared to growth stocks, especially during the February–March correction, suggests a shift in investor sentiment and risk appetite.
+
