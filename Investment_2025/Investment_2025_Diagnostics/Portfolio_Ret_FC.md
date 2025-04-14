@@ -101,8 +101,8 @@ print(summary_stats)
       <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
     1  130.   126.  28.6  88.7  182.  63.5  245.
 
-This means that based on the simulations, there’s a 90% chance your
-portfolio will be between 88.65 and 181.62 by year-end, with a median
+This means that based on the simulations, there’s a 90% chance **the
+portfolio** will be between 88.65 and 181.62 by year-end, with a median
 outcome around 126.14.
 
 ``` r
@@ -139,8 +139,6 @@ legend("topright",
     time.
 
 -   The median is above 100, suggesting a positive expected drift in
-    your portfolio under historical conditions.
+    **the portfolio** under historical conditions.
 
--   The 5%–95% range gives a useful sense of expected variability (but
-    not a prediction interval in a strict probabilistic sense — as
-    discussed earlier).
+-   The 5%–95% range gives a useful sense of expected variability 
