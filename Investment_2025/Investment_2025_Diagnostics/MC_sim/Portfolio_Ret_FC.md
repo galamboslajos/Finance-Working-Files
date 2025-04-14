@@ -59,7 +59,7 @@ matplot(sim_prices, type = "l", col = rgb(0, 0, 1, 0.1), lty = 1,
 abline(h = 100, col = "red", lty = 2)
 ```
 
-![](Portfolio_Ret_FC.markdown_strict_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+![](Portfolio_Ret_FC.markdown_MC_sim/unnamed-chunk-5-1.png)
 
 ## Summary Statistics
 
