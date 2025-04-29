@@ -1,0 +1,1006 @@
+---
+title: "Index Return Modelling"
+author: "Lajos Galambos"
+format: md
+---
+
+## Introduction
+
+In this document I set up and evaluate different models for **index return prediction**. The aim is to get high precision prediciton for **Nasdaq index return**. 
+
+## Data
+
+**Nasadq Composite Index is proxied by the IXIC ticker**. The data is downloaded from Yahoo Finance. The daily log returns are calculated from the closing prices. Data is taken from 2010-01-01 to the current date. 
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| out: false
+# install.packages(c("quantmod", "forecast", "ggplot2"))
+
+library(quantmod)
+library(forecast)
+library(ggplot2)
+
+getSymbols("^IXIC", from = "2010-01-01", to = Sys.Date(), src = "yahoo")
+
+returns_xts <- dailyReturn(Cl(IXIC), type = "log")
+
+price_ts <- ts(as.numeric(Cl(IXIC)), frequency = 252)       
+returns_ts <- ts(as.numeric(returns_xts), frequency = 252)
+
+par(mfrow = c(1,2))  
+
+plot(price_ts, main = "NASDAQ Composite Index (Units)", col = "black", ylab = "Index Level", xlab = "Time")
+plot(returns_ts, main = "NASDAQ Daily Log Returns", col = "blue", ylab = "Log Return", xlab = "Time")
+
+par(mfrow = c(1,1))
+```
+
+## 1. ARIMA Model
+
+The first model is an **ARIMA model**. The ARIMA model is a popular time series forecasting method that combines autoregressive (AR) and moving average (MA) components. This is an automated process (auto.arima) that selects the best ARIMA model based on the Akaike Information Criterion (AIC).
+
+```{r}
+#| echo: false
+#| out: false
+#| results: 'hide'
+#| message: false
+#| warning: false
+# Fit ARIMA model
+arima_model <- auto.arima(returns_ts, seasonal = FALSE, stepwise = FALSE, approximation = FALSE)
+
+summary(arima_model)
+
+fitted_values <- fitted(arima_model)
+
+rmse_arima <- sqrt(mean((returns_ts - fitted_values)^2))
+mae_arima <- mean(abs(returns_ts - fitted_values))
+aic_arima <- AIC(arima_model)
+
+# In-sample classification accuracy
+predicted_class <- ifelse(fitted_values > 0, 1, 0)
+
+actual_class <- ifelse(as.numeric(returns_ts) > 0, 1, 0)
+
+conf_matrix <- table(Predicted = predicted_class, Actual = actual_class)
+
+accuracy_arima <- mean(predicted_class == actual_class)
+
+# Model performance
+cat("=== ARIMA Model Performance ===\n")
+cat("RMSE         :", round(rmse_arima, 6), "\n")
+cat("MAE          :", round(mae_arima, 6), "\n")
+cat("AIC          :", round(aic_arima, 2), "\n")
+cat("Accuracy     :", round(accuracy_arima * 100, 2), "%\n")
+cat("\nConfusion Matrix:\n")
+print(conf_matrix)
+```
+
+### Model Structure
+
+We fitted an **ARIMA(2,0,2)** model to NASDAQ Composite daily log returns from 2010 to today.  
+This model includes:
+
+- 2 autoregressive (AR) terms: returns depend on the last two lags,
+- 0 differencing (I): returns are already stationary,
+- 2 moving average (MA) terms: corrections based on the last two residuals.
+
+---
+
+### Estimated Coefficients
+
+| Term  | Estimate | Interpretation |
+|:------|:---------|:---------------|
+| AR(1) | -1.7222  | Strong negative autocorrelation at lag 1 |
+| AR(2) | -0.8713  | Additional negative autocorrelation at lag 2 |
+| MA(1) | +1.6453  | Positive moving average adjustment at lag 1 |
+| MA(2) | +0.7949  | Positive moving average adjustment at lag 2 |
+| Mean  | +0.0005  | Slight positive daily drift (~0.05%) |
+
+The AR and MA terms show typical oscillating corrections found in financial return series.  
+A very small positive mean is consistent with the historical upward bias in stock indices.
+
+---
+
+### Model Fit Quality
+
+| Metric | Value | Interpretation |
+|:---|:---|:---|
+| sigma² (residual variance) | 0.0001668 | Small variance — tight fit |
+| Log Likelihood | 11290.92 | Higher log-likelihood = better model |
+| AIC | -22569.84 | Very low AIC = good fit |
+| BIC | -22532.3 | Consistent with low AIC |
+
+The model fits the data tightly with small residuals and very low AIC.
+
+---
+
+### Training Set Error Measures
+
+| Metric | Value | Interpretation |
+|:---|:---|:---|
+| RMSE | 0.01291 | Typical daily prediction error ~1.29% |
+| MAE | 0.00897 | Mean absolute error ~0.90% per day |
+| MASE | 0.666 | MASE < 1, good performance |
+| ACF1 | -0.00029 | Residuals are white noise |
+
+The residuals are well-behaved with almost no autocorrelation left.
+
+---
+
+### Classification Performance (Sign Prediction)
+
+We evaluated the sign prediction ability of the model:
+
+| Metric | Value |
+|:---|:---|
+| In-sample Accuracy | **52.86%** |
+
+**Confusion Matrix:**
+
+| Predicted | Actual 0 (Negative) | Actual 1 (Positive) |
+|:---|:---|:---|
+| 0 | 620 | 727 |
+| 1 | 1089 | 1416 |
+
+Directional prediction is slightly better than random guessing (50%).
+
+---
+
+
+### Plotting the actual vs fitted values for the ARIMA model
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+plot_data <- data.frame(
+  date = time(returns_ts),
+  actual = as.numeric(returns_ts),
+  fitted = as.numeric(fitted_values)
+)
+
+ggplot(plot_data, aes(x = date)) +
+  geom_line(aes(y = actual, color = "Actual")) +
+  geom_line(aes(y = fitted, color = "Fitted"), linetype = "dashed") +
+  labs(title = "ARIMA Model: Actual vs Fitted NASDAQ Returns",
+       x = "Time", y = "Log Return") +
+  scale_color_manual(values = c("Actual" = "black", "Fitted" = "blue")) +
+  theme_minimal()
+```
+## 2. ARIMA(2,0,2) + GARCH(1,1)
+
+The second model is an **ARIMA(2,0,2) + GARCH(1,1)** model. The GARCH model captures the volatility clustering often observed in financial time series data. The GARCH(1,1) model allows for time-varying volatility.
+
+```{r}
+#| echo: false
+#| results: 'hide'
+#| message: false
+#| warning: false
+
+#install.packages("rugarch")
+library(rugarch)
+
+# ARIMA(2,2) + GARCH(1,1) model
+spec_garch <- ugarchspec(
+  variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+  mean.model = list(armaOrder = c(2,2), include.mean = TRUE),
+  distribution.model = "norm"
+)
+
+garch_fit <- ugarchfit(spec = spec_garch, data = returns_ts)
+
+print(garch_fit)
+
+garch_fitted <- fitted(garch_fit)
+
+rmse_garch <- sqrt(mean((returns_ts - garch_fitted)^2))
+mae_garch <- mean(abs(returns_ts - garch_fitted))
+aic_garch <- infocriteria(garch_fit)[1]  # AIC
+print(rmse_garch)
+print(mae_garch)
+print(aic_garch)
+
+garch_predicted_class <- ifelse(garch_fitted > 0, 1, 0)
+garch_actual_class <- ifelse(as.numeric(returns_ts) > 0, 1, 0)
+
+# Confusion matrix
+conf_matrix_garch <- table(Predicted = garch_predicted_class, Actual = garch_actual_class)
+print(conf_matrix_garch)
+
+accuracy_garch <- mean(garch_predicted_class == garch_actual_class)
+print(accuracy_garch)
+```
+### Model Structure
+
+We fitted an **ARIMA(2,2) + GARCH(1,1)** model to NASDAQ Composite daily log returns.  
+The model structure captures both:
+
+- Autoregressive and Moving Average dynamics in the returns (ARIMA mean equation),
+- Volatility clustering and time-varying conditional variance (GARCH variance equation).
+
+---
+
+### Coefficient Estimates
+
+| Term    | Estimate | Interpretation |
+|:--------|:---------|:---------------|
+| MA(1)   | 0.10886  | Moving average term from ARIMA(2,2) mean equation |
+| MA(2)   | 0.12739  | Second moving average term from ARIMA(2,2) |
+| Omega   | 0.04353  | Constant term for unconditional variance |
+| Alpha1  | 0.67505  | Shock effect (impact of past squared returns) |
+| Beta1   | 0.72865  | Persistence effect (impact of past variance) |
+
+The model captures volatility clustering well.  
+However, **Alpha1 + Beta1 ≈ 1.4037**, suggesting very strong volatility persistence, typical for financial return series but indicating possible near-integrated behavior.
+
+---
+
+### Sign Bias Test Results
+
+| Test                  | t-value | p-value  | Significance | Interpretation |
+|:----------------------|:--------|:---------|:-------------|:---------------|
+| Sign Bias              | 2.343   | 0.0192   | ** (5% level) | Overall asymmetry detected |
+| Negative Sign Bias     | 0.086   | 0.9315   | Not significant | Negative shocks alone not asymmetric |
+| Positive Sign Bias     | 1.452   | 0.1465   | Not significant | Positive shocks alone not asymmetric |
+| Joint Effect (Chi-sq)  | 20.503  | 0.00013  | *** (1% level) | Strong combined asymmetry |
+
+The Sign Bias Test suggests that while individual negative and positive shocks are not statistically significant,  
+the **joint asymmetry is highly significant**.  
+Thus, the GARCH(1,1) model misses some asymmetric volatility patterns, and future modeling could improve by using **EGARCH** or **GJR-GARCH**.
+
+---
+
+### Prediction Performance
+
+| Metric  | Value |
+|:--------|:------|
+| RMSE    | 0.01304 |
+| MAE     | 0.00893 |
+| AIC     | -6.18 |
+| Accuracy | 55.48% |
+
+
+**Confusion Matrix:**
+
+| Predicted | Actual 0 (Negative) | Actual 1 (Positive) |
+|:---------|:--------------------|:--------------------|
+| 0         | 105                 | 111                 |
+| 1         | 1604                | 2032                |
+
+The ARIMA(2,2) + GARCH(1,1) model achieves **higher directional prediction accuracy (55.48%)** compared to the ARIMA-only model (52.86%).  
+The RMSE and MAE are slightly higher compared to ARIMA, but this is expected because GARCH models volatility dynamics, not just return levels.  
+The model still heavily biases toward predicting **positive returns**, consistent with the historical upward drift of the NASDAQ index.
+
+---
+
+### Plotting the actual vs fitted values for the ARIMA(2,2) + GARCH(1,1) model
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+garch_plot_data <- data.frame(
+  date = time(returns_ts),
+  actual = as.numeric(returns_ts),
+  fitted = as.numeric(garch_fitted)
+)
+
+
+ggplot(garch_plot_data, aes(x = date)) +
+  geom_line(aes(y = actual, color = "Actual")) +
+  geom_line(aes(y = fitted, color = "Fitted"), linetype = "dashed") +
+  labs(title = "ARIMA(2,2) + GARCH(1,1): Actual vs Fitted NASDAQ Returns",
+       x = "Date", y = "Log Return") +
+  scale_color_manual(values = c("Actual" = "black", "Fitted" = "blue")) +
+  theme_minimal()
+```
+
+## Time Series Comparison Table
+
+| Model                  | RMSE    | MAE     | AIC     | Accuracy |
+|:------------------------|:--------|:--------|:--------|:---------|
+| ARIMA(2,2)              | 0.01291 | 0.00897 | -22569.84 | 52.86% |
+| ARIMA(2,2) + GARCH(1,1) | 0.01304 | 0.00893 | -6.18    | 55.48% |
+
+
+## Machine Learning Models: Logistic Regression
+
+Some data preparation is needed before we can start building machine learning models. New features are created from the daily log returns: lags, rolling means, rolling standard deviations, and absolute values of the lagged returns. **The target variable is defined as 1 if the return is positive and 0 otherwise**.
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(quantmod)
+library(dplyr)
+library(zoo)
+
+returns_xts <- dailyReturn(Cl(IXIC), type = "log")
+
+ml_data <- data.frame(
+  date = index(returns_xts),
+  return = as.numeric(returns_xts)
+) %>%
+  mutate(
+    r_lag1 = lag(return, 1),
+    r_lag2 = lag(return, 2),
+    r_lag3 = lag(return, 3),
+    abs_r_lag1 = abs(lag(return, 1)),
+    roll_mean5 = rollapply(return, width = 5, FUN = mean, align = "right", fill = NA),
+    roll_sd5 = rollapply(return, width = 5, FUN = sd, align = "right", fill = NA),
+    target = ifelse(return > 0, 1, 0)
+  ) %>%
+  na.omit()  
+
+head(ml_data)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+range(ml_data$date)
+
+train_data <- ml_data %>% filter(date < as.Date("2022-01-01"))
+test_data <- ml_data %>% filter(date >= as.Date("2022-01-01"))
+
+X_train <- train_data %>% select(r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5, roll_sd5)
+y_train <- train_data$target
+
+X_test <- test_data %>% select(r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5, roll_sd5)
+y_test <- test_data$target
+
+cat("Training set size:", nrow(X_train), "\n")
+cat("Testing set size :", nrow(X_test), "\n")
+```
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: 'hide'
+# Logistic Regression
+logistic_model <- glm(y_train ~ ., data = X_train, family = binomial(link = "logit"))
+
+predicted_probs <- predict(logistic_model, newdata = X_test, type = "response")
+
+predicted_classes <- ifelse(predicted_probs > 0.5, 1, 0)
+
+conf_matrix_logistic <- table(Predicted = predicted_classes, Actual = y_test)
+
+accuracy_logistic <- mean(predicted_classes == y_test)
+
+cat("Logistic Regression Test Accuracy:", round(accuracy_logistic * 100, 2), "%\n")
+cat("Confusion Matrix:\n")
+print(conf_matrix_logistic)
+
+summary(logistic_model)
+```
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+rmse_logistic <- sqrt(mean((y_test - predicted_probs)^2))
+mae_logistic <- mean(abs(y_test - predicted_probs))
+
+# Step 2: AIC of the fitted logistic model
+aic_logistic <- AIC(logistic_model)
+
+# Step 3: Print results
+cat("Logistic Regression Evaluation Metrics:\n")
+cat("RMSE:", round(rmse_logistic, 6), "\n")
+cat("MAE :", round(mae_logistic, 6), "\n")
+cat("AIC :", round(aic_logistic, 2), "\n")
+cat("Test Accuracy:", round(accuracy_logistic * 100, 2), "%\n")
+```
+
+
+### Model Structure
+
+We fitted a **Logistic Regression** model to predict the **direction** (positive/negative) of NASDAQ Composite daily returns.  
+Predictor variables included:
+
+- Lagged returns: `r_lag1`, `r_lag2`, `r_lag3`,
+- Lagged absolute return: `abs_r_lag1`,
+- 5-day rolling mean return: `roll_mean5`,
+- 5-day rolling standard deviation: `roll_sd5`.
+
+The model was trained on data from **2010–2021** and tested on data from **2022–2025**.
+
+---
+
+### Prediction Performance on Test Set
+
+| Metric  | Value |
+|:--------|:------|
+| RMSE    | 0.43077 |
+| MAE     | 0.33096 |
+| AIC     | 3115.13 |
+| Test Accuracy | 73.41% |
+
+**Confusion Matrix:**
+
+| Predicted | Actual 0 (Negative) | Actual 1 (Positive) |
+|:---------|:--------------------|:--------------------|
+| 0         | 254                 | 82                  |
+| 1         | 139                 | 356                 |
+
+The model achieves an out-of-sample directional prediction accuracy of **73.41%**,  
+substantially better than random guessing (50%) and better than traditional time series models (ARIMA, GARCH).
+
+---
+
+### Coefficient Estimates and Feature Importance
+
+| Feature        | Coefficient | Std. Error | z-value | p-value | Significance | Interpretation |
+|:---------------|:------------|:-----------|:--------|:--------|:-------------|:---------------|
+| (Intercept)    | -0.21876     | 0.08834    | -2.476  | 0.0133  | *            | Small negative baseline effect |
+| r_lag1         | -109.79102   | 6.17724    | -17.773 | <2e-16  | ***          | Recent positive return reduces today's up probability |
+| r_lag2         | -101.59867   | 6.22916    | -16.310 | <2e-16  | ***          | Same effect 2 days ago |
+| r_lag3         | -104.40404   | 6.07008    | -17.200 | <2e-16  | ***          | Same effect 3 days ago |
+| abs_r_lag1     | -13.33758    | 7.54806    | -1.767  | 0.0772  | .            | Weak negative impact from past volatility |
+| roll_mean5     | +561.38712   | 23.64694   | 23.740  | <2e-16  | ***          | Strong momentum effect from 5-day trend |
+| roll_sd5       | +53.99046    | 10.80108   | 4.999   | 5.77e-7 | ***          | Mild positive effect from recent volatility |
+
+**Interpretation:**
+
+- **r_lag1**, **r_lag2**, and **r_lag3** are highly negative and significant, indicating strong short-term **mean-reversion**:  
+  recent positive returns decrease the probability of another positive return today.
+  
+- **roll_mean5** is strongly positive and significant, indicating **short-term momentum**:  
+  recent positive trends increase the chance of a positive return today.
+
+- **roll_sd5** (recent volatility) has a mild positive effect on today’s return probability.
+
+- **abs_r_lag1** is weakly significant and slightly negative, indicating yesterday’s return size has marginal effect.
+
+---
+
+### Model Interpretation and Insights
+
+- Logistic Regression predicts **probabilities of a positive return** rather than return magnitudes.
+- Despite a larger RMSE (due to scale differences between probabilities [0,1] vs returns [small values]),  
+  the model achieves a **higher directional accuracy** than ARIMA or GARCH models.
+- Key drivers of daily returns are a mix of **mean-reversion** (lags 1–3) and **momentum** (5-day trend).
+
+---
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(pROC)
+library(ggplot2)
+
+roc_obj <- roc(y_test, predicted_probs)
+
+auc_value <- auc(roc_obj)
+
+ggplot(data = data.frame(
+  Specificity = 1 - roc_obj$specificities,
+  Sensitivity = roc_obj$sensitivities
+), aes(x = Specificity, y = Sensitivity)) +
+  geom_line(color = "blue", size = 1.2) +
+  geom_abline(linetype = "dashed", color = "gray") +
+  labs(title = paste0("ROC Curve (AUC = ", round(auc_value, 3), ")"),
+       x = "1 - Specificity (False Positive Rate)",
+       y = "Sensitivity (True Positive Rate)") +
+  theme_minimal()
+```
+
+### ROC Curve and AUC
+
+The ROC curve illustrates the model's ability to distinguish between positive and negative return days across all probability thresholds.  
+A model with no predictive power would follow the diagonal (AUC = 0.5).  
+The Logistic Regression model achieves an **AUC of 0.799**, indicating strong discriminative power.  
+This means the model effectively separates "up" vs "down" days based on the constructed features.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+coefs <- summary(logistic_model)$coefficients
+coefs_df <- as.data.frame(coefs)
+coefs_df$Feature <- rownames(coefs_df)
+
+coefs_df <- coefs_df[coefs_df$Feature != "(Intercept)", ]
+
+coefs_df$Importance <- abs(coefs_df$Estimate)
+
+coefs_df <- coefs_df[order(coefs_df$Importance, decreasing = TRUE), ]
+
+
+ggplot(coefs_df, aes(x = reorder(Feature, Importance), y = Importance)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Logistic Regression Feature Importance",
+       x = "Feature",
+       y = "Absolute Coefficient (|β|)") +
+  theme_minimal()
+```
+
+### Feature Importance: Logistic Regression
+
+The plot below shows the absolute values of the logistic regression coefficients (|β|) as a measure of each feature’s importance in predicting return direction.
+
+The most influential feature is `roll_mean5`, which captures short-term momentum.  
+This suggests that a positive 5-day trend significantly increases the probability of an up day.
+
+The lagged return features (`r_lag1`, `r_lag2`, `r_lag3`) also show strong importance, with negative coefficients indicating short-term mean-reversion:  
+a gain in the previous few days decreases the likelihood of another gain today.
+
+`roll_sd5` (volatility) has a smaller positive influence, while `abs_r_lag1` (yesterday's absolute return) has negligible impact.
+
+
+The Logistic Regression model provides a strong and interpretable baseline for directional return prediction.  
+Its high out-of-sample accuracy (73.41%) demonstrates the predictive value of combining recent return lags, volatility, and short-term trend features.  
+
+## Note on Model Evaluation of Time Series models vs Logistic Model
+
+The Root Mean Squared Error (RMSE) values between time series models and classification models are **not directly comparable** because they predict different types of outputs:
+
+- ARIMA and GARCH models predict **continuous returns**, which are typically very small.
+- Logistic Regression predicts **probabilities** of positive returns, which range between 0 and 1.
+
+Thus, even though the Logistic Regression model has a higher RMSE numerically, it achieves **higher directional prediction accuracy**.
+
+Additionally, feature importance in Logistic Regression can be interpreted from the model coefficients: features with larger absolute values and statistically significant p-values contribute more strongly to predicting return direction.
+
+
+## Random Forest
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#install.packages("randomForest")
+library(randomForest)
+
+y_train_factor <- as.factor(y_train)
+
+rf_model <- randomForest(x = X_train, y = y_train_factor,
+                         ntree = 500,
+                         mtry = 3,
+                         importance = TRUE,
+                         na.action = na.omit)
+
+rf_pred_class <- predict(rf_model, newdata = X_test)
+
+rf_pred_prob <- predict(rf_model, newdata = X_test, type = "prob")[, 2]
+```
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# Model Performance
+conf_matrix_rf <- table(Predicted = rf_pred_class, Actual = y_test)
+
+accuracy_rf <- mean(rf_pred_class == y_test)
+
+cat("Random Forest Accuracy:", round(accuracy_rf * 100, 2), "%\n")
+print(conf_matrix_rf)
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+# RMSE and MAE for Random Forest
+rmse_rf <- sqrt(mean((y_test - rf_pred_prob)^2))
+mae_rf <- mean(abs(y_test - rf_pred_prob))
+
+
+cat("Random Forest RMSE:", round(rmse_rf, 6), "\n")
+cat("Random Forest MAE :", round(mae_rf, 6), "\n")
+```
+
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Feature importance
+varImpPlot(rf_model,
+           main = "Random Forest Feature Importance",
+           n.var = min(10, ncol(X_train)))
+```
+
+### Model Structure
+
+We fitted a Random Forest classifier to predict the daily return direction of the NASDAQ Composite index, using the same features:
+
+- Lagged returns (`r_lag1`, `r_lag2`, `r_lag3`)
+- Lagged absolute return (`abs_r_lag1`)
+- 5-day rolling mean (`roll_mean5`)
+- 5-day rolling standard deviation (`roll_sd5`)
+
+---
+
+### Prediction Performance on Test Set
+
+| Metric  | Value |
+|:--------|:------|
+| RMSE    | 0.43776 |
+| MAE     | 0.37008 |
+| AIC     | Not applicable |
+| Test Accuracy | 70.28% |
+
+**Confusion Matrix:**
+
+| Predicted | Actual 0 (Negative) | Actual 1 (Positive) |
+|:---------|:--------------------|:--------------------|
+| 0         | 246                 | 100                 |
+| 1         | 147                 | 338                 |
+
+---
+
+### Interpreting Feature Importance in Random Forests
+
+Random Forests compute feature importance in two distinct ways:
+
+- **Mean Decrease in Accuracy:**  
+  This metric evaluates how much the model’s prediction accuracy drops when the values of a feature are randomly permuted.  
+  A large drop indicates that the feature was crucial for prediction. It directly reflects a feature's contribution to overall model performance.
+
+- **Mean Decrease in Gini (Gini Importance):**  
+  This measures the total reduction in node impurity (Gini impurity) caused by a feature across all trees in the forest.  
+  Features that result in large decreases in impurity are considered more important. This captures the feature’s role in splitting the data effectively during training.
+
+Both metrics provide consistent rankings in this analysis, identifying `roll_mean5` as the dominant feature, followed by short-term lagged returns.
+
+---
+
+
+The Random Forest model demonstrates strong predictive performance with a test accuracy of **70.28%**, slightly lower than Logistic Regression but significantly higher than traditional ARIMA and GARCH models.
+
+Random Forest captures non-linear patterns and interactions between features, supporting the earlier findings of **momentum** and **mean-reversion** influences in stock returns.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+rf_pred_prob <- predict(rf_model, newdata = X_test, type = "prob")[, 2]
+
+
+roc_rf <- roc(y_test, rf_pred_prob)
+auc_rf <- auc(roc_rf)
+
+ggplot(data = data.frame(
+  Specificity = 1 - roc_rf$specificities,
+  Sensitivity = roc_rf$sensitivities
+), aes(x = Specificity, y = Sensitivity)) +
+  geom_line(color = "darkgreen", size = 1.2) +
+  geom_abline(linetype = "dashed", color = "gray") +
+  labs(title = paste0("Random Forest ROC Curve (AUC = ", round(auc_rf, 3), ")"),
+       x = "1 - Specificity (False Positive Rate)",
+       y = "Sensitivity (True Positive Rate)") +
+  theme_minimal()
+```
+
+The ROC curve below illustrates the performance of the Random Forest classifier in distinguishing positive and negative daily returns.  
+With an **AUC of 0.779**, the model demonstrates strong discriminative power, performing significantly better than random guessing.
+
+## So far...
+
+| Model                  | RMSE     | MAE      | AIC         | Accuracy |
+|:------------------------|:---------|:---------|:------------|:---------|
+| ARIMA(2,2)              | 0.01291  | 0.00897  | -22569.84   | 52.86%   |
+| ARIMA(2,2) + GARCH(1,1) | 0.01304  | 0.00893  | -6.18       | 55.48%   |
+| Logistic Regression     | 0.43077  | 0.33096  | 3115.13     | **73.41%** |
+| Random Forest           | 0.43776  | 0.37008  | Not applicable | **70.28%** |
+
+**Note:** RMSE and MAE for Logistic Regression and Random Forest are based on predicted probabilities.  
+AIC is only defined for models estimated via maximum likelihood (not applicable for Random Forest).
+
+## XGBoost Classifier
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+#install.packages("xgboost")
+library(xgboost)
+library(Matrix)
+
+X_train_mat <- as.matrix(X_train)
+X_test_mat  <- as.matrix(X_test)
+
+dtrain <- xgb.DMatrix(data = X_train_mat, label = y_train)
+dtest  <- xgb.DMatrix(data = X_test_mat, label = y_test)
+
+xgb_model <- xgboost(data = dtrain,
+                     objective = "binary:logistic",
+                     eval_metric = "logloss",
+                     nrounds = 100,
+                     verbose = 0)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+xgb_pred_prob <- predict(xgb_model, newdata = dtest)
+xgb_pred_class <- ifelse(xgb_pred_prob > 0.5, 1, 0)
+xgb_accuracy <- mean(xgb_pred_class == y_test)
+xgb_conf_matrix <- table(Predicted = xgb_pred_class, Actual = y_test)
+
+cat("XGBoost Accuracy:", round(xgb_accuracy * 100, 2), "%\n")
+print(xgb_conf_matrix)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| output: false
+library(pROC)
+
+# Performance
+xgb_rmse <- sqrt(mean((y_test - xgb_pred_prob)^2))
+xgb_mae <- mean(abs(y_test - xgb_pred_prob))
+
+xgb_roc <- roc(y_test, xgb_pred_prob)
+xgb_auc <- auc(xgb_roc)
+
+cat("XGBoost RMSE:", round(xgb_rmse, 6), "\n")
+cat("XGBoost MAE :", round(xgb_mae, 6), "\n")
+cat("XGBoost AUC :", round(xgb_auc, 3), "\n")
+```
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Importance matrix
+importance_matrix <- xgb.importance(model = xgb_model)
+
+xgb.plot.importance(importance_matrix, top_n = 10,
+                    rel_to_first = TRUE, xlab = "Relative Importance")
+```
+
+
+### Model Structure
+
+We trained an XGBoost (Extreme Gradient Boosting) classifier to predict the daily return direction of the NASDAQ Composite index.  
+XGBoost is a high-performance ensemble method that builds trees sequentially and corrects previous errors using gradient boosting.
+
+**Features used:**
+- Lagged returns: `r_lag1`, `r_lag2`, `r_lag3`
+- Lagged absolute return: `abs_r_lag1`
+- 5-day rolling mean: `roll_mean5`
+- 5-day rolling standard deviation: `roll_sd5`
+
+---
+
+### Prediction Performance on Test Set
+
+| Metric  | Value |
+|:--------|:------|
+| RMSE    | 0.45594 |
+| MAE     | 0.32559 |
+| AIC     | Not applicable |
+| Accuracy | **71.48%** |
+| AUC     | **0.783** |
+
+**Confusion Matrix:**
+
+| Predicted | Actual 0 (Negative) | Actual 1 (Positive) |
+|:---------|:--------------------|:--------------------|
+| 0         | 256                 | 100                 |
+| 1         | 137                 | 338                 |
+
+The model achieved **71.48% directional accuracy** and a strong AUC of **0.783**, showing its ability to distinguish between up and down days better than chance.
+
+---
+
+### Feature Importance
+
+
+The most important predictor was again `roll_mean5`, confirming the presence of a short-term momentum effect.  
+Lagged returns (`r_lag1`, `r_lag2`, `r_lag3`) were all highly influential, while `roll_sd5` and `abs_r_lag1` had moderate to low predictive value.
+
+---
+
+### Interpretation
+
+- XGBoost confirms the pattern observed in previous models:  
+  **momentum (roll_mean5)** and **mean-reversion (lagged returns)** drive short-term return direction.
+- The model offers strong predictive accuracy and well-calibrated probability outputs.
+
+---
+
+XGBoost provides a competitive predictive model, slightly outperforming Random Forest and nearly matching Logistic Regression in accuracy,  
+while offering robust AUC performance and non-linear learning capabilities.  
+It serves as a powerful baseline for return direction classification.
+
+
+## Final Model Comparison Table: **Logit wins**
+
+| Model                  | RMSE     | MAE      | AIC         | Accuracy | AUC    |
+|:------------------------|:---------|:---------|:------------|:---------|:-------|
+| ARIMA(2,2)              | 0.01291  | 0.00897  | -22569.84   | 52.86%   | —      |
+| ARIMA(2,2) + GARCH(1,1) | 0.01304  | 0.00893  | -6.18       | 55.48%   | —      |
+| Logistic Regression     | 0.43077  | 0.33096  | 3115.13     | **73.41%** | 0.799 |
+| Random Forest           | 0.43776  | 0.37008  | N/A         | 70.28%   | 0.779 |
+| XGBoost                 | 0.45594  | 0.32559  | N/A         | 71.48%   | 0.783 |
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+roc_logit <- roc(y_test, predicted_probs)
+roc_rf    <- roc(y_test, rf_pred_prob)
+roc_xgb   <- roc(y_test, xgb_pred_prob)
+
+roc_df <- data.frame(
+  fpr = c(1 - roc_logit$specificities, 1 - roc_rf$specificities, 1 - roc_xgb$specificities),
+  tpr = c(roc_logit$sensitivities, roc_rf$sensitivities, roc_xgb$sensitivities),
+  model = factor(rep(c("Logistic", "Random Forest", "XGBoost"),
+                     times = c(length(roc_logit$sensitivities),
+                               length(roc_rf$sensitivities),
+                               length(roc_xgb$sensitivities))))
+)
+
+ggplot(roc_df, aes(x = fpr, y = tpr, color = model)) +
+  geom_line(size = 1.2) +
+  geom_abline(linetype = "dashed", color = "gray") +
+  labs(
+    title = "ROC Curve Comparison",
+    x = "1 - Specificity (False Positive Rate)",
+    y = "Sensitivity (True Positive Rate)"
+  ) +
+  theme_minimal() +
+  scale_color_manual(values = c("blue", "darkgreen", "darkred"))
+```
+
+## Backtesting: Trading Strategy from the Logistic Regression
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+test_data <- test_data %>%
+  mutate(daily_return = ml_data$return[match(date, ml_data$date)])
+
+backtest_df <- test_data %>%
+  mutate(
+    prediction = predicted_classes,
+    strategy_return = daily_return * prediction,
+    cum_strategy = cumprod(1 + strategy_return),
+    cum_market = cumprod(1 + daily_return)
+  )
+
+
+ggplot(backtest_df, aes(x = date)) +
+  geom_line(aes(y = cum_strategy, color = "Strategy")) +
+  geom_line(aes(y = cum_market, color = "Buy & Hold")) +
+  labs(title = "Cumulative Returns: Logistic Model vs Buy-and-Hold",
+       x = "Date", y = "Cumulative Return",
+       color = "Legend") +
+  theme_minimal()
+```
+
+## Backtest: Logistic Regression-Based Trading Strategy
+
+### Strategy Logic
+
+We implemented a simple daily trading strategy using the predictions of the Logistic Regression model:
+
+- **Signal:**  
+  If the model predicts a positive return (class = 1), take a **long position** in the NASDAQ index for that day.  
+  If the model predicts a negative return (class = 0), **hold cash** (no position, return = 0%).
+
+- **Positioning:**  
+  The portfolio is either 100% long or 100% in cash — no short selling is used.  
+  The strategy re-evaluates position **daily** based on the model's prediction.
+
+- **Returns:**  
+  - If long: return = actual NASDAQ return that day.  
+  - If cash: return = 0%.  
+  - Cumulative return is calculated as the product of `(1 + daily return)` over time.
+
+---
+
+### Performance
+
+The chart below compares the cumulative return of this model-driven strategy against a passive **buy-and-hold** investment in the NASDAQ index:
+
+
+As shown, the strategy significantly outperformed the market benchmark over the test period (2022–2025), demonstrating the practical value of the logistic regression model beyond pure classification accuracy.
+
+---
+
+### Interpretation
+
+This result suggests that the model's directional forecasts, though simple, contain enough predictive signal to create **substantial alpha** when used to time exposure to the index.  
+It avoids most negative-return days while compounding gains on positive days.
+
+**Note:** The strategy does not include transaction costs, slippage, or capital constraints — future refinements could test robustness under realistic conditions.
+
+## SO WHAT IS THE SIGNAL?
+
+```{r}
+# Signals using default threshold = 0.5, can be change for higher for tighter threshold and potentially higher accuracy
+generate_trade_signals <- function(predicted_probs, threshold = 0.5, today_signal = TRUE) {
+  signals <- ifelse(predicted_probs >= threshold, 1, 0)
+  
+  if (today_signal) {
+    last_signal <- tail(signals, 1)
+    if (last_signal == 1) {
+      cat("Today's trading signal: LONG (Buy)\n")
+    } else {
+      cat("Today's trading signal: CASH (Stay Flat)\n")
+    }
+  }
+  
+  return(signals)
+}
+```
+
+```{r}
+# Generate signals and print today's recommendation
+logit_signals <- generate_trade_signals(predicted_probs, threshold = 0.5)
+```
+
+## More detailed: 
+```{r}
+# generate signal + show today's info
+generate_trade_signals <- function(predicted_probs, feature_data = NULL, threshold = 0.5, today_signal = TRUE) {
+  signals <- ifelse(predicted_probs >= threshold, 1, 0)
+  
+  if (today_signal) {
+    last_prob <- tail(predicted_probs, 1)
+    last_signal <- tail(signals, 1)
+    
+
+    cat("Today's predicted probability of positive return:", round(last_prob * 100, 2), "%\n")
+    if (last_signal == 1) {
+      cat("Today's trading signal: LONG (Buy)\n")
+    } else {
+      cat("Today's trading signal: CASH (Stay Flat)\n")
+    }
+    
+  
+    if (!is.null(feature_data)) {
+      cat("\nFeatures used for today's prediction:\n")
+      
+      
+      latest_features <- tail(feature_data, 1)
+      
+      print(latest_features)
+      
+      
+      if ("date" %in% colnames(feature_data)) {
+        cat("\nPrediction based on data available up to:", as.character(latest_features$date), "\n")
+      }
+    }
+  }
+  
+  return(signals)
+}
+```
+
+```{r}
+# Feature data = X_test + date column
+feature_data_for_today <- test_data %>%
+  select(date, r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5, roll_sd5)
+
+# Generate signals with full today's info
+logit_signals <- generate_trade_signals(predicted_probs,
+                                         feature_data = feature_data_for_today,
+                                         threshold = 0.5)
+```
+This is all nice but the problem is that that the new data will not be fed into the model. In a new file I create an automated version whichh always takes the last 5 days of data and then predict time (t).
