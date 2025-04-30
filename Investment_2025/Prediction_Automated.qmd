@@ -1,0 +1,138 @@
+---
+title: "Prediction_Automated"
+author: "Lajos Galambos"
+format: md
+---
+
+# Description
+
+In a [previous file](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investment_2025/Index_Modelling.md), we tried out multiple methods to come up with precise prediction results for Nasdaq 100 daily returns (direction: +/-). This time we want to implement those results form the most accurate Logistic Regression model to a more automated process. We will work with code that feeds the model with new data and returns the predictions.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# ================================
+# Full Daily Logistic Trading Signal + Price Check
+# ================================
+
+library(quantmod)
+library(dplyr)
+library(zoo)
+
+nasdaq_data <- getSymbols("^IXIC", src = "yahoo",
+                          from = Sys.Date() - (365 * 5),
+                          to = Sys.Date(), 
+                          auto.assign = FALSE)
+
+cat("Recent NASDAQ Closing Prices:\n")
+last_5 <- tail(nasdaq_data, 5)
+print(data.frame(Date = index(last_5), IXIC.Close = round(Cl(last_5), 2)))
+
+nasdaq_returns <- dailyReturn(Cl(nasdaq_data), type = "log")
+
+full_data <- data.frame(
+  date = index(nasdaq_returns),
+  return = as.numeric(nasdaq_returns)
+) %>%
+  mutate(
+    r_lag1 = lag(return, 1),
+    r_lag2 = lag(return, 2),
+    r_lag3 = lag(return, 3),
+    abs_r_lag1 = abs(lag(return, 1)),
+    roll_mean5 = rollapply(return, width = 5, FUN = mean, align = "right", fill = NA),
+    roll_sd5 = rollapply(return, width = 5, FUN = sd, align = "right", fill = NA),
+    target = ifelse(return > 0, 1, 0)
+  ) %>%
+  na.omit()
+
+today_data <- full_data %>% arrange(date) %>% slice(n())  # last row
+prediction_date <- today_data$date + 1                    # next market day
+
+train_data <- full_data %>% filter(date < today_data$date)
+
+X_train <- train_data %>% select(r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5, roll_sd5)
+y_train <- train_data$target
+model_data <- cbind(X_train, target = y_train)
+
+logistic_model <- glm(target ~ ., data = model_data, family = binomial(link = "logit"))
+
+X_today <- today_data %>% select(r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5, roll_sd5)
+predicted_prob_today <- predict(logistic_model, newdata = X_today, type = "response")
+predicted_signal_today <- ifelse(predicted_prob_today >= 0.5, 1, 0)
+
+cat("\n=== DAILY NASDAQ SIGNAL ===\n")
+cat("Prediction is for market day:", as.character(prediction_date), "\n")
+cat("Based on data available up to:", as.character(today_data$date), "\n")
+cat("Today's predicted probability of positive return:", round(predicted_prob_today * 100, 2), "%\n")
+
+if (predicted_signal_today == 1) {
+  cat("Today's trading signal: LONG (Buy)\n")
+} else {
+  cat("Today's trading signal: CASH (Stay Flat)\n")
+}
+
+cat("\nFeatures used for today's prediction:\n")
+print(today_data %>% select(date, r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5, roll_sd5))
+
+print(tail(index(nasdaq_returns), 3))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# ================================
+# Signal Evaluation & Performance Tracker
+# ================================
+
+library(readr)
+library(dplyr)
+
+log_path <- "nasdaq_prediction_log.csv"
+
+if (file.exists(log_path)) {
+  signal_log <- read_csv(log_path, show_col_types = FALSE)
+} else {
+  signal_log <- data.frame(
+    date = as.Date(character()),
+    predicted = integer(),
+    actual = integer(),
+    correct = logical(),
+    stringsAsFactors = FALSE
+  )
+}
+
+actual_return_today <- today_data$return
+actual_direction <- ifelse(actual_return_today > 0, 1, 0)
+was_correct <- predicted_signal_today == actual_direction
+
+new_entry <- data.frame(
+  date = today_data$date,
+  predicted = predicted_signal_today,
+  actual = actual_direction,
+  correct = was_correct
+)
+
+signal_log <- signal_log %>% filter(date != today_data$date)
+signal_log <- rbind(signal_log, new_entry)
+
+write_csv(signal_log, log_path)
+
+total_predictions <- nrow(signal_log)
+correct_predictions <- sum(signal_log$correct)
+accuracy <- round(100 * correct_predictions / total_predictions, 2)
+
+cat("\n=== SIGNAL PERFORMANCE TRACKER ===\n")
+cat("Total predictions:", total_predictions, "\n")
+cat("Correct predictions:", correct_predictions, "\n")
+cat("Accuracy:", accuracy, "%\n")
+
+signal_log %>%
+  mutate(outcome = ifelse(correct, "🟢 Correct", "🔴 Wrong")) %>%
+  select(date, predicted, actual, outcome) %>%
+  arrange(desc(date)) %>%
+  head(7) %>%
+  print()
+```
