@@ -78,3 +78,61 @@ print(today_data %>% select(date, r_lag1, r_lag2, r_lag3, abs_r_lag1, roll_mean5
 
 cat("\nPrediction based on data available up to:", as.character(today_data$date), "\n")
 ```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# ================================
+# Signal Evaluation & Performance Tracker
+# ================================
+
+library(readr)
+library(dplyr)
+
+log_path <- "nasdaq_prediction_log.csv"
+
+if (file.exists(log_path)) {
+  signal_log <- read_csv(log_path, show_col_types = FALSE)
+} else {
+  signal_log <- data.frame(
+    date = as.Date(character()),
+    predicted = integer(),
+    actual = integer(),
+    correct = logical(),
+    stringsAsFactors = FALSE
+  )
+}
+
+actual_return_today <- today_data$return
+actual_direction <- ifelse(actual_return_today > 0, 1, 0)
+was_correct <- predicted_signal_today == actual_direction
+
+new_entry <- data.frame(
+  date = today_data$date,
+  predicted = predicted_signal_today,
+  actual = actual_direction,
+  correct = was_correct
+)
+
+signal_log <- signal_log %>% filter(date != today_data$date)
+signal_log <- rbind(signal_log, new_entry)
+
+write_csv(signal_log, log_path)
+
+total_predictions <- nrow(signal_log)
+correct_predictions <- sum(signal_log$correct)
+accuracy <- round(100 * correct_predictions / total_predictions, 2)
+
+cat("\n=== SIGNAL PERFORMANCE TRACKER ===\n")
+cat("Total predictions:", total_predictions, "\n")
+cat("Correct predictions:", correct_predictions, "\n")
+cat("Accuracy:", accuracy, "%\n")
+
+signal_log %>%
+  mutate(outcome = ifelse(correct, "🟢 Correct", "🔴 Wrong")) %>%
+  select(date, predicted, actual, outcome) %>%
+  arrange(desc(date)) %>%
+  head(7) %>%
+  print()
+```
