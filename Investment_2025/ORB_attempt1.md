@@ -25,9 +25,9 @@ The time span goes from 2020-10-09 to 2025-05-21.
 
 ## Returns on the NASDAQ ETF is taken as a benchmark for the strategy performance evaluation
 
-![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-1.png)
+![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-1.png)
 
-![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-2.png)
+![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-2.png)
 
 ## Applying the Strategy
 
@@ -75,25 +75,25 @@ the paper):
     # A tibble: 17 × 2
        Metric                    Value      
        <chr>                     <chr>      
-     1 Total Return (%)          392.1068   
-     2 Annualized Return (%)     26.9134    
-     3 Annualized Volatility (%) 45.8650    
-     4 Annualized Sharpe Ratio   0.7544     
-     5 Max Drawdown (%)          -32.5207   
-     6 CAPM Alpha (%)            36.6945    
-     7 Beta                      0.1222     
+     1 Total Return (%)          392.7324   
+     2 Annualized Return (%)     26.9375    
+     3 Annualized Volatility (%) 45.8635    
+     4 Annualized Sharpe Ratio   0.7552     
+     5 Max Drawdown (%)          -32.5737   
+     6 CAPM Alpha (%)            36.7314    
+     7 Beta                      0.1220     
      8 Total Trades              1151.0000  
-     9 Winning Trades            273.0000   
-    10 Losing Trades             878.0000   
+     9 Winning Trades            275.0000   
+    10 Losing Trades             876.0000   
     11 Breakeven Trades          0.0000     
-    12 Win Rate (%)              23.7185    
-    13 Avg Net PnL               253.7853   
-    14 Profit Factor             1.1636     
-    15 Total Commission Paid     2848.0800  
-    16 Avg Position Notional     965967.7259
-    17 Avg Leverage Used         4.9014     
+    12 Win Rate (%)              23.8923    
+    13 Avg Net PnL               254.3288   
+    14 Profit Factor             1.1631     
+    15 Total Commission Paid     2860.1720  
+    16 Avg Position Notional     970034.9654
+    17 Avg Leverage Used         4.9015     
 
-![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
 Although the strategy produced mostly alpha returns, which is a key
 feature of successful trading strategies, the Sharp-ratio remained lower
@@ -101,13 +101,13 @@ than the stats of the paper (4.5% risk free was assumed).
 
 <figure>
 <img
-src="ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-9-1.png"
+src="ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-9-1.png"
 alt="Rolling Sharpe Ratio and Net Monthly PnL" />
 <figcaption aria-hidden="true">Rolling Sharpe Ratio and Net Monthly
 PnL</figcaption>
 </figure>
 
-![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-12-1.png)
+![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-12-1.png)
 
 The histogram chart shows the mean and the distribution of **winning**
 returns (in terms of R) on the trades over time.
@@ -121,7 +121,7 @@ taken.
 
 <figure>
 <img
-src="ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-13-1.png"
+src="ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-13-1.png"
 alt="Example Trades (2 × 2) with Unified Legend" />
 <figcaption aria-hidden="true">Example Trades (2 × 2) with Unified
 Legend</figcaption>
@@ -136,7 +136,7 @@ They might be smaller or larger, but all in all, slippage and spread are
 the two main factors that can affect the profitablity of trades in real
 life.
 
-![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-14-1.png)
+![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
 ## Conclusion
 
