@@ -75,22 +75,22 @@ the paper):
     # A tibble: 17 × 2
        Metric                    Value      
        <chr>                     <chr>      
-     1 Total Return (%)          158.9366   
-     2 Annualized Return (%)     93.2647    
-     3 Annualized Volatility (%) 53.7939    
-     4 Annualized Sharpe Ratio   1.0690     
-     5 Max Drawdown (%)          -18.4471   
-     6 CAPM Alpha (%)            56.4997    
-     7 Beta                      0.3146     
+     1 Total Return (%)          159.3589   
+     2 Annualized Return (%)     93.4829    
+     3 Annualized Volatility (%) 53.8173    
+     4 Annualized Sharpe Ratio   1.0730     
+     5 Max Drawdown (%)          -18.5629   
+     6 CAPM Alpha (%)            56.7427    
+     7 Beta                      0.3142     
      8 Total Trades              248.0000   
-     9 Winning Trades            56.0000    
-    10 Losing Trades             192.0000   
+     9 Winning Trades            57.0000    
+    10 Losing Trades             191.0000   
     11 Breakeven Trades          0.0000     
-    12 Win Rate (%)              22.5806    
-    13 Avg Net PnL               237.6475   
-    14 Profit Factor             1.2283     
-    15 Total Commission Paid     335.3810   
-    16 Avg Position Notional     668765.0134
+    12 Win Rate (%)              22.9839    
+    13 Avg Net PnL               239.3503   
+    14 Profit Factor             1.2297     
+    15 Total Commission Paid     335.9790   
+    16 Avg Position Notional     669948.3829
     17 Avg Leverage Used         5.2875     
 
 ![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-8-1.png)
