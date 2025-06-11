@@ -46,6 +46,7 @@ The time span goes from 2020-10-09 to 2025-05-21.
 #install.packages("arrow")
 library(arrow)
 
+#### Change for "last_year" for the latest observations ####
 df <- read_parquet("~/Desktop/qqq_5min.parquet")
 head(df, 10)
 tail(df, 10)
@@ -58,6 +59,9 @@ tail(df, 10)
 #| message: false
 #| echo: false
 plot(df$datetime, df$close, type = "l", main = "QQQ Historical Based on 5-Minute Close Prices", xlab = "Datetime", ylab = "Close Price")
+
+# plot volume over time the same way
+plot(df$datetime, df$volume, type = "l", main = "QQQ Volume Based on 5-Minute Data", xlab = "Datetime", ylab = "Volume")
 ```
 
 ## Applying the Strategy
@@ -91,7 +95,6 @@ The position size is calculated using the following formula (same as in the pape
 ```{r}
 #| warning: false
 #| message: false
-#| output: false
 #| echo: false
 library(dplyr)
 library(lubridate)
@@ -101,101 +104,98 @@ run_orb_backtest <- function(df,
                              initial_capital      = 100000,
                              risk_per_trade_pct   = 0.01,    # 1 % of equity
                              commission_per_share = 0.0005,
-                             max_leverage         = 10) {
-  
-  # ── Pre-process ─────────────────────────────────────────────────────────
+                             max_leverage         = 10,
+                             spread_bps           = 0.5,       # full bid-ask spread (bps)
+                             slippage_sd_bps      = 0.5,       # slippage σ (bps, adverse)
+                             seed                 = NULL) {
+
+  # ── Reproducibility (optional) ────────────────────────────
+  if (!is.null(seed)) set.seed(seed)
+
+  # ── Pre-process ───────────────────────────────────────────
   df <- df %>% 
     mutate(date = as.Date(datetime),
            time = format(datetime, "%H:%M:%S")) %>% 
     arrange(datetime)
-  
+
   trading_days    <- unique(df$date)
   current_capital <- initial_capital
   trade_log       <- tibble()
-  
-  # ── Daily loop ──────────────────────────────────────────────────────────
+
+  # Helper: apply spread + slippage around a raw price
+  half_spread_frac <- (spread_bps / 2) / 10000
+  apply_slippage <- function(price, direction, is_entry = TRUE) {
+    slip_frac <- abs(rnorm(1, mean = 0, sd = slippage_sd_bps / 10000))  # always adverse
+    if (direction == "Long") {
+      if (is_entry) price * (1 + half_spread_frac + slip_frac)  # buy higher
+      else           price * (1 - half_spread_frac - slip_frac) # sell lower
+    } else {                                                    # Short
+      if (is_entry) price * (1 - half_spread_frac - slip_frac)  # sell lower
+      else           price * (1 + half_spread_frac + slip_frac) # buy higher
+    }
+  }
+
+  # ── Daily loop ────────────────────────────────────────────
   for (day in trading_days) {
-    
+
     day_data <- df %>% filter(date == day) %>% arrange(datetime)
     if (nrow(day_data) < 2) next
-    
-    # Opening-range candle (first 5-min bar)
+
     or_candle <- day_data[1, ]
     if (anyNA(or_candle[c("open","close","high","low")])) next
-    
-    # Entry candle (second 5-min bar)
+
     entry_bar   <- day_data[2, ]
     entry_price <- entry_bar$open
     entry_time  <- entry_bar$datetime
     if (is.na(entry_price)) next
-    
-    # Direction
-    direction <- case_when(
+
+    direction <- dplyr::case_when(
       or_candle$close > or_candle$open ~ "Long",
       or_candle$close < or_candle$open ~ "Short",
-      TRUE                              ~ NA_character_
+      TRUE                             ~ NA_character_
     )
     if (is.na(direction)) next
-    
-    # Stop-loss & per-share risk
+
     stop_price     <- if (direction == "Long") or_candle$low else or_candle$high
     risk_per_share <- abs(entry_price - stop_price)
     if (risk_per_share <= 0) next
-    
-    # ── Position sizing (formula in PNG) ──────────────────────────────────
+
     shares_by_risk    <- (current_capital * risk_per_trade_pct) / risk_per_share
     shares_by_capital <- (current_capital * max_leverage)       / entry_price
-    shares_traded     <- as.integer( floor(min(shares_by_risk, shares_by_capital)) )
+    shares_traded     <- as.integer(floor(min(shares_by_risk, shares_by_capital)))
     if (shares_traded < 1) next
-    
+
     notional_position <- shares_traded * entry_price
-    
-    # ── Intraday monitoring: Stop-loss or EoD exit ────────────────────────
+    exec_entry_price  <- apply_slippage(entry_price, direction, TRUE)
+
     after_entry <- day_data %>% filter(datetime >= entry_time)
-    
-    exit_price  <- NA_real_
-    exit_time   <- NA
-    exit_reason <- NA_character_
-    
+    exit_price  <- NA_real_; exit_time <- NA; exit_reason <- NA_character_
+
     for (i in seq_len(nrow(after_entry))) {
       bar <- after_entry[i, ]
-      
-      # Skip bars with missing data to avoid NA in logical tests
-      if (anyNA(bar[c("high", "low", "close")])) next
-      
+      if (anyNA(bar[c("high","low","close")])) next
+
       hit_sl <- (direction == "Long"  && bar$low  <= stop_price) ||
                 (direction == "Short" && bar$high >= stop_price)
-      
-      if (hit_sl) {
-        exit_price  <- stop_price
-        exit_time   <- bar$datetime
-        exit_reason <- "SL"
-        break
-      }
-      
-      # End-of-day exit on final bar
+      if (hit_sl) { exit_price <- stop_price; exit_time <- bar$datetime; exit_reason <- "SL"; break }
+
       if (i == nrow(after_entry)) {
-        exit_price  <- bar$close
-        exit_time   <- bar$datetime
-        exit_reason <- "EoD"
+        exit_price <- bar$close; exit_time <- bar$datetime; exit_reason <- "EoD"
       }
     }
-    
-    # Safety check
     if (is.na(exit_price)) next
-    
-    # ── P&L calculation ───────────────────────────────────────────────────
+
+    exec_exit_price <- apply_slippage(exit_price, direction, FALSE)
+
     gross_pnl <- if (direction == "Long") {
-      (exit_price - entry_price) * shares_traded
+      (exec_exit_price - exec_entry_price) * shares_traded
     } else {
-      (entry_price - exit_price) * shares_traded
+      (exec_entry_price - exec_exit_price) * shares_traded
     }
-    
     commission_total <- shares_traded * commission_per_share * 2
     net_pnl          <- gross_pnl - commission_total
-    
-    # ── Logging ───────────────────────────────────────────────────────────
-    trade_log <- bind_rows(
+
+    trade_log <- dplyr::bind_rows(
       trade_log,
       tibble(
         Date             = day,
@@ -203,7 +203,9 @@ run_orb_backtest <- function(df,
         ExitTime         = exit_time,
         Direction        = direction,
         EntryPrice       = entry_price,
+        ExecEntryPrice   = exec_entry_price,
         ExitPrice        = exit_price,
+        ExecExitPrice    = exec_exit_price,
         StopPrice        = stop_price,
         R                = risk_per_share,
         Shares           = shares_traded,
@@ -217,12 +219,11 @@ run_orb_backtest <- function(df,
         CapitalAfter     = current_capital + net_pnl
       )
     )
-    
     current_capital <- current_capital + net_pnl
   }
-  
   trade_log
 }
+
 
 ```
 
@@ -240,7 +241,7 @@ results <- run_orb_backtest(df)
 #| message: false
 #| output: false
 #| echo: false
-summarize_orb_performance <- function(trade_log, df, rf = 0.045) {
+summarize_orb_performance <- function(trade_log, df, rf = 0.04) {
   if (nrow(trade_log) == 0) {
     message("No trades to summarize.")
     return(NULL)
@@ -268,7 +269,8 @@ summarize_orb_performance <- function(trade_log, df, rf = 0.045) {
   daily_returns <- diff(capital_curve) / head(capital_curve, -1)
 
   # --- Performance metrics ---
-  total_return <- (last(capital_curve) - first(trade_log$CapitalBefore)) / first(trade_log$CapitalBefore)
+  #### original total return calculation:  total_return <- (last(capital_curve) - first(trade_log$CapitalBefore)) / first(trade_log$CapitalBefore) ####
+  total_return <- (last(capital_curve) / first(trade_log$CapitalBefore))
   annualized_return <- (1 + total_return)^(252 / total_days) - 1
   annualized_vol <- sd(daily_returns, na.rm = TRUE) * sqrt(252)
   annualized_sharpe <- ifelse(annualized_vol > 0,
@@ -285,7 +287,7 @@ summarize_orb_performance <- function(trade_log, df, rf = 0.045) {
     summarize(StrategyCapital = max(CapitalAfter), .groups = "drop")
 
   bh_curve <- df %>%
-    filter(Ticker == "QQQ.US") %>%
+    #filter(Ticker == "QQQ.US") %>%#
     mutate(Date = as.Date(datetime)) %>%
     group_by(Date) %>%
     summarize(QQQ_Close = last(close), .groups = "drop") %>%
@@ -350,7 +352,6 @@ summarize_orb_performance <- function(trade_log, df, rf = 0.045) {
     ) +
     theme_minimal()
 }
-
 ```
 
 ```{r}
@@ -368,7 +369,7 @@ Although the strategy produced mostly alpha returns, which is a key feature of s
 #| warning: false
 #| message: false
 #| echo: false
-#| fig-cap: "Rolling Sharpe Ratio and Monthly PnL"
+#| fig-cap: "Rolling Sharpe Ratio and Net Monthly PnL"
 #| fig-asp: 0.6
 # install.packages(c("patchwork"))
 library(dplyr)
@@ -378,8 +379,9 @@ library(zoo)      # rollapply
 library(scales)   # pretty axes
 
 # ─────────────────────────────────────────────────────────────
-# 1)  20-day rolling Sharpe ratio of daily strategy returns
+# 1)  20‑day rolling Sharpe ratio of daily strategy returns
 # ─────────────────────────────────────────────────────────────
+
 daily_curve <- log %>%                         # <- `log` comes from previous chunk
   mutate(Date = as.Date(ExitTime)) %>%
   group_by(Date) %>%
@@ -387,7 +389,7 @@ daily_curve <- log %>%                         # <- `log` comes from previous ch
   arrange(Date) %>%
   mutate(Return = Capital / lag(Capital) - 1)
 
-window <- 20  # trading-day look-back
+window <- 20  # trading‑day look‑back
 
 rolling_sharpe <- daily_curve %>%
   mutate(
@@ -408,39 +410,40 @@ p1 <- ggplot(rolling_sharpe, aes(Date, RollingSharpe)) +
   geom_line(color = "purple") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   labs(
-    title = paste0(window, "-Day Rolling Sharpe Ratio"),
+    title = paste0(window, "‑Day Rolling Sharpe Ratio"),
     x = NULL, y = "Sharpe"
   ) +
   theme_minimal()
 
 # ─────────────────────────────────────────────────────────────
-# 2)  Average monthly Net PnL
+# 2)  **Net** monthly PnL (sum of profits and losses)
 # ─────────────────────────────────────────────────────────────
+
 monthly_pnl <- log %>%
   mutate(Month = floor_date(as.Date(ExitTime), "month")) %>%
   group_by(Month) %>%
   summarise(
-    AvgPnL   = mean(NetPnL),
-    TotalPnL = sum(NetPnL),
-    Trades   = n(),
-    .groups  = "drop"
+    NetPnL = sum(NetPnL),      # <-- netted‑out PnL, not average
+    Trades = n(),
+    .groups = "drop"
   )
 
-p2 <- ggplot(monthly_pnl, aes(Month, AvgPnL)) +
+p2 <- ggplot(monthly_pnl, aes(Month, NetPnL)) +
   geom_col(fill = "steelblue") +
   geom_hline(yintercept = 0, color = "grey50") +
   scale_y_continuous(labels = dollar_format()) +
   labs(
-    title = "Average Monthly Net PnL",
-    x = NULL, y = "Average Net PnL ($)"
+    title = "Net Monthly PnL",
+    x = NULL, y = "Net PnL ($)"
   ) +
   theme_minimal()
 
 # ─────────────────────────────────────────────────────────────
-# Display the two plots one below the other
-# (Patchwork is not strictly required; base grid works too)
+# 3)  Display the two plots one below the other
 # ─────────────────────────────────────────────────────────────
+
 library(patchwork)  # if not installed: install.packages("patchwork")
+
 p1 / p2
 ```
 
@@ -518,7 +521,7 @@ mean_win <- mean(winning_trades$R_Multiple, na.rm = TRUE)
 x_clip   <- quantile(winning_trades$R_Multiple, 0.99, na.rm = TRUE)  # 99-th pct
 
 ggplot(winning_trades, aes(x = R_Multiple)) +
-  geom_histogram(bins = 1000,
+  geom_histogram(bins = 10000,
                  fill = "steelblue",
                  color = "white",
                  linewidth = 0.5) +
@@ -640,6 +643,104 @@ plots <- lapply(split(examples, examples$tag), function(row) {
 ```
 
 
+To demonstrate some of the real life execution related "noise" and "imperfections" of trades the following graphs demonstrate the difference between the theoretical entry/exit prices and the actual executed prices, which are affected by the bid-ask spread and slippage. 
+
+They might be smaller or larger, but all in all, slippage and spread are the two main factors that can affect the profitablity of trades in real life.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+# ─────────────────────────────────────────────────────────────
+# ORB execution demo – perfect vs. realistic fills
+# ─────────────────────────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(patchwork)
+
+plot_orb_execution_vs_theoretical <- function(df,
+                                              spread_bps = 1,
+                                              slippage_sd_bps = 2,
+                                              seed = 123) {
+  if (!is.null(seed)) set.seed(seed)
+
+  half_spread  <- (spread_bps / 2) / 1e4           # fraction
+  slip_sd_frac <-  slippage_sd_bps      / 1e4       # σ as fraction
+
+  # Helper: apply adverse spread + slippage
+  exec_price <- function(price, dir, entry = TRUE) {
+    slip <- abs(rnorm(1, 0, slip_sd_frac))
+    adj  <- half_spread + slip
+    if (dir == "Long") {
+      if (entry) price * (1 + adj) else price * (1 - adj)
+    } else { # Short
+      if (entry) price * (1 - adj) else price * (1 + adj)
+    }
+  }
+
+  df <- df %>% mutate(date = as.Date(datetime))
+
+  # Pick first day with clear long/short ORB bias
+  pick_day <- function(want_long = TRUE) {
+    df %>%
+      group_by(date) %>%
+      summarise(open1 = first(open), close1 = first(close), .groups = "drop") %>%
+      filter(if (want_long) close1 > open1 else close1 < open1) %>%
+      slice_head() %>%
+      pull(date)
+  }
+  long_day  <- pick_day(TRUE)
+  short_day <- pick_day(FALSE)
+
+  make_candle_plot <- function(day, direction) {
+    d <- df %>% filter(date == day)
+    or_candle <- d[1, ]               # opening-range bar
+    entry_bar <- d[2, ]
+    exit_bar  <- dplyr::last(d)       # last 5-min bar of day
+
+    entry_quote <- entry_bar$open
+    exit_quote  <- exit_bar$close
+
+    entry_exec <- exec_price(entry_quote, direction, TRUE)
+    exit_exec  <- exec_price(exit_quote,  direction, FALSE)
+
+    ggplot(d, aes(datetime)) +
+      geom_linerange(aes(ymin = low, ymax = high), colour = "grey60") +
+      geom_linerange(aes(ymin = pmin(open, close), ymax = pmax(open, close),
+                         colour = open < close), linewidth = 2) +
+      scale_colour_manual(values = c("TRUE" = "forestgreen", "FALSE" = "firebrick"), guide = "none") +
+      # Perfect vs. executed fills
+      geom_hline(yintercept = entry_quote, linetype = "dotted", colour = "blue") +
+      geom_hline(yintercept = entry_exec,  linetype = "solid",  colour = "blue") +
+      geom_hline(yintercept = exit_quote,  linetype = "dotted", colour = "purple") +
+      geom_hline(yintercept = exit_exec,   linetype = "solid",  colour = "purple") +
+      labs(
+        title    = paste(direction, "-bias day"),
+        subtitle = "Blue = entry, Purple = exit (dotted = quoted, solid = executed)",
+        x = NULL, y = NULL
+      ) +
+      theme_minimal()
+  }
+
+  (make_candle_plot(long_day,  "Long") /
+   make_candle_plot(short_day, "Short")) +
+   plot_layout(heights = c(1, 1)) +
+   plot_annotation(
+     title = sprintf("ORB Execution vs. Theoretical Prices (Spread = %.1f bp, Slippage SD = %.1f bp)",
+                     spread_bps, slippage_sd_bps),
+     theme = theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+   )
+}
+
+# ── How to run ───────────────────────────────────────────────
+# df must contain 5-min OHLC columns: datetime, open, high, low, close
+# Example with 1 bp spread & 1 bp slippage:
+plot_orb_execution_vs_theoretical(df, spread_bps = 3, slippage_sd_bps = 3)
+
+```
+
+
 ## Conclusion
 
 The Opening Range Breakout strategy applied to the NASDAQ-100 ETF (QQQ) using 5-minute intraday data has shown potential for generating alpha returns. However, the overall performance, as measured by the Sharpe ratio and other metrics, indicates that the strategy may require improvements in terms of risk management and position sizing. The strategy's reliance on the opening range and the subsequent price action has yielded some profitable trades, but the volatility and drawdowns suggest that further refinement is needed to enhance its robustness and consistency.
@@ -649,7 +750,7 @@ The Opening Range Breakout strategy applied to the NASDAQ-100 ETF (QQQ) using 5-
 #| message: false
 #| echo: false
 #| output: false
-write.csv(valid_trades, "trade_log_qqq.csv", row.names = TRUE)
+# write.csv(valid_trades, "trade_log_qqq.csv", row.names = TRUE)
 ```
 
 

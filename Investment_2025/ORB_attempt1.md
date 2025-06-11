@@ -25,7 +25,9 @@ The time span goes from 2020-10-09 to 2025-05-21.
 
 ## Returns on the NASDAQ ETF is taken as a benchmark for the strategy performance evaluation
 
-![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-1.png)
+![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-1.png)
+
+![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-4-2.png)
 
 ## Applying the Strategy
 
@@ -71,36 +73,41 @@ the paper):
 <!-- -->
 
     # A tibble: 17 × 2
-       Metric                    Value       
-       <chr>                     <chr>       
-     1 Total Return (%)          717.3917    
-     2 Annualized Return (%)     36.9201     
-     3 Annualized Volatility (%) 45.8829     
-     4 Annualized Sharpe Ratio   1.0941      
-     5 Max Drawdown (%)          -27.7695    
-     6 CAPM Alpha (%)            52.7911     
-     7 Beta                      0.1225      
-     8 Total Trades              1151.0000   
-     9 Winning Trades            276.0000    
-    10 Losing Trades             875.0000    
-    11 Breakeven Trades          0.0000      
-    12 Win Rate (%)              23.9791     
-    13 Avg Net PnL               623.2769    
-    14 Profit Factor             1.2719      
-    15 Total Commission Paid     4403.3280   
-    16 Avg Position Notional     1541576.1158
-    17 Avg Leverage Used         4.9017      
+       Metric                    Value      
+       <chr>                     <chr>      
+     1 Total Return (%)          392.1068   
+     2 Annualized Return (%)     26.9134    
+     3 Annualized Volatility (%) 45.8650    
+     4 Annualized Sharpe Ratio   0.7544     
+     5 Max Drawdown (%)          -32.5207   
+     6 CAPM Alpha (%)            36.6945    
+     7 Beta                      0.1222     
+     8 Total Trades              1151.0000  
+     9 Winning Trades            273.0000   
+    10 Losing Trades             878.0000   
+    11 Breakeven Trades          0.0000     
+    12 Win Rate (%)              23.7185    
+    13 Avg Net PnL               253.7853   
+    14 Profit Factor             1.1636     
+    15 Total Commission Paid     2848.0800  
+    16 Avg Position Notional     965967.7259
+    17 Avg Leverage Used         4.9014     
 
-![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
 Although the strategy produced mostly alpha returns, which is a key
 feature of successful trading strategies, the Sharp-ratio remained lower
 than the stats of the paper (4.5% risk free was assumed).
 
-![Rolling Sharpe Ratio and Monthly
-PnL](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+<figure>
+<img
+src="ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-9-1.png"
+alt="Rolling Sharpe Ratio and Net Monthly PnL" />
+<figcaption aria-hidden="true">Rolling Sharpe Ratio and Net Monthly
+PnL</figcaption>
+</figure>
 
-![](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-12-1.png)
+![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-12-1.png)
 
 The histogram chart shows the mean and the distribution of **winning**
 returns (in terms of R) on the trades over time.
@@ -112,8 +119,24 @@ taken.
 
 ## Example of a valid trades
 
-![Example Trades (2 × 2) with Unified
-Legend](ORB_attempt1.markdown_strict_files/figure-markdown_strict/unnamed-chunk-13-1.png)
+<figure>
+<img
+src="ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-13-1.png"
+alt="Example Trades (2 × 2) with Unified Legend" />
+<figcaption aria-hidden="true">Example Trades (2 × 2) with Unified
+Legend</figcaption>
+</figure>
+
+To demonstrate some of the real life execution related “noise” and
+“imperfections” of trades the following graphs demonstrate the
+difference between the theoretical entry/exit prices and the actual
+executed prices, which are affected by the bid-ask spread and slippage.
+
+They might be smaller or larger, but all in all, slippage and spread are
+the two main factors that can affect the profitablity of trades in real
+life.
+
+![](ORB_attempt1_last_year.markdown_strict_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
 ## Conclusion
 
