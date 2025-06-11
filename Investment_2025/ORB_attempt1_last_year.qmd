@@ -521,7 +521,7 @@ mean_win <- mean(winning_trades$R_Multiple, na.rm = TRUE)
 x_clip   <- quantile(winning_trades$R_Multiple, 0.99, na.rm = TRUE)  # 99-th pct
 
 ggplot(winning_trades, aes(x = R_Multiple)) +
-  geom_histogram(bins = 50,
+  geom_histogram(bins = 10000,
                  fill = "steelblue",
                  color = "white",
                  linewidth = 0.5) +
