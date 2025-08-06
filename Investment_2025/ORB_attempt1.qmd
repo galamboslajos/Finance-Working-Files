@@ -463,6 +463,96 @@ The bottom panel plots **rolling 50-day CAPM alpha and beta**:
 These rolling measures provide insight into how the strategy's **exposures and return premiums change over time**.
 
 ```{r}
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(scales)
+library(patchwork)
+
+# 1. Run backtest and get raw trade log
+trade_log <- run_orb_backtest(df)
+
+# 2. Rebuild strat_curve and bh_curve
+#    (mirroring the logic in summarize_orb_performance)
+strat_curve <- trade_log %>%
+  mutate(ExitTime = as.POSIXct(ExitTime)) %>%
+  group_by(Date = as.Date(ExitTime)) %>%
+  summarize(StrategyCapital = max(CapitalAfter), .groups = "drop") %>%
+  arrange(Date)
+
+bh_curve <- df %>%
+  mutate(Date = as.Date(datetime)) %>%
+  group_by(Date) %>%
+  summarize(QQQ_Close = last(close), .groups = "drop") %>%
+  filter(Date >= min(strat_curve$Date), Date <= max(strat_curve$Date)) %>%
+  mutate(
+    BnH_Capital = first(strat_curve$StrategyCapital) * (QQQ_Close / first(QQQ_Close))
+  ) %>%
+  select(Date, BnH_Capital)
+
+# 3. Prep full joined curve
+full_curve <- inner_join(strat_curve, bh_curve, by = "Date") %>% arrange(Date)
+
+# 4. Define 20 one‐year windows evenly across the sample
+first_date <- min(full_curve$Date)
+last_date  <- max(full_curve$Date)
+total_days <- as.numeric(difftime(last_date, first_date, units = "days"))
+n_plots    <- 20
+window_days <- 365
+offsets    <- seq(0, total_days - window_days, length.out = n_plots)
+window_ranges <- tibble(
+  start = first_date + days(round(offsets)),
+  end   = first_date + days(round(offsets + window_days))
+)
+
+# 5. Build each small plot (normalized + better titles & x-axis)
+plot_list <- purrr::map2(
+  window_ranges$start,
+  window_ranges$end,
+  function(start_date, end_date) {
+    dat <- full_curve %>%
+      filter(Date >= start_date, Date <= end_date) %>%
+      arrange(Date) %>%
+      mutate(
+        StratPct = (StrategyCapital / first(StrategyCapital) - 1) * 100,
+        BnHPct   = (BnH_Capital     / first(BnH_Capital)     - 1) * 100
+      )
+    
+    ggplot(dat, aes(x = Date)) +
+      geom_line(aes(y = StratPct, color = "Strategy"), size = 0.6) +
+      geom_line(aes(y = BnHPct,   color = "Buy & Hold"), linetype = "dashed", size = 0.6) +
+      scale_color_manual(values = c("Strategy" = "steelblue", "Buy & Hold" = "darkorange")) +
+      scale_y_continuous(labels = function(x) paste0(x, "%")) +
+      scale_x_date(
+        breaks = seq(start_date, end_date, by = "3 months"),
+        labels = scales::date_format("%b %Y"),
+        expand = expansion(add = c(0, 0))
+      ) +
+      labs(
+        title = paste0(format(start_date, "%Y-%m"), " → ", format(end_date, "%Y-%m"))
+      ) +
+      theme_minimal(base_size = 8) +
+      theme(
+        legend.position = "none",
+        plot.title     = element_text(size = 8, hjust = 0.5),
+        axis.text.x    = element_text(size = 6, angle = 45, hjust = 1),
+        axis.text.y    = element_text(size = 6),
+        axis.title     = element_blank(),
+        panel.grid.minor = element_blank()
+      )
+  }
+)
+
+# 6. Mosaic layout in 5 columns × 4 rows
+wrap_plots(plot_list, ncol = 5, nrow = 4) +
+  plot_annotation(
+    title = "Mosaic of 1-Year % Returns: Strategy vs Buy & Hold (QQQ)",
+    theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+  )
+
+```
+
+```{r}
 #| label: optimise_orb_parameters
 #| eval: false
 #| output: false
