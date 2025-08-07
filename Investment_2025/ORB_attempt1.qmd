@@ -1,0 +1,1175 @@
+---
+title: "ORB_NASDAQ_5min"
+author: "Lajos Galambos"
+format: md
+---
+
+## Introduction
+
+This document outlines the implementation of an Opening Range Breakout (ORB) strategy using 5-minute intraday data for the NASDAQ-100 ETF (QQQ). The strategy is designed to capture price movements based on the opening range of the first two 5-minute candles after market open and take position with a dynamic risk related sizing method.
+
+The idea to test such approach comes from [a study by Carlo Zarattini, Andrea Barbon, Andrew Aziz (2024)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4416622).
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+#| message: false
+# install.packages(c("dplyr", "TTR", "lubridate", "arrow"))
+library(dplyr)
+library(TTR)
+library(lubridate)
+library(arrow)
+library(ggplot2)
+library(lubridate)
+library(scales)
+library(tidyr)
+library(broom)
+library(patchwork)
+library(zoo)
+library(purrr)
+df <- read_parquet("~/Desktop/qqq_5min.parquet")
+```
+
+## Data
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+str(df)
+head(df, 10)
+tail(df, 10)
+```
+
+Data has been gathered from the EOD API and saved as a Parquet file. The data set contains **5-minute OHLCV** data for **QQQ** (a Nasdaq ETF), including datetime, open, high, low, close, volume, and ticker information.
+
+**London trading hours** UTC time code were provided as default.
+
+The time span goes from **2020-10-09 to 2025-05-21**.
+
+## Returns on the NASDAQ ETF is taken as a benchmark for the strategy performance evaluation
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+plot(df$datetime, df$close, type = "l", main = "QQQ Historical Based on 5-Minute Close Prices", xlab = "Datetime", ylab = "Close Price")
+
+# Plotting volume is optional
+# plot(df$datetime, df$volume, type = "l", main = "QQQ Volume Based on 5-Minute Data", xlab = "Datetime", ylab = "Volume")
+```
+
+## Applying the Strategy
+
+1.  The direction of each trade (long or short) was determined by the **initial movement of the opening range**.
+2.  The stop loss was placed at the low of the day (which was the low of the first 5-minute candle) for a long trade, and at the high of the day (which was the high of the first 5-minute candle) for a short trade.
+3.  The distance between the entry price and the stop is labeled as **Risk(\$R)**. Returns are also evaluated based on their multiple of this.
+4.  We set the profit to the end of the day **(EoD)** (although later in this analysis we might relax that and explore potential different timinig for closing profiatble positions), we liquidate the position at market closure.
+5.  We assumed a starting capital of \$100,000, a maximum leverage of **10x**, and a commission of \$0.0010/share traded.
+
+## Position Sizing
+
+Position sizing proved to be a choke point of the strategy, as it is crucial to determine how many shares to buy or sell based on the available capital and risk per trade.
+
+The position size is calculated using the following formula (same as in the paper):
+
+* `A` – current account equity (`current_capital`)  
+* `p` – `risk_per_trade_pct` (here 0.01 = 1 %)  
+* `L` – `max_leverage` (here 10)  
+* `P` – entry price  
+* `R` – `risk_per_share`  
+
+`R` is derived from a volatility proxy. Defined as the distance between entry and stop; we set the stop a fixed multiple of the recent range, so `R` automatically grows when the market is more volatile and shrinks when it’s quieter. This implements classic volatility scaling: higher range ⇒ smaller size, lower range ⇒ larger size.
+
+**Key properties**
+
+* Fixed-fractional: each position risks exactly **1 % of equity**.  
+* Hard leverage ceiling: total exposure never exceeds **10 × equity**.  
+* Whole-share only: `floor()` ensures no fractional shares.  
+* Adaptive: position size automatically shrinks when the stop is wide and grows when the stop is tight, but never breaches either risk or leverage limits.  
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+run_orb_backtest <- function(df,
+                             initial_capital      = 100000,
+                             risk_per_trade_pct   = 0.01,      # 1 % of equity
+                             commission_per_share = 0.01,
+                             max_leverage         = 10,
+                             spread_bps           = 0.5,       # full bid-ask spread (bps)
+                             slippage_sd_bps      = 0.5,       # slippage σ (bps, adverse)
+                             seed                 = NULL,
+                             holding_minutes_opt  = 380) {     # ← NEW PARAMETER
+
+  if (!is.null(seed)) set.seed(seed)
+
+  df <- df %>% 
+    mutate(date = as.Date(datetime),
+           time = format(datetime, "%H:%M:%S")) %>% 
+    arrange(datetime)
+
+  trading_days    <- unique(df$date)
+  current_capital <- initial_capital
+  trade_log       <- tibble()
+
+  half_spread_frac <- (spread_bps / 2) / 10000
+  apply_slippage <- function(price, direction, is_entry = TRUE) {
+    slip_frac <- abs(rnorm(1, mean = 0, sd = slippage_sd_bps / 10000))
+    if (direction == "Long") {
+      if (is_entry) price * (1 + half_spread_frac + slip_frac)
+      else           price * (1 - half_spread_frac - slip_frac)
+    } else {
+      if (is_entry) price * (1 - half_spread_frac - slip_frac)
+      else           price * (1 + half_spread_frac + slip_frac)
+    }
+  }
+
+  for (day in trading_days) {
+
+    day_data <- df %>% filter(date == day) %>% arrange(datetime)
+    if (nrow(day_data) < 2) next
+
+    or_candle <- day_data[1, ]
+    if (anyNA(or_candle[c("open","close","high","low")])) next
+
+    entry_bar   <- day_data[2, ]
+    entry_price <- entry_bar$open
+    entry_time  <- entry_bar$datetime
+    if (is.na(entry_price)) next
+
+    direction <- dplyr::case_when(
+      or_candle$close > or_candle$open ~ "Long",
+      or_candle$close < or_candle$open ~ "Short",
+      TRUE                             ~ NA_character_
+    )
+    if (is.na(direction)) next
+
+    stop_price     <- if (direction == "Long") or_candle$low else or_candle$high
+    risk_per_share <- abs(entry_price - stop_price)
+    if (risk_per_share <= 0) next
+
+    shares_by_risk    <- (current_capital * risk_per_trade_pct) / risk_per_share
+    shares_by_capital <- (current_capital * max_leverage)       / entry_price
+    shares_traded     <- as.integer(floor(min(shares_by_risk, shares_by_capital)))
+    if (shares_traded < 1) next
+
+    notional_position <- shares_traded * entry_price
+    exec_entry_price  <- apply_slippage(entry_price, direction, TRUE)
+
+    after_entry <- day_data %>%
+      filter(datetime >= entry_time) %>%
+      mutate(mins_since_entry = as.numeric(difftime(datetime, entry_time, units = "mins")))
+
+    exit_price  <- NA_real_
+    exit_time   <- NA
+    exit_reason <- NA_character_
+
+    for (i in seq_len(nrow(after_entry))) {
+      bar <- after_entry[i, ]
+      if (anyNA(bar[c("high", "low", "close")])) next
+
+      hit_sl <- (direction == "Long"  && bar$low  <= stop_price) ||
+                (direction == "Short" && bar$high >= stop_price)
+
+      if (hit_sl) {
+        exit_price  <- stop_price
+        exit_time   <- bar$datetime
+        exit_reason <- "SL"
+        break
+      }
+
+      # Timed exit after N minutes if reached
+      if (bar$mins_since_entry >= holding_minutes_opt) {
+        exit_price  <- bar$close
+        exit_time   <- bar$datetime
+        exit_reason <- "Timed"
+        break
+      }
+    }
+
+    if (is.na(exit_price)) next
+
+    exec_exit_price <- apply_slippage(exit_price, direction, FALSE)
+
+    gross_pnl <- if (direction == "Long") {
+      (exec_exit_price - exec_entry_price) * shares_traded
+    } else {
+      (exec_entry_price - exec_exit_price) * shares_traded
+    }
+
+    commission_total <- shares_traded * commission_per_share * 2
+    net_pnl          <- gross_pnl - commission_total
+
+    trade_log <- dplyr::bind_rows(
+      trade_log,
+      tibble(
+        Date             = day,
+        EntryTime        = entry_time,
+        ExitTime         = exit_time,
+        Direction        = direction,
+        EntryPrice       = entry_price,
+        ExecEntryPrice   = exec_entry_price,
+        ExitPrice        = exit_price,
+        ExecExitPrice    = exec_exit_price,
+        StopPrice        = stop_price,
+        R                = risk_per_share,
+        Shares           = shares_traded,
+        NotionalPosition = notional_position,
+        MarginUsed       = notional_position / max_leverage,
+        GrossPnL         = gross_pnl,
+        Commission       = commission_total,
+        NetPnL           = net_pnl,
+        ExitReason       = exit_reason,
+        CapitalBefore    = current_capital,
+        CapitalAfter     = current_capital + net_pnl
+      )
+    )
+
+    current_capital <- current_capital + net_pnl
+  }
+
+  trade_log
+}
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| otput: false
+#| echo: false
+results <- run_orb_backtest(df)
+# View(results)
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| output: false
+#| echo: false
+
+summarize_orb_performance <- function(trade_log, df, rf = 0.04) {
+  if (nrow(trade_log) == 0) {
+    message("No trades to summarize.")
+    return(NULL)
+  }
+
+  # ── Process trade log ────────────────────────────────────────────
+  trade_log <- trade_log %>%
+    mutate(
+      R_multiple = NetPnL / (R * Shares),
+      ExitTime = as.POSIXct(ExitTime),
+      LeverageUsed = NotionalPosition / CapitalBefore
+    )
+
+  first_date <- min(trade_log$ExitTime)
+  last_date <- max(trade_log$ExitTime)
+  total_days <- as.numeric(difftime(last_date, first_date, units = "days"))
+  capital_curve <- trade_log$CapitalAfter
+  daily_returns <- diff(capital_curve) / head(capital_curve, -1)
+
+  # ── Performance metrics ────────────────────────────────────────────
+  total_return <- (last(capital_curve) - first(trade_log$CapitalBefore)) /   first(trade_log$CapitalBefore)
+  annualized_return <- (1 + total_return)^(252 / total_days) - 1
+  annualized_vol <- sd(daily_returns, na.rm = TRUE) * sqrt(252)
+  annualized_sharpe <- ifelse(annualized_vol > 0,
+                              (mean(daily_returns, na.rm = TRUE) * 252 - rf) / annualized_vol,
+                              NA)
+  cum_max <- cummax(capital_curve)
+  drawdowns <- capital_curve / cum_max - 1
+  max_dd <- min(drawdowns, na.rm = TRUE)
+
+  strat_curve <- trade_log %>%
+    mutate(Date = as.Date(ExitTime)) %>%
+    group_by(Date) %>%
+    summarize(StrategyCapital = max(CapitalAfter), .groups = "drop")
+
+  bh_curve <- df %>%
+    #filter(Ticker == "QQQ.US") %>%#
+    mutate(Date = as.Date(datetime)) %>%
+    group_by(Date) %>%
+    summarize(QQQ_Close = last(close), .groups = "drop") %>%
+    filter(Date >= min(strat_curve$Date), Date <= max(strat_curve$Date)) %>%
+    mutate(BnH_Capital = first(strat_curve$StrategyCapital) * (QQQ_Close / first(QQQ_Close)))
+
+  # Alpha estimation with regression (CAPM style) 
+  merged_returns <- left_join(strat_curve, bh_curve, by = "Date") %>%
+    arrange(Date) %>%
+    mutate(
+      strat_ret = c(NA, diff(StrategyCapital)) / lag(StrategyCapital),
+      qqq_ret = c(NA, diff(BnH_Capital)) / lag(BnH_Capital)
+    ) %>%
+    drop_na(strat_ret, qqq_ret)
+
+  capm_model <- lm(strat_ret ~ qqq_ret, data = merged_returns)
+  alpha <- coef(capm_model)[1] * 252  
+  beta <- coef(capm_model)[2]
+
+ # ── Summary stats ────────────────────────────────────────────
+  stats <- tibble(
+    Metric = c(
+      "Total Return (%)", "Annualized Return (%)", "Annualized Volatility (%)", "Annualized Sharpe Ratio",
+      "Max Drawdown (%)", "CAPM Alpha (%)", "Beta", "Total Trades", "Winning Trades",
+      "Losing Trades", "Breakeven Trades", "Win Rate (%)", "Avg Net PnL", "Profit Factor",
+      "Total Commission Paid", "Avg Position Notional", "Avg Leverage Used"
+    ),
+    Value = sprintf("%.4f", c(
+      total_return * 100,
+      annualized_return * 100,
+      annualized_vol * 100,
+      annualized_sharpe,
+      max_dd * 100,
+      alpha * 100,
+      beta,
+      nrow(trade_log),
+      sum(trade_log$NetPnL > 0),
+      sum(trade_log$NetPnL < 0),
+      sum(trade_log$NetPnL == 0),
+      mean(trade_log$NetPnL > 0) * 100,
+      mean(trade_log$NetPnL),
+      ifelse(sum(trade_log$NetPnL < 0) == 0, NA,
+             sum(trade_log$NetPnL[trade_log$NetPnL > 0]) / abs(sum(trade_log$NetPnL[trade_log$NetPnL < 0]))),
+      sum(trade_log$Commission),
+      mean(trade_log$NotionalPosition),
+      mean(trade_log$LeverageUsed)
+    ))
+  )
+
+  print(stats)
+
+
+# ── Drawdowns ────────────────────────────────────────────
+drawdown_df <- strat_curve %>%
+  arrange(Date) %>%
+  mutate(
+    CumMax = cummax(StrategyCapital),
+    DrawdownPct = StrategyCapital / CumMax - 1
+  )
+
+# ── Cummulative Returns ────────────────────────────────────────────
+p1 <- ggplot(merged_returns, aes(x = Date)) +
+  geom_line(aes(y = StrategyCapital, color = "Strategy")) +
+  geom_line(aes(y = BnH_Capital, color = "Buy & Hold QQQ"), linetype = "dashed") +
+  scale_color_manual(values = c("Strategy" = "steelblue", "Buy & Hold QQQ" = "darkorange")) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  labs(
+    title = "Equity Curve: Strategy vs Buy & Hold QQQ",
+    x = NULL, y = "Capital ($)",
+    color = "Legend"
+  ) +
+  theme_minimal()
+
+# ── Drawdown ────────────────────────────────────────────
+p2 <- ggplot(drawdown_df, aes(x = Date, y = DrawdownPct)) +
+  geom_area(fill = "firebrick", alpha = 0.3) +
+  geom_line(color = "firebrick", linewidth = 0.5) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    title = "Drawdown Over Time",
+    x = "Date", y = "Drawdown (%)"
+  ) +
+  theme_minimal()
+
+# ── Rolling stats ────────────────────────────────────────────
+
+rolling_data <- merged_returns %>%
+  select(Date, strat_ret, qqq_ret) %>%
+  drop_na()
+
+window <- 50
+
+rolling_list <- vector("list", length = nrow(rolling_data) - window + 1)
+
+for (i in seq_along(rolling_list)) {
+  w <- rolling_data[i:(i + window - 1), ]
+  model <- try(lm(strat_ret ~ qqq_ret, data = w), silent = TRUE)
+  if (inherits(model, "try-error")) {
+    rolling_list[[i]] <- tibble(alpha = NA_real_, beta = NA_real_)
+  } else {
+    coefs <- coef(model)
+    rolling_list[[i]] <- tibble(alpha = coefs[1], beta = coefs[2])
+  }
+}
+
+rolling_capm_df <- bind_rows(rolling_list) %>%
+  mutate(Date = rolling_data$Date[window:nrow(rolling_data)])
+
+mean_alpha <- mean(rolling_capm_df$alpha, na.rm = TRUE)
+mean_beta  <- mean(rolling_capm_df$beta,  na.rm = TRUE)
+
+p3 <- ggplot(rolling_capm_df, aes(x = Date)) +
+  geom_line(aes(y = alpha * 252, color = "Alpha (Annualized)"), linewidth = 0.7) +
+  geom_line(aes(y = beta, color = "Beta"), linewidth = 0.7) +
+  geom_hline(yintercept = mean_alpha * 252, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = mean_beta, linetype = "dashed", color = "orange") +
+  annotate("text", x = min(rolling_capm_df$Date), y = mean_alpha * 252,
+           label = paste0("Mean Alpha: ", sprintf("%.2f", mean_alpha * 252)),
+           vjust = -1, hjust = 0, color = "blue", size = 3.5) +
+  annotate("text", x = min(rolling_capm_df$Date), y = mean_beta,
+           label = paste0("Mean Beta: ", sprintf("%.2f", mean_beta)),
+           vjust = -1, hjust = 0, color = "orange", size = 3.5) +
+  scale_color_manual(values = c("Alpha (Annualized)" = "blue", "Beta" = "orange")) +
+  labs(
+    title = "50-Day Rolling Alpha and Beta",
+    x = "Date", y = "Value", color = "Metric"
+  ) +
+  theme_minimal()
+
+# ── Combine plots ────────────────────────────────────────────
+p1 / p2 / p3
+
+}
+```
+
+```{r}
+#| fig-asp: 1.8
+#| warning: false
+#| message: false
+#| echo: false
+log <- run_orb_backtest(df)
+summarize_orb_performance(log, df)
+```
+### Strategy Equity Curve vs. Buy & Hold Benchmark
+
+The top panel shows the evolution of capital for:
+
+- **Strategy** (blue line): performance of the active trading system.
+- **Buy & Hold QQQ** (orange dashed line): a passive benchmark for comparison.
+
+The active strategy significantly outperforms the benchmark, especially from 2023 onward, although it shows more volatility and deeper pullbacks.
+
+
+### Drawdown Over Time
+
+The second panel displays the strategy's **drawdowns** — the percentage decline from peak equity:
+
+- Red shaded areas indicate capital drawdowns.
+- The strategy experienced several deep drawdowns (as much as **-30%**), especially in 2021 and 2023.
+- The drawdowns appear to stabilize somewhat toward 2025, reflecting improved robustness.
+
+
+### 50-Day Rolling Alpha and Beta
+
+The bottom panel plots **rolling 50-day CAPM alpha and beta**:
+
+- **Alpha (blue line)**: Measures excess return beyond what is explained by exposure to the QQQ index.  
+  - It is annualized (×252) and fluctuates meaningfully around the global mean (dashed blue line).
+- **Beta (orange line)**: Measures sensitivity to the benchmark.  
+  - A beta above 1 implies high exposure to market risk. A beta near 0 indicates market neutrality.
+- Both alpha and beta are volatile, but the average alpha is slightly positive, and beta remains relatively low, suggesting consistent **market-independent outperformance**.
+
+These rolling measures provide insight into how the strategy's **exposures and return premiums change over time**.
+
+### We might observe different subsamples of time-periods separatley in cummulative terms 
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+# 1. Run backtest and get raw trade log
+trade_log <- run_orb_backtest(df)
+
+# 2. Rebuild strat_curve and bh_curve
+#    (mirroring the logic in summarize_orb_performance)
+strat_curve <- trade_log %>%
+  mutate(ExitTime = as.POSIXct(ExitTime)) %>%
+  group_by(Date = as.Date(ExitTime)) %>%
+  summarize(StrategyCapital = max(CapitalAfter), .groups = "drop") %>%
+  arrange(Date)
+
+bh_curve <- df %>%
+  mutate(Date = as.Date(datetime)) %>%
+  group_by(Date) %>%
+  summarize(QQQ_Close = last(close), .groups = "drop") %>%
+  filter(Date >= min(strat_curve$Date), Date <= max(strat_curve$Date)) %>%
+  mutate(
+    BnH_Capital = first(strat_curve$StrategyCapital) * (QQQ_Close / first(QQQ_Close))
+  ) %>%
+  select(Date, BnH_Capital)
+
+# 3. Prep full joined curve
+full_curve <- inner_join(strat_curve, bh_curve, by = "Date") %>% arrange(Date)
+
+# 4. Define 20 one‐year windows evenly across the sample
+first_date <- min(full_curve$Date)
+last_date  <- max(full_curve$Date)
+total_days <- as.numeric(difftime(last_date, first_date, units = "days"))
+n_plots    <- 20
+window_days <- 365
+offsets    <- seq(0, total_days - window_days, length.out = n_plots)
+window_ranges <- tibble(
+  start = first_date + days(round(offsets)),
+  end   = first_date + days(round(offsets + window_days))
+)
+
+# 5. Build each small plot (normalized + better titles & x-axis)
+plot_list <- purrr::map2(
+  window_ranges$start,
+  window_ranges$end,
+  function(start_date, end_date) {
+    dat <- full_curve %>%
+      filter(Date >= start_date, Date <= end_date) %>%
+      arrange(Date) %>%
+      mutate(
+        StratPct = (StrategyCapital / first(StrategyCapital) - 1) * 100,
+        BnHPct   = (BnH_Capital     / first(BnH_Capital)     - 1) * 100
+      )
+    
+    ggplot(dat, aes(x = Date)) +
+      geom_line(aes(y = StratPct, color = "Strategy"), size = 0.6) +
+      geom_line(aes(y = BnHPct,   color = "Buy & Hold"), linetype = "dashed", size = 0.6) +
+      scale_color_manual(values = c("Strategy" = "steelblue", "Buy & Hold" = "darkorange")) +
+      scale_y_continuous(labels = function(x) paste0(x, "%")) +
+      scale_x_date(
+        breaks = seq(start_date, end_date, by = "3 months"),
+        labels = scales::date_format("%b %Y"),
+        expand = expansion(add = c(0, 0))
+      ) +
+      labs(
+        title = paste0(format(start_date, "%Y-%m"), " → ", format(end_date, "%Y-%m"))
+      ) +
+      theme_minimal(base_size = 8) +
+      theme(
+        legend.position = "none",
+        plot.title     = element_text(size = 8, hjust = 0.5),
+        axis.text.x    = element_text(size = 6, angle = 45, hjust = 1),
+        axis.text.y    = element_text(size = 6),
+        axis.title     = element_blank(),
+        panel.grid.minor = element_blank()
+      )
+  }
+)
+
+# 6. Mosaic layout in 5 columns × 4 rows
+wrap_plots(plot_list, ncol = 5, nrow = 4) +
+  plot_annotation(
+    title = "Mosaic of 1-Year % Returns: Strategy vs Buy & Hold (QQQ)",
+    theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+  )
+
+```
+
+```{r}
+#| label: optimise_orb_parameters
+#| eval: false
+#| output: false
+#| warning: false
+#| message: false
+#| echo: false
+#| comment: NA
+#  ──────────────────────────────────────────────────────────────────────────
+#  CHANGE "eval: false" in order to let the code run and be rendered if needed!
+#  Optimise `risk_per_trade_pct`  and  `holding_minutes_opt`
+#  objective → maximise `total_return` as computed in summarize_orb_performance
+#  ──────────────────────────────────────────────────────────────────────────
+#  Prerequisites:
+#    ▸ run_orb_backtest()               – already defined earlier
+#    ▸ summarize_orb_performance()      – already defined earlier
+#    ▸ df                               – minute-bar data frame in memory
+#  ──────────────────────────────────────────────────────────────────────────
+
+optimise_orb_params <- function(df,
+                                risk_grid   = seq(0.0025, 0.0300, by = 0.0025),   # 0.25 % … 3 %
+                                hold_grid   = seq(5,        390, by = 5),       
+                                init_capital = 100000,
+                                ...) {                                           # pass-through args
+  
+  # ── helper: run one combo & return total return ──────────────────────────
+  eval_combo <- function(risk_pct, hold_min) {
+    log <- run_orb_backtest(df,
+                            initial_capital     = init_capital,
+                            risk_per_trade_pct  = risk_pct,
+                            holding_minutes_opt = hold_min,
+                            ...)
+    
+    if (nrow(log) == 0) return(NA_real_)                        
+    (tail(log$CapitalAfter, 1) - log$CapitalBefore[1]) /
+      log$CapitalBefore[1]                                      
+  }
+  
+  # ── grid search ──────────────────────────────────────────────────────────
+  combos <- expand.grid(risk = risk_grid,
+                        hold = hold_grid,
+                        KEEP.OUT.ATTRS = FALSE,
+                        stringsAsFactors = FALSE)
+  
+  pb <- txtProgressBar(min = 0, max = nrow(combos), style = 3)
+  combos$total_return <- vapply(seq_len(nrow(combos)), function(i) {
+    setTxtProgressBar(pb, i)
+    eval_combo(combos$risk[i], combos$hold[i])
+  }, numeric(1))
+  close(pb)
+  
+  # ── best combo + full grid out ───────────────────────────────────────────
+  best_row <- combos[which.max(combos$total_return), ]
+  
+  list(best_params = list(risk_per_trade_pct  = best_row$risk,
+                          holding_minutes_opt = best_row$hold,
+                          total_return        = best_row$total_return),
+       full_grid   = combos)
+}
+
+# ── run the optimiser ───────────────────────────────────────────────────────
+opt_results <- optimise_orb_params(df)
+
+print(opt_results$best_params)
+
+best_log <- run_orb_backtest(df,
+                             risk_per_trade_pct  = opt_results$best_params$risk_per_trade_pct,
+                             holding_minutes_opt = opt_results$best_params$holding_minutes_opt)
+
+summarize_orb_performance(best_log, df)
+
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-cap: "Rolling Sharpe Ratio, Net Monthly PnL, and Rolling Win Rate"
+#| fig-asp: 0.9
+
+library(zoo)
+library(patchwork)
+
+# ── Rolling (50 day) Sharpe ────────────────────────────────────────────
+
+daily_curve <- log %>%                         
+  mutate(Date = as.Date(ExitTime)) %>%
+  group_by(Date) %>%
+  summarise(Capital = max(CapitalAfter), .groups = "drop") %>%
+  arrange(Date) %>%
+  mutate(Return = Capital / lag(Capital) - 1)
+
+window <- 50
+
+rolling_sharpe <- daily_curve %>%
+  mutate(
+    RollingSharpe = rollapply(
+      Return,
+      width = window,
+      FUN   = function(x) {
+        m <- mean(x, na.rm = TRUE)
+        s <- sd(  x, na.rm = TRUE)
+        if (s == 0 || is.na(s)) NA else (m / s) * sqrt(252)
+      },
+      fill  = NA,
+      align = "right"
+    )
+  )
+
+p1 <- ggplot(rolling_sharpe, aes(Date, RollingSharpe)) +
+  geom_line(color = "purple") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(
+    title = paste0(window, "-Day Rolling Sharpe Ratio"),
+    x = NULL, y = "Sharpe"
+  ) +
+  theme_minimal()
+
+# ── Monthly Net P&L ────────────────────────────────────────────
+
+monthly_pnl <- log %>%
+  mutate(Month = floor_date(as.Date(ExitTime), "month")) %>%
+  group_by(Month) %>%
+  summarise(
+    NetPnL = sum(NetPnL),
+    Trades = n(),
+    .groups = "drop"
+  )
+
+p2 <- ggplot(monthly_pnl, aes(Month, NetPnL)) +
+  geom_col(fill = "steelblue") +
+  geom_hline(yintercept = 0, color = "grey50") +
+  scale_y_continuous(labels = dollar_format()) +
+  labs(
+    title = "Net Monthly PnL",
+    x = NULL, y = "Net PnL ($)"
+  ) +
+  theme_minimal()
+
+# ── Rolling (50 day) Win rate────────────────────────────────────────────
+rolling_win_rate <- log %>%
+  mutate(Date = as.Date(ExitTime)) %>%
+  group_by(Date) %>%
+  summarise(Win = sum(NetPnL > 0), Total = n(), .groups = "drop") %>%
+  mutate(DailyWinRate = Win / Total) %>%
+  arrange(Date) %>%
+  mutate(
+    RollingWinRate = rollapply(
+      DailyWinRate,
+      width = window,
+      FUN = function(x) mean(x, na.rm = TRUE),
+      fill = NA,
+      align = "right"
+    )
+  )
+
+p3 <- ggplot(rolling_win_rate, aes(Date, RollingWinRate)) +
+  geom_line(color = "darkgreen") +
+  geom_hline(yintercept = 0.5, linetype = "dashed") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    title = paste0(window, "-Day Rolling Win Rate"),
+    x = NULL, y = "Win Rate"
+  ) +
+  theme_minimal()
+
+p1 / p2 / p3
+```
+
+### 1. 50-Day Rolling Sharpe Ratio
+
+This plot shows the strategy's Sharpe ratio over a 50-day rolling window.
+
+- Values above 0 indicate positive risk-adjusted returns.
+- Dips below 0 reflect periods of poor performance relative to volatility.
+- Sharpe falls sharply in 2021 and mid-2023 but stabilizes by 2025.
+- Useful for tracking how consistently the strategy rewards risk over time.
+
+
+### 2. Net Monthly PnL
+
+This bar chart shows the net profit or loss for each calendar month.
+
+- Positive bars show profitable months; negative bars show losses.
+- Profits spike in some months (e.g. late 2022 and 2024), reaching ~$60,000.
+- Losses are also present, occasionally exceeding -$20,000.
+- Reveals the cyclical nature of the strategy's performance.
+
+
+
+### 3. 50-Day Rolling Win Rate
+
+This plot tracks the percentage of winning trades in a 50-day window.
+
+- The dashed line at 50% is the breakeven level.
+- The win rate mostly stays between 15% and 40%.
+- Indicates a strategy that wins less often but may have favorable risk/reward.
+- Useful for understanding trade structure and consistency.
+
+## The model's accuracy in directional term (initial direction is accurate for day's direction)
+
+The following metric shows the overall directional accuracy of the model. If, in a certain trading day the model went short, we can expect the closing candle's closing price level to be smaller than the first candle's closing price level (conversely in a long-case). 
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+
+# ── Directional Accuracy ────────────────────────────────────────────
+
+df$datetime <- as.POSIXct(df$datetime, tz = "UTC")
+
+df <- df %>%
+  mutate(date = as.Date(datetime))
+
+first_candle <- df %>% filter(format(datetime, "%H:%M:%S") == "13:30:00")
+last_candle  <- df %>% filter(format(datetime, "%H:%M:%S") == "19:55:00")
+
+direction_check <- first_candle %>%
+  select(date, open_first = open, close_first = close) %>%
+  inner_join(last_candle %>% select(date, close_last = close), by = "date") %>%
+  mutate(
+    direction = ifelse(close_first > open_first, "long", 
+                       ifelse(close_first < open_first, "short", "neutral")),
+    success = case_when(
+      direction == "long"  & close_last > close_first ~ TRUE,
+      direction == "short" & close_last < close_first ~ TRUE,
+      TRUE ~ FALSE
+    )
+  )
+
+total_days <- nrow(direction_check %>% filter(direction != "neutral"))
+successful_days <- sum(direction_check$success, na.rm = TRUE)
+accuracy <- successful_days / total_days
+
+cat("Directional success count:", successful_days, "out of", total_days, "trading days\n")
+cat("Directional accuracy rate:", round(accuracy * 100, 2), "%\n")
+```
+
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+# ── Win distribution ────────────────────────────────────────────
+valid_trades <- log %>% 
+  filter(!is.na(NetPnL), !is.na(R), R > 0) %>%
+  mutate(
+    R_Multiple = NetPnL / (R * Shares),
+    ExitTime = as.POSIXct(ExitTime)
+  )
+
+mean_r <- mean(valid_trades$R_Multiple, na.rm = TRUE)
+mean_win <- mean(valid_trades$R_Multiple[valid_trades$R_Multiple > 0], na.rm = TRUE)
+mean_loss <- mean(valid_trades$R_Multiple[valid_trades$R_Multiple < 0], na.rm = TRUE)
+
+winning_trades <- valid_trades %>%
+  filter(R_Multiple > 0, is.finite(R_Multiple))
+
+mean_win <- mean(winning_trades$R_Multiple, na.rm = TRUE)
+x_clip   <- quantile(winning_trades$R_Multiple, 0.99, na.rm = TRUE)  # 99-th pct
+
+ggplot(winning_trades, aes(x = R_Multiple)) +
+  geom_histogram(bins = 10000,
+                 fill = "steelblue",
+                 color = "white",
+                 linewidth = 0.5) +
+  geom_vline(xintercept = mean_win,
+             color      = "darkred",
+             linetype   = "dashed",
+             linewidth  = 1) +
+  coord_cartesian(xlim = c(0, x_clip)) +   # ← zoom
+  labs(
+    title = "Winning-Trade R-Multiples (0–99th %ile view)",
+    x     = "R Multiple (NetPnL / Risk)",
+    y     = "Frequency"
+  ) +
+  annotate("text",
+           x = mean_win,
+           y = Inf, vjust = -0.5,
+           label = paste0("Mean Win R: ", round(mean_win, 2)),
+           color = "darkred", size = 4) +
+  theme_minimal()
+
+```
+
+The histogram chart shows the mean and the distribution of **winning** returns (in terms of R) on the trades over time.
+
+It looks like that the distribution has a long right tail, which is a good sign for the strategy. The mean of the winning trades is around 9R, which means that the average winning trade returns 9 times the risk taken.
+
+
+## Example of a valid trades 
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-cap: "Example Trades (2 × 2) with Unified Legend"
+#| fig-asp: 0.6
+
+plot_trade <- function(trd, df_day, title_note = "") {
+  
+  half_width <- dseconds(150)  
+  
+  ggplot(df_day) +
+    geom_linerange(aes(x = datetime, ymin = low, ymax = high),
+                   colour = "grey60") +
+    geom_rect(
+      aes(xmin = datetime - half_width,
+          xmax = datetime + half_width,
+          ymin = pmin(open, close),
+          ymax = pmax(open, close),
+          fill = close >= open),
+      colour = "grey30", linewidth = .2
+    ) +
+    scale_fill_manual(values = c(`TRUE` = "#4CAF50", `FALSE` = "#E53935"),
+                      guide = "none") +
+    
+    geom_hline(aes(yintercept = trd$StopPrice, colour = "Stop"),
+               linetype = "dashed", linewidth = 1) +
+    geom_point(aes(x = trd$EntryTime, y = trd$EntryPrice, colour = "Entry"),
+               size = 3) +
+    geom_point(aes(x = trd$ExitTime,  y = trd$ExitPrice,  colour = "Exit"),
+               size = 3) +
+    
+    scale_colour_manual(
+      name   = NULL,
+      values = c(Stop = "red", Entry = "blue", Exit = "gold"),
+      breaks = c("Entry", "Exit", "Stop")
+    ) +
+    guides(
+      colour = guide_legend(
+        override.aes = list(
+          linetype = c("blank", "blank", "dashed"),
+          shape    = c(16, 16, NA),
+          size     = c(3, 3, 1)
+        )
+      )
+    ) +
+    
+    labs(
+      title = paste0(title_note, " — ", format(as.Date(trd$ExitTime), "%Y-%m-%d")),
+      x = NULL, y = "Price"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x  = element_text(angle = 45, hjust = 1),
+      legend.position = "bottom"   
+    )
+}
+
+# ── pick four illustrative trades ────────────────────────────────────────
+tr_long_win  <- valid_trades %>% filter(Direction == "Long",  NetPnL > 0) %>% slice_max(NetPnL, n = 1)
+tr_short_win <- valid_trades %>% filter(Direction == "Short", NetPnL > 0) %>% slice_max(NetPnL, n = 1)
+tr_big_loss  <- valid_trades %>%                                slice_min(NetPnL, n = 1)
+tr_best_R    <- valid_trades %>% filter(R_Multiple == max(R_Multiple, na.rm = TRUE))
+
+examples <- bind_rows(
+  mutate(tr_long_win,  tag = "Long Winner"),
+  mutate(tr_short_win, tag = "Short Winner"),
+  mutate(tr_big_loss,  tag = "Biggest Loser"),
+  mutate(tr_best_R,    tag = paste0("Top R (", round(tr_best_R$R_Multiple, 2), ")"))
+)
+
+plots <- lapply(split(examples, examples$tag), function(row) {
+  trd    <- row[1, ]
+  day_df <- df %>% filter(as.Date(datetime) == as.Date(trd$ExitTime))
+  plot_trade(trd, day_df, trd$tag)
+})
+
+((plots[[1]] | plots[[2]]) / (plots[[3]] | plots[[4]])) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+```
+
+
+###  Selected Trade Case Studies
+
+This panel showcases four notable individual trades from the backtest, with price action annotated by:
+
+- **Entry point**
+- **Exit point**
+- **Stop level** (horizontal dashed line)
+
+Each subplot highlights a different performance scenario:
+
+
+**Biggest Loser — 2025-04-21**  
+- A long trade that quickly moved against the entry.
+- The stop loss was hit early in the session, leading to the largest dollar loss in the dataset.
+
+**Long Winner — 2025-04-09**  
+- A long breakout trade that trended upward for the rest of the day.
+- Captured strong upside momentum, exiting with a large gain.
+
+**Short Winner — 2025-03-13**  
+- A short trade executed after a bearish ORB setup.
+- Price continued to decline, producing one of the most profitable short-side trades.
+
+**Top R (1137.14) — 2021-12-16**  
+- This trade had the **highest R-multiple** (return relative to risk taken).
+- The tight stop enabled a very high return with relatively small capital exposure.
+- A textbook example of **asymmetric payoff**.
+
+
+These visualizations provide intuitive insight into trade dynamics — showcasing how both risk and reward evolve intraday.
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| output: false
+# Optional: write a CSV file for further analysis
+#write.csv(valid_trades, "trade_log_qqq.csv", row.names = TRUE)
+```
+
+
+## Exploring Hypothetical Profit Taking Moments, Optimal Holding Period
+
+### Is it relly rational to hold it untio the end of the day?
+
+Let's explore the hypothetical profit-taking moments in the trades, assuming we could exit at any 5-minute interval after entry. This will help us understand how holding time affects the R-multiple and whether it is rational to hold until the end of the day.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+# ── 1.  KEEP *ALL* TRADES ──────────────────────────────────────────────
+valid_trades_all <- valid_trades   # ← no ExitReason filter
+
+# ── 2.  Build 5-min grid up to the real exit (TP or SL) ────────────────
+expanded_trades <- valid_trades_all %>%
+  rowwise() %>%
+  mutate(
+    HypoExitTimes = list(seq.POSIXt(EntryTime, ExitTime, by = "5 mins"))
+  ) %>%
+  unnest(HypoExitTimes) %>%
+  filter(HypoExitTimes > EntryTime) %>%  # skip 0-minute row
+  ungroup()
+
+# ── 3.  Stitch in prices ───────────────────────────────────────────────
+price_df <- df %>%
+  select(datetime, close) %>%
+  rename(HypoExitTimes = datetime, ExitPriceClose = close)
+
+expanded_trades <- expanded_trades %>%
+  left_join(price_df, by = "HypoExitTimes") %>%
+  filter(!is.na(ExitPriceClose))
+
+# ── 4.  Compute hypothetical P&L and R multiple ────────────────────────
+expanded_trades <- expanded_trades %>%
+  mutate(
+    MinutesHeld = as.numeric(difftime(HypoExitTimes, EntryTime, units = "mins")),
+    HypoNetPnL = case_when(
+      Direction == "Long"  ~ (ExitPriceClose - ExecEntryPrice) * Shares,
+      Direction == "Short" ~ (ExecEntryPrice - ExitPriceClose) * Shares
+    ),
+    HypoRMultiple = HypoNetPnL / (R * Shares)
+  )
+
+# ── 5.  Trim extremes & plot (unchanged) ───────────────────────────────
+quantiles <- quantile(expanded_trades$HypoRMultiple, probs = c(0.025, 0.975), na.rm = TRUE)
+
+filtered_trades <- expanded_trades %>%
+  filter(HypoRMultiple >= quantiles[1], HypoRMultiple <= quantiles[2])
+
+
+
+ggplot(filtered_trades, aes(x = MinutesHeld, y = HypoRMultiple)) +
+  geom_point(aes(color = "Individual trades"), alpha = 0.1) +
+  stat_summary_bin(
+    aes(color = "5 min median R"), 
+    fun = median, bins = 60, geom = "line", linewidth = 1
+  ) +
+  # LOESS with linetype set outside of aes()
+  geom_smooth(
+    aes(color = "LOESS fit"), 
+    method = "loess", se = FALSE, linetype = "dashed", linewidth = 0.8
+  ) +
+  scale_color_manual(
+    name   = "Series",
+    values = c(
+      "Individual trades" = "grey70",
+      "5 min median R"    = "purple",
+      "LOESS fit"         = "red"
+    )
+  ) +
+  labs(
+    title    = "Hypothetical R Multiple vs. Holding Time",
+    subtitle = "5 min by 5 min Holding Periods: median R multiples if sold in successive 5 min buckets",
+    x        = "Minutes Held",
+    y        = "Hypothetical R Multiple"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.title    = element_text(face = "bold")
+  )
+```
+
+There is an apparent trade off between the number of trades that make it until the EoD vs the R multiple achieved. The longer the trades are held, the more likely they are to be closed at a loss. This is being shown in the next section, where the trades are bucketed into 5-minute bands and the R-multiple is shown as a box-plot. The bottom panel shows the number of trades in each bucket.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+# ── 1.  Bucket the data in 5-minute bands ─────────────────────────────
+bucketed <- filtered_trades %>%
+  mutate(MinsBucket = cut(
+    MinutesHeld,
+    breaks = seq(0, max(MinutesHeld, na.rm = TRUE) + 5, by = 5),   # 0–5, 5–10, …
+    include.lowest = TRUE, right  = FALSE,
+    labels = paste0(
+      seq(0, max(MinutesHeld, na.rm = TRUE), by = 5),  "–",
+      seq(5, max(MinutesHeld, na.rm = TRUE) + 5, by = 5), " m"
+    )
+  ))
+
+# ── 2.  Count observations in each bucket ─────────────────────────────
+n_by_bucket <- bucketed %>%
+  count(MinsBucket, name = "n")
+
+# ── 3.  Build the box-plot (top panel) ────────────────────────────────
+p_box <- ggplot(bucketed,
+                aes(x = MinsBucket, y = HypoRMultiple)) +
+  geom_boxplot(outlier.alpha = 0.05,
+               fill = "skyblue",
+               color = "darkblue") +
+  labs(
+    title = "Hypothetical R-Multiple by Holding-Time (5-min buckets)",
+    y     = "R Multiple",
+    x     = NULL   # hide x-axis title here so it shows only once
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),      # hide tick labels on top plot
+    axis.ticks.x = element_blank()
+  )
+
+# ── 4.  Build the bar chart (bottom panel) ────────────────────────────
+p_bar <- ggplot(n_by_bucket,
+                aes(x = MinsBucket, y = n)) +
+  geom_col(fill = "grey60") +
+  labs(
+    title = NULL,
+    y     = "Number of trades",
+    x     = "Minutes Held (5-min bands)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 6)
+  )
+
+# ── 5.  Stack the two plots vertically ────────────────────────────────
+p_box / p_bar +           # patchwork’s “/” stacks vertically
+  plot_layout(heights = c(3, 1))   # give the box-plot more space
+
+```
+Analytically, we can check for optimal holding period based on the backtest results by calculating the first derivative of the LOESS fit. This will help us identify the point where the R-multiple starts to decrease over holding period, indicating that holding longer is not beneficial. However, even visually, we can see that the R-multiple is strictly increasing. 
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+loess_fit <- loess(HypoRMultiple ~ MinutesHeld, data = filtered_trades, span = 1.5)
+
+x_vals <- seq(0, 360, by = 1)
+y_vals <- predict(loess_fit, newdata = data.frame(MinutesHeld = x_vals))
+dy <- diff(y_vals) / diff(x_vals)
+
+df_loess_deriv <- data.frame(
+  MinutesHeld = x_vals[-1],
+  dR_dt = dy
+)
+
+ggplot(df_loess_deriv, aes(x = MinutesHeld, y = dR_dt)) +
+  geom_line(color = "blue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Estimated First Derivative from LOESS",
+    y = "dR/dt", x = "Minutes Held"
+  ) +
+  theme_minimal()
+```
+We aslo look at the R-multiple per minute held, which is a measure of "efficiency" (in terms of time). The higher the R-multiple per minute, the more efficient the trade is. This is shown in the next plot, where we filter out trades that were held for 0 minutes (to avoid division by zero) and calculate the R-multiple per minute held.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+filtered_trades <- filtered_trades %>%
+  filter(MinutesHeld > 0) %>%  # avoid division by zero
+  mutate(R_per_min = HypoRMultiple / MinutesHeld)
+
+
+ggplot(filtered_trades, aes(x = MinutesHeld, y = R_per_min)) +
+  stat_summary_bin(
+    fun = median, bins = 60, geom = "line", color = "purple", linewidth = 1
+  ) +
+  geom_smooth(method = "loess", se = FALSE, color = "red", linetype = "dashed") +
+  labs(
+    title = "R-per-Minute Efficiency vs. Holding Time",
+    subtitle = "Higher = faster, more efficient trades",
+    x = "Minutes Held",
+    y = "R Multiple per Minute"
+  ) +
+  theme_minimal()
+```
+
+
+## Conclusion
+
+The Opening Range Breakout strategy applied to the NASDAQ-100 ETF (QQQ) using 5-minute intraday data has shown potential for generating alpha returns. However, the overall performance, as measured by the Sharpe ratio and other metrics, indicates that the strategy may require improvements in terms of risk management and position sizing. The strategy's reliance on the opening range and the subsequent price action has yielded some profitable trades, but the volatility and drawdowns suggest that further refinement is needed to enhance its robustness and consistency.
+
+We noticed during the real-life testing period, that the strategy's performance and win-rate was significantly (positively) affected by the fact that we eventually still deviate from the original strategy by not strictly adhering to the "End of the Day" holding rule. 
