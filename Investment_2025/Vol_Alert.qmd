@@ -1,0 +1,375 @@
+---
+title: "Vol_Alerts"
+author: "Lajos Galambos"
+format: html
+---
+
+
+
+```{r}
+
+df <- read.csv("~/Desktop/trade_log_qqq.csv")
+str(df)
+```
+
+You can add options to executable code like this 
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(tidyquant)
+
+# 1. Work directly on your existing `df`
+df <- df %>%
+  mutate(
+    # strip off time from EntryTime, keep only YYYY-MM-DD
+    TradeDate    = as_date( ymd_hms(EntryTime) ),
+    # compute return for each trade
+    strat_return = (CapitalAfter - CapitalBefore) / CapitalBefore
+  )
+
+# 2. Fetch VIX daily close over the date range in `df`
+vix <- tq_get("^VIX",
+              get  = "stock.prices",
+              from = min(df$TradeDate),
+              to   = max(df$TradeDate)) %>%
+  select(TradeDate = date, VIX_Close = close)
+
+# 3. Merge VIX back into `df`
+df <- df %>%
+  left_join(vix, by = "TradeDate")
+
+# 4. Sanity check: show first few rows
+df %>%
+  select(EntryTime, TradeDate, strat_return, VIX_Close) %>%
+  slice_head(n = 5) %>%
+  print()
+
+# plot vix daily
+ggplot(vix, aes(x = TradeDate, y = VIX_Close)) +
+  geom_line(color = "steelblue", size = 0.8) +
+  labs(
+    title    = "VIX Daily Close",
+    x        = "Date",
+    y        = "VIX Close",
+    caption  = "Source: Yahoo Finance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title     = element_text(face = "bold"),
+    axis.text.x    = element_text(angle = 45, hjust = 1)
+  )
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(broom)
+
+# 1. Prepare data: log of end-of-day capital, same-day VIX
+df <- df %>%
+  filter(!is.na(VIX_Close), !is.na(CapitalAfter)) %>%
+  mutate(
+    log_cap_after = log(CapitalAfter)
+  )
+
+# 2. Fit a simple linear model: log(CapitalAfter) ~ VIX_Close
+lm_cap <- lm(log_cap_after ~ VIX_Close, data = df)
+
+# 3. Model summary
+print(glance(lm_cap))
+print(tidy(lm_cap))
+
+# 4. Plot fitted line + data
+ggplot(df, aes(x = VIX_Close, y = log_cap_after)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  labs(
+    title    = "Log End-of-Day Capital vs. Same-Day VIX",
+    x        = "VIX Close (same day)",
+    y        = "log(CapitalAfter)",
+    caption  = "Model: linear regression"
+  ) +
+  theme_minimal()
+```
+```{r}
+library(dplyr)
+library(ggplot2)
+library(broom)
+
+# 1. Compute fitted values on log scale, back‐transform
+df <- df %>%
+  filter(!is.na(VIX_Close), !is.na(CapitalAfter)) %>%
+  mutate(
+    log_cap_after = log(CapitalAfter),
+    .fitted_log   = predict(lm_cap, newdata = .),
+    .fitted_cap   = exp(.fitted_log)
+  )
+
+# 2. Plot actual vs. fitted over time
+ggplot(df, aes(x = TradeDate)) +
+  geom_line(aes(y = CapitalAfter),   color = "steelblue", size = 0.8, alpha = 0.8) +
+  geom_line(aes(y = .fitted_cap),     color = "orange",    size = 0.8, alpha = 0.8) +
+  labs(
+    title    = "Actual vs. Fitted End‐of‐Day Capital Over Time",
+    subtitle = "Blue = Actual CapitalAfter; Orange = Model‐Predicted",
+    x        = "Date",
+    y        = "Capital After (USD)",
+    caption  = "Model: log(CapitalAfter) ~ VIX_Close"
+  ) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  theme_minimal() +
+  theme(
+    plot.title     = element_text(face = "bold"),
+    plot.subtitle  = element_text(color = "grey40"),
+    axis.text.x    = element_text(angle = 45, hjust = 1)
+  )
+```
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+# ensure we have the fitted_log from lm_cap
+df <- df %>%
+  filter(!is.na(VIX_Close), !is.na(CapitalAfter)) %>%
+  mutate(
+    log_cap_after = log(CapitalAfter),
+    .fitted_log   = predict(lm_cap, newdata = .)
+  )
+
+# plot both on log scale
+ggplot(df, aes(x = TradeDate)) +
+  geom_line(aes(y = log_cap_after), color = "steelblue", size = 0.8, alpha = 0.8) +
+  geom_line(aes(y = .fitted_log),     color = "orange",    size = 0.8, alpha = 0.8) +
+  labs(
+    title    = "Actual vs. Fitted log(CapitalAfter) Over Time",
+    subtitle = "Blue = log(actual); Orange = fitted from log-linear model",
+    x        = "Date",
+    y        = "log(CapitalAfter)",
+    caption  = "Model: log(CapitalAfter) ~ VIX_Close"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title     = element_text(face = "bold"),
+    plot.subtitle  = element_text(color = "grey40"),
+    axis.text.x    = element_text(angle = 45, hjust = 1)
+  )
+```
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(broom)
+
+# 1. Prepare the base data
+df2 <- df %>%
+  arrange(TradeDate) %>%
+  # compute level‐model residuals and log capital
+  mutate(
+    log_cap_after = log(CapitalAfter),
+    res_level     = residuals(lm_cap)          # from model of log_cap ~ VIX
+  ) %>%
+  # lagged variables
+  mutate(
+    VIX_prev      = lag(VIX_Close),            # 1-day lag of VIX level
+    res_prev      = lag(res_level),            # 1-day lag of level-model residual
+    d_log_cap     = log_cap_after - lag(log_cap_after),  # Δ log capital
+    d_vix         = VIX_Close   - lag(VIX_Close)         # Δ VIX level
+  ) %>%
+  # drop rows with any NA in our new predictors/response
+  filter(
+    !is.na(d_log_cap),
+    !is.na(d_vix),
+    !is.na(VIX_prev),
+    !is.na(res_prev)
+  )
+
+# 2. Fit the new regression
+lm_delta <- lm(d_log_cap ~ d_vix + VIX_prev + res_prev, data = df2)
+
+# 3. Summarize the model
+print(glance(lm_delta))
+print(tidy(lm_delta))
+
+# 4. Plot actual vs. fitted Δ log-capital
+df2 <- df2 %>%
+  mutate(pred_d_log = predict(lm_delta, newdata = .))
+
+ggplot(df2, aes(x = TradeDate)) +
+  geom_line(aes(y = d_log_cap),     color = "steelblue", size = 0.7, alpha = 0.8) +
+  geom_line(aes(y = pred_d_log),     color = "orange",    size = 0.7, alpha = 0.8) +
+  labs(
+    title    = "Actual vs. Fitted Daily Δ log(CapitalAfter)",
+    subtitle = "Blue = observed Δ log-capital; Orange = model fit",
+    x        = "Date",
+    y        = "Δ log(CapitalAfter)",
+    caption  = "Model: Δ log_cap ~ ΔVIX + lag(VIX) + lag(residual_level)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title     = element_text(face = "bold"),
+    plot.subtitle  = element_text(color = "grey40"),
+    axis.text.x    = element_text(angle = 45, hjust = 1)
+  )
+```
+
+```{r}
+
+library(dplyr)
+library(yardstick)
+library(ggplot2)
+
+# 1. Build the dataset with up_day and vix_up
+df_rule <- df %>%
+  arrange(TradeDate) %>%
+  mutate(
+    up_day = factor(CapitalAfter > lag(CapitalAfter),
+                    levels = c(FALSE, TRUE),
+                    labels = c("down","up")),
+    d_vix  = VIX_Close - lag(VIX_Close),
+    vix_up = factor(d_vix > 0,
+                    levels = c(FALSE, TRUE),
+                    labels = c("vix_down","vix_up"))
+  ) %>%
+  filter(!is.na(up_day), !is.na(vix_up))
+
+# 2. “Model” prediction: predict “up” whenever vix_up
+df_pred <- df_rule %>%
+  mutate(
+    .pred_class = factor(ifelse(vix_up == "vix_up","up","down"),
+                         levels = c("down","up"))
+  )
+
+# 3. Evaluate performance
+metrics <- df_pred %>%
+  summarise(
+    accuracy = accuracy_vec(truth = up_day, estimate = .pred_class),
+    sens     = sens_vec    (truth = up_day, estimate = .pred_class),  # true‐positive rate
+    spec     = spec_vec    (truth = up_day, estimate = .pred_class)   # true‐negative rate
+  )
+
+confusion <- conf_mat(df_pred, truth = up_day, estimate = .pred_class)
+
+# 4. Output
+metrics
+confusion
+
+```
+
+
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(broom)
+
+# 1. Ensure NotionalPosition is available and clean
+df2 <- df %>%
+  filter(!is.na(VIX_Close), !is.na(CapitalAfter), !is.na(NotionalPosition)) %>%
+  mutate(
+    log_cap_after = log(CapitalAfter)
+  )
+
+# 2. Fit the extended model
+lm_cap2 <- lm(log_cap_after ~ VIX_Close + NotionalPosition, data = df2)
+
+# 3. Compare summaries
+cat("Original model:\n")
+print(glance(lm_cap))
+print(tidy(lm_cap))
+
+cat("\nExtended model:\n")
+print(glance(lm_cap2))
+print(tidy(lm_cap2))
+
+# 4. Plot fitted vs actual for the new model
+df2 <- df2 %>%
+  mutate(
+    fitted2 = predict(lm_cap2, newdata = .)
+  )
+
+ggplot(df2, aes(x = fitted2, y = log_cap_after)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey50") +
+  labs(
+    title = "Extended Model: Predicted vs. Actual log(CapitalAfter)",
+    x     = "Fitted log(CapitalAfter)",
+    y     = "Actual log(CapitalAfter)"
+  ) +
+  theme_minimal()
+```
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# Prepare data and compute fitted log‐values
+df_ext <- df %>%
+  filter(!is.na(VIX_Close), !is.na(CapitalAfter), !is.na(NotionalPosition)) %>%
+  mutate(
+    log_cap_after = log(CapitalAfter),
+    fitted2       = predict(lm_cap2, newdata = .)  # already on log scale
+  )
+
+# Plot both series on the same log scale
+ggplot(df_ext, aes(x = TradeDate)) +
+  geom_line(aes(y = log_cap_after), color = "steelblue", size = 0.8, alpha = 0.8) +
+  geom_line(aes(y = fitted2),       color = "orange",    size = 0.8, alpha = 0.8) +
+  labs(
+    title    = "Actual vs. Fitted log(CapitalAfter) Over Time",
+    subtitle = "Blue = log(actual); Orange = fitted from VIX + NotionalPosition model",
+    x        = "Date",
+    y        = "log(CapitalAfter)",
+    caption  = "Extended model: log(CapitalAfter) ~ VIX_Close + NotionalPosition"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title    = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "grey40"),
+    axis.text.x   = element_text(angle = 45, hjust = 1)
+  )
+
+```
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = TradeDate, y = NotionalPosition)) +
+  geom_line(color = "steelblue", size = 0.8) +
+  labs(
+    title = "Notional Position Over Time",
+    x     = "Date",
+    y     = "Notional Position (USD)"
+  ) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  theme_minimal() +
+  theme(
+    plot.title      = element_text(face = "bold"),
+    axis.text.x     = element_text(angle = 45, hjust = 1)
+  )
+```
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# 1. Prepare data with log‐notional
+df_log_notional <- df %>%
+  filter(!is.na(NotionalPosition)) %>%
+  mutate(log_notional = log(NotionalPosition))
+
+# 2. Plot
+ggplot(df_log_notional, aes(x = TradeDate, y = log_notional)) +
+  geom_line(color = "darkgreen", size = 0.8) +
+  labs(
+    title = "Log of Notional Position Over Time",
+    x     = "Date",
+    y     = "log(Notional Position)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title  = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+

@@ -1,0 +1,364 @@
+---
+title: "Gap_Trading_Analysis"
+author: "Lajos Galambos"
+format: html
+
+---
+
+```{r}
+library(dplyr)
+library(TTR)
+library(lubridate)
+library(arrow)
+library(ggplot2)
+library(lubridate)
+library(scales)
+library(tidyr)
+library(broom)
+library(patchwork)
+library(zoo)
+library(purrr)
+df <- read_parquet("~/Desktop/sp500_5min_combined.parquet")
+str(df)
+head(df)
+```
+
+```{r}
+# 1a. Compute daily gaps and static + kmeans bins
+compute_daily <- function(data, gap_threshold = 5) {
+  # note: data is not modified
+  data %>%
+    arrange(Ticker, datetime) %>%
+    mutate(date = as.Date(datetime)) %>%
+    group_by(Ticker, date) %>%
+    summarise(
+      open  = first(open),
+      close = last(close),
+      .groups = "drop"
+    ) %>%
+    as.data.table() %>%
+    .[, prev_close := shift(close, 1L), by = Ticker] %>%
+    as_tibble() %>%
+    filter(!is.na(prev_close)) %>%
+    mutate(
+      gap_pct = 100 * (open - prev_close) / prev_close,
+      abs_gap = abs(gap_pct)
+    ) %>%
+    filter(abs_gap >= gap_threshold) %>%
+    # static bins
+    { 
+      breaks <- c(-Inf, -20, -15, -10, -5, 5, 10, 15, 20, Inf)
+      labs   <- c("≤ -20%", "-20 to -15%", "-15 to -10%", "-10 to -5%",
+                  "-5 to 5%", "5 to 10%", "10 to 15%", "15 to 20%", "> 20%")
+      mutate(., gap_bin = cut(gap_pct, breaks = breaks, labels = labs))
+    } %>%
+    # kmeans clustering of abs_gap
+    {
+      set.seed(42)
+      km <- kmeans(.$abs_gap, centers = c(5,10,15,25))
+      mutate(., km_cluster = factor(km$cluster))
+    }
+}
+
+# 1b. Summarise bin statistics
+summarise_bins <- function(daily_df) {
+  daily_df %>%
+    group_by(gap_bin) %>%
+    summarise(
+      count       = n(),
+      mean_gap    = mean(gap_pct),
+      median_gap  = median(gap_pct),
+      sd_gap      = sd(gap_pct),
+      min_gap     = min(gap_pct),
+      max_gap     = max(gap_pct),
+      .groups     = "drop"
+    ) %>%
+    arrange(gap_bin)
+}
+
+# 1c. Compute first‐and‐close day returns
+compute_first_and_close <- function(data, daily_df) {
+  data %>%
+    mutate(date = as.Date(datetime)) %>%
+    inner_join(
+      daily_df %>% select(Ticker, date, gap_bin),
+      by = c("Ticker", "date")
+    ) %>%
+    group_by(Ticker, date) %>%
+    filter(n() >= 2) %>%
+    arrange(datetime) %>%
+    summarise(
+      first_open      = first(open),
+      first_close     = first(close),
+      day_close       = last(close),
+      gap_bin         = first(gap_bin),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      first_dir       = if_else(first_close > first_open, 1L, -1L),
+      rest_return_pct = 100 * (day_close - first_close) / first_close,
+      momentum        = (sign(rest_return_pct) == first_dir)
+    ) %>%
+    filter(!is.na(rest_return_pct))
+}
+
+# 1d. Summarise momentum vs mean‐reversion
+summarise_momentum <- function(fac_df) {
+  fac_df %>%
+    group_by(
+      gap_bin,
+      first_dir = factor(first_dir, levels = c(-1,1),
+                         labels = c("bearish","bullish"))
+    ) %>%
+    summarise(
+      n_days            = n(),
+      pct_momentum      = mean(momentum) * 100,
+      mean_rest_return  = mean(rest_return_pct),
+      median_rest_return= median(rest_return_pct),
+      sd_rest_return    = sd(rest_return_pct),
+      .groups = "drop"
+    ) %>%
+    arrange(gap_bin, first_dir)
+}
+```
+
+```{r}
+# static bin summary
+print(bin_summary)
+# momentum vs reversal
+print(mom_rev)
+```
+- **gap_bin**  
+  Categorical label for the overnight percentage gap, computed as (Today’s Open – Yesterday’s Close) ÷ Yesterday’s Close × 100, then assigned to one of nine static bins: “≤ –20%”, “–20 to –15%”, “–15 to –10%”, “–10 to –5%”, “–5 to 5%”, “5 to 10%”, “10 to 15%”, “15 to 20%”, “> 20%”.  
+
+- **first_dir**  
+  Direction of the first 5-minute bar of the trading day:  
+  - **bearish** (–1) if that bar’s close is below its open  
+  - **bullish** (+1) if that bar’s close is at or above its open  
+
+- **n_days**  
+  Number of trading-day observations in each gap_bin × first_dir cell.  
+
+- **pct_momentum**  
+  Percentage of days on which the rest-of-day return (from first-bar close to end-of-day close) had the same sign as the first-bar return (from open to first-bar close).  
+
+- **mean_rest_return**  
+  Arithmetic average of the rest-of-day return, calculated as (End-of-Day Close – First-Bar Close) ÷ First-Bar Close × 100.  
+
+- **median_rest_return**  
+  Median of the rest-of-day return distribution, based on the same calculation as above.  
+
+- **sd_rest_return**  
+  Sample standard deviation of the rest-of-day return distribution, based on the same calculation as above.  
+
+**Notes**  
+1. Only days with |gap_pct| ≥ 5% and at least two 5-minute bars are included.  
+2. “Momentum” is counted when the sign of the intraday return matches the sign of the first-bar return.  
+3. All gaps and returns are expressed in percentage terms.  
+
+```{r}
+daily %>%
+  count(gap_bin) %>%
+  ggplot(aes(gap_bin, n)) +
+    geom_col() +
+    labs(
+      x     = "Gap Bin",
+      y     = "Number of Days",
+      title = "Count of Trading Days by Gap Bin"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+daily %>%
+  filter(abs(gap_pct) <= 100) %>%
+  ggplot(aes(gap_bin, gap_pct)) +
+    geom_boxplot(outlier.alpha = 0.3) +
+    labs(
+      x     = "Gap Bin",
+      y     = "Gap (%)",
+      title = "Distribution of Gap % by Bin (|gap| ≤ 100%)"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+ggplot(daily, aes(gap_bin, gap_pct)) +
+  geom_violin(trim = FALSE) +
+  coord_cartesian(ylim = c(-100,100)) +
+  labs(
+    x     = "Gap Bin",
+    y     = "Gap (%)",
+    title = "Density of Gap % by Bin (±100% zoom)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+ggplot(mom_rev, aes(x = gap_bin, y = pct_momentum, fill = first_dir)) +
+  geom_col(position = position_dodge()) +
+  geom_hline(yintercept = 50, linetype = "dashed") +
+  labs(
+    x     = "Gap Size Bin",
+    y     = "Momentum Rate (%)",
+    title = "Probability of Continuation vs. Gap Size",
+    fill  = "First Candle"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+# 5.1 Extract the first 5-min bar of each day
+first_bars <- df %>%
+  arrange(Ticker, datetime) %>%
+  mutate(date = as.Date(datetime)) %>%
+  group_by(Ticker, date) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(Ticker, date, vol_first = volume)
+
+# 5.2 Compute the 10-day rolling mean of vol_first (excluding the current day)
+hist_vol <- first_bars %>%
+  group_by(Ticker) %>%
+  arrange(date) %>%
+  mutate(
+    avg10 = rollapplyr(vol_first, width = 10, FUN = mean, fill = NA, partial = FALSE),
+    avg10 = lag(avg10, 1)       # shift so that avg10 is based on the *previous* 10 days
+  ) %>%
+  ungroup()
+
+# 5.3 Join to our first_and_close data frame and compute relative volume
+first_close <- first_close %>%
+  left_join(hist_vol, by = c("Ticker", "date")) %>%
+  mutate(
+    rel_vol = vol_first / avg10
+  )
+
+# 5.4 Inspect relative volume by gap bin
+relvol_summary <- first_close %>%
+  filter(!is.na(rel_vol)) %>%
+  group_by(gap_bin) %>%
+  summarise(
+    n_obs        = n(),
+    mean_rel_vol   = mean(rel_vol, na.rm = TRUE),
+    median_rel_vol = median(rel_vol, na.rm = TRUE),
+    sd_rel_vol     = sd(rel_vol, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(gap_bin)
+
+print(relvol_summary)
+```
+
+```{r}
+library(dplyr)
+library(broom)
+library(purrr)
+library(tidyr)
+
+# prepare the data: ensure continuation & rel_vol exist
+fc <- first_close %>%
+  filter(!is.na(rel_vol)) %>%
+  mutate(
+    continuation = factor(momentum, c(FALSE,TRUE), c("no","yes")),
+    dir_label    = if_else(first_dir==1, "bullish", "bearish")
+  )
+
+# nest by gap_bin & direction
+nested <- fc %>%
+  group_by(gap_bin, dir_label) %>%
+  nest()
+
+# fit one logistic per group: continuation ~ rel_vol
+nested <- nested %>%
+  mutate(
+    model = map(data, ~ glm(continuation ~ rel_vol,
+                            data = .x,
+                            family = binomial)),
+    tidied = map(model, tidy)
+  )
+
+# unnest the coefficient tables
+results <- nested %>%
+  select(gap_bin, dir_label, tidied) %>%
+  unnest(tidied) %>%
+  filter(term == "rel_vol") %>%
+  select(
+    gap_bin,
+    first_dir   = dir_label,
+    estimate,
+    std.error,
+    p.value
+  )
+
+print(results)
+```
+```{r}
+
+library(dplyr)
+library(broom)
+library(purrr)
+
+# prepare data as before
+fc <- first_close %>%
+  filter(!is.na(rel_vol)) %>%
+  mutate(
+    continuation = factor(momentum, c(FALSE,TRUE), c("no","yes")),
+    dir_label    = if_else(first_dir==1, "bullish", "bearish")
+  )
+
+# nest by gap_bin & direction
+nested <- fc %>%
+  group_by(gap_bin, dir_label) %>%
+  nest()
+
+# fit model and compute accuracy on each subgroup
+accuracy_tbl <- nested %>%
+  mutate(
+    model = map(data, ~ glm(continuation ~ rel_vol, data = .x, family = binomial)),
+    preds = map2(model, data, ~ predict(.x, .y, type = "response")),
+    # classify with 0.5 threshold
+    pred_class = map(preds, ~ factor(ifelse(.x >= 0.5, "yes", "no"), levels = c("no","yes"))),
+    # compute accuracy
+    accuracy = map2_dbl(pred_class, data, ~ mean(.x == as.character(.y$continuation)))
+  ) %>%
+  select(gap_bin, first_dir = dir_label, accuracy)
+
+print(accuracy_tbl)
+
+```
+```{r}
+library(dplyr)
+library(scales)
+library(kableExtra)
+
+accuracy_tbl %>%
+  arrange(gap_bin, first_dir) %>%
+  transmute(
+    `Gap Bin`              = gap_bin,
+    `First-Bar Direction`  = first_dir,
+    Accuracy               = percent(accuracy, accuracy = 0.1)
+  ) %>%
+  kbl(
+    caption           = "Table X: Classification Accuracy by Gap Bin and First-Bar Direction",
+    booktabs          = TRUE,
+    linesep           = ""
+  ) %>%
+  kable_styling(
+    full_width        = FALSE,
+    position          = "center",
+    bootstrap_options = c("striped", "hover", "condensed")
+  ) %>%
+  row_spec(0, bold = TRUE, background = "#F2F2F2")
+
+# export table
+write.csv(accuracy_tbl, "gap_bin_accuracy.csv")
+```
+
+
