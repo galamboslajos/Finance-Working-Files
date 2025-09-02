@@ -1,0 +1,410 @@
+---
+title: "ORB_NASDAQ_15min"
+author: "Lajos Galambos"
+format: html
+---
+
+##
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+#| message: false
+# install.packages(c("dplyr", "TTR", "lubridate", "arrow"))
+library(dplyr)
+library(TTR)
+library(lubridate)
+library(arrow)
+df <- read_parquet("~/Desktop/qqq_5min.parquet")
+```
+
+
+
+```{r}
+library(dplyr)
+library(lubridate)
+
+# Ensure datetime is in POSIXct
+df$datetime <- as.POSIXct(df$datetime, tz = "UTC")
+
+# Create a 15-minute floor timestamp
+df <- df %>%
+  mutate(datetime_15min = floor_date(datetime, unit = "15 minutes"))
+
+df <- df %>%
+  mutate(datetime_15min = floor_date(datetime, unit = "15 minutes")) %>%
+  group_by(Ticker, datetime_15min) %>%
+  filter(any(!is.na(open) & !is.na(high) & !is.na(low) & !is.na(close))) %>%  # Drop empty intervals
+  summarise(
+    open = first(open),
+    high = max(high, na.rm = TRUE),
+    low = min(low, na.rm = TRUE),
+    close = last(close),
+    volume = sum(volume, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  rename(datetime = datetime_15min) %>%
+  arrange(datetime)
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+plot(df$datetime, df$close, type = "l", main = "QQQ Historical Based on 5-Minute Close Prices", xlab = "Datetime", ylab = "Close Price")
+
+# plot volume over time the same way
+plot(df$datetime, df$volume, type = "l", main = "QQQ Volume Based on 5-Minute Data", xlab = "Datetime", ylab = "Volume")
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+library(dplyr)
+library(lubridate)
+library(tibble)
+
+run_orb_backtest <- function(df,
+                             initial_capital      = 100000,
+                             risk_per_trade_pct   = 0.01,    # 1 % of equity
+                             commission_per_share = 0.0005,
+                             max_leverage         = 10,
+                             spread_bps           = 0.5,       # full bid-ask spread (bps)
+                             slippage_sd_bps      = 0.5,       # slippage σ (bps, adverse)
+                             seed                 = NULL) {
+
+  # ── Reproducibility (optional) ────────────────────────────
+  if (!is.null(seed)) set.seed(seed)
+
+  # ── Pre-process ───────────────────────────────────────────
+  df <- df %>% 
+    mutate(date = as.Date(datetime),
+           time = format(datetime, "%H:%M:%S")) %>% 
+    arrange(datetime)
+
+  trading_days    <- unique(df$date)
+  current_capital <- initial_capital
+  trade_log       <- tibble()
+
+  # Helper: apply spread + slippage around a raw price
+  half_spread_frac <- (spread_bps / 2) / 10000
+  apply_slippage <- function(price, direction, is_entry = TRUE) {
+    slip_frac <- abs(rnorm(1, mean = 0, sd = slippage_sd_bps / 10000))  # always adverse
+    if (direction == "Long") {
+      if (is_entry) price * (1 + half_spread_frac + slip_frac)  # buy higher
+      else           price * (1 - half_spread_frac - slip_frac) # sell lower
+    } else {                                                    # Short
+      if (is_entry) price * (1 - half_spread_frac - slip_frac)  # sell lower
+      else           price * (1 + half_spread_frac + slip_frac) # buy higher
+    }
+  }
+
+  # ── Daily loop ────────────────────────────────────────────
+  for (day in trading_days) {
+
+    day_data <- df %>% filter(date == day) %>% arrange(datetime)
+    if (nrow(day_data) < 2) next
+
+    or_candle <- day_data[1, ]
+    if (anyNA(or_candle[c("open","close","high","low")])) next
+
+    entry_bar   <- day_data[2, ]
+    entry_price <- entry_bar$open
+    entry_time  <- entry_bar$datetime
+    if (is.na(entry_price)) next
+
+    direction <- dplyr::case_when(
+      or_candle$close > or_candle$open ~ "Long",
+      or_candle$close < or_candle$open ~ "Short",
+      TRUE                             ~ NA_character_
+    )
+    if (is.na(direction)) next
+
+    stop_price     <- if (direction == "Long") or_candle$low else or_candle$high
+    risk_per_share <- abs(entry_price - stop_price)
+    if (risk_per_share <= 0) next
+
+    shares_by_risk    <- (current_capital * risk_per_trade_pct) / risk_per_share
+    shares_by_capital <- (current_capital * max_leverage)       / entry_price
+    shares_traded     <- as.integer(floor(min(shares_by_risk, shares_by_capital)))
+    if (shares_traded < 1) next
+
+    notional_position <- shares_traded * entry_price
+    exec_entry_price  <- apply_slippage(entry_price, direction, TRUE)
+
+    after_entry <- day_data %>% filter(datetime >= entry_time)
+    exit_price  <- NA_real_; exit_time <- NA; exit_reason <- NA_character_
+
+    for (i in seq_len(nrow(after_entry))) {
+      bar <- after_entry[i, ]
+      if (anyNA(bar[c("high","low","close")])) next
+
+      hit_sl <- (direction == "Long"  && bar$low  <= stop_price) ||
+                (direction == "Short" && bar$high >= stop_price)
+      if (hit_sl) { exit_price <- stop_price; exit_time <- bar$datetime; exit_reason <- "SL"; break }
+
+      if (i == nrow(after_entry)) {
+        exit_price <- bar$close; exit_time <- bar$datetime; exit_reason <- "EoD"
+      }
+    }
+    if (is.na(exit_price)) next
+
+    exec_exit_price <- apply_slippage(exit_price, direction, FALSE)
+
+    gross_pnl <- if (direction == "Long") {
+      (exec_exit_price - exec_entry_price) * shares_traded
+    } else {
+      (exec_entry_price - exec_exit_price) * shares_traded
+    }
+    commission_total <- shares_traded * commission_per_share * 2
+    net_pnl          <- gross_pnl - commission_total
+
+    trade_log <- dplyr::bind_rows(
+      trade_log,
+      tibble(
+        Date             = day,
+        EntryTime        = entry_time,
+        ExitTime         = exit_time,
+        Direction        = direction,
+        EntryPrice       = entry_price,
+        ExecEntryPrice   = exec_entry_price,
+        ExitPrice        = exit_price,
+        ExecExitPrice    = exec_exit_price,
+        StopPrice        = stop_price,
+        R                = risk_per_share,
+        Shares           = shares_traded,
+        NotionalPosition = notional_position,
+        MarginUsed       = notional_position / max_leverage,
+        GrossPnL         = gross_pnl,
+        Commission       = commission_total,
+        NetPnL           = net_pnl,
+        ExitReason       = exit_reason,
+        CapitalBefore    = current_capital,
+        CapitalAfter     = current_capital + net_pnl
+      )
+    )
+    current_capital <- current_capital + net_pnl
+  }
+  trade_log
+}
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+#| otput: false
+#| echo: false
+results <- run_orb_backtest(df)
+# View(results)
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| output: false
+#| echo: false
+
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(scales)
+library(tidyr)
+library(broom)
+library(patchwork)
+library(zoo)
+
+
+summarize_orb_performance <- function(trade_log, df, rf = 0.04) {
+  if (nrow(trade_log) == 0) {
+    message("No trades to summarize.")
+    return(NULL)
+  }
+
+  # --- Preprocess trade log ---
+  trade_log <- trade_log %>%
+    mutate(
+      R_multiple = NetPnL / (R * Shares),
+      ExitTime = as.POSIXct(ExitTime),
+      LeverageUsed = NotionalPosition / CapitalBefore
+    )
+
+  first_date <- min(trade_log$ExitTime)
+  last_date <- max(trade_log$ExitTime)
+  total_days <- as.numeric(difftime(last_date, first_date, units = "days"))
+  capital_curve <- trade_log$CapitalAfter
+  daily_returns <- diff(capital_curve) / head(capital_curve, -1)
+
+  # --- Performance metrics ---
+  total_return <- (last(capital_curve) - first(trade_log$CapitalBefore)) /   first(trade_log$CapitalBefore)
+  annualized_return <- (1 + total_return)^(252 / total_days) - 1
+  annualized_vol <- sd(daily_returns, na.rm = TRUE) * sqrt(252)
+  annualized_sharpe <- ifelse(annualized_vol > 0,
+                              (mean(daily_returns, na.rm = TRUE) * 252 - rf) / annualized_vol,
+                              NA)
+  cum_max <- cummax(capital_curve)
+  drawdowns <- capital_curve / cum_max - 1
+  max_dd <- min(drawdowns, na.rm = TRUE)
+
+  # --- Benchmark processing ---
+  strat_curve <- trade_log %>%
+    mutate(Date = as.Date(ExitTime)) %>%
+    group_by(Date) %>%
+    summarize(StrategyCapital = max(CapitalAfter), .groups = "drop")
+
+  bh_curve <- df %>%
+    #filter(Ticker == "QQQ.US") %>%#
+    mutate(Date = as.Date(datetime)) %>%
+    group_by(Date) %>%
+    summarize(QQQ_Close = last(close), .groups = "drop") %>%
+    filter(Date >= min(strat_curve$Date), Date <= max(strat_curve$Date)) %>%
+    mutate(BnH_Capital = first(strat_curve$StrategyCapital) * (QQQ_Close / first(QQQ_Close)))
+
+  # --- Alpha estimation with regression (CAPM style) ---
+  merged_returns <- left_join(strat_curve, bh_curve, by = "Date") %>%
+    arrange(Date) %>%
+    mutate(
+      strat_ret = c(NA, diff(StrategyCapital)) / lag(StrategyCapital),
+      qqq_ret = c(NA, diff(BnH_Capital)) / lag(BnH_Capital)
+    ) %>%
+    drop_na(strat_ret, qqq_ret)
+
+  capm_model <- lm(strat_ret ~ qqq_ret, data = merged_returns)
+  alpha <- coef(capm_model)[1] * 252  # annualize daily alpha
+  beta <- coef(capm_model)[2]
+
+  # --- Summary statistics ---
+  stats <- tibble(
+    Metric = c(
+      "Total Return (%)", "Annualized Return (%)", "Annualized Volatility (%)", "Annualized Sharpe Ratio",
+      "Max Drawdown (%)", "CAPM Alpha (%)", "Beta", "Total Trades", "Winning Trades",
+      "Losing Trades", "Breakeven Trades", "Win Rate (%)", "Avg Net PnL", "Profit Factor",
+      "Total Commission Paid", "Avg Position Notional", "Avg Leverage Used"
+    ),
+    Value = sprintf("%.4f", c(
+      total_return * 100,
+      annualized_return * 100,
+      annualized_vol * 100,
+      annualized_sharpe,
+      max_dd * 100,
+      alpha * 100,
+      beta,
+      nrow(trade_log),
+      sum(trade_log$NetPnL > 0),
+      sum(trade_log$NetPnL < 0),
+      sum(trade_log$NetPnL == 0),
+      mean(trade_log$NetPnL > 0) * 100,
+      mean(trade_log$NetPnL),
+      ifelse(sum(trade_log$NetPnL < 0) == 0, NA,
+             sum(trade_log$NetPnL[trade_log$NetPnL > 0]) / abs(sum(trade_log$NetPnL[trade_log$NetPnL < 0]))),
+      sum(trade_log$Commission),
+      mean(trade_log$NotionalPosition),
+      mean(trade_log$LeverageUsed)
+    ))
+  )
+
+  print(stats)
+
+
+# --- Calculate Drawdowns (again, but time-aligned) ---
+drawdown_df <- strat_curve %>%
+  arrange(Date) %>%
+  mutate(
+    CumMax = cummax(StrategyCapital),
+    DrawdownPct = StrategyCapital / CumMax - 1
+  )
+
+# --- Top plot: Strategy vs Buy & Hold ---
+p1 <- ggplot(merged_returns, aes(x = Date)) +
+  geom_line(aes(y = StrategyCapital, color = "Strategy")) +
+  geom_line(aes(y = BnH_Capital, color = "Buy & Hold QQQ"), linetype = "dashed") +
+  scale_color_manual(values = c("Strategy" = "steelblue", "Buy & Hold QQQ" = "darkorange")) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  labs(
+    title = "Equity Curve: Strategy vs Buy & Hold QQQ",
+    x = NULL, y = "Capital ($)",
+    color = "Legend"
+  ) +
+  theme_minimal()
+
+# --- Bottom plot: Drawdown %
+p2 <- ggplot(drawdown_df, aes(x = Date, y = DrawdownPct)) +
+  geom_area(fill = "firebrick", alpha = 0.3) +
+  geom_line(color = "firebrick", linewidth = 0.5) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    title = "Drawdown Over Time",
+    x = "Date", y = "Drawdown (%)"
+  ) +
+  theme_minimal()
+
+# --- Third panel: 50-day Rolling Alpha & Beta ---
+
+
+# Prepare input
+rolling_data <- merged_returns %>%
+  select(Date, strat_ret, qqq_ret) %>%
+  drop_na()
+
+window <- 50
+
+# Initialize results list
+rolling_list <- vector("list", length = nrow(rolling_data) - window + 1)
+
+# Loop over rolling windows
+for (i in seq_along(rolling_list)) {
+  w <- rolling_data[i:(i + window - 1), ]
+  model <- try(lm(strat_ret ~ qqq_ret, data = w), silent = TRUE)
+  if (inherits(model, "try-error")) {
+    rolling_list[[i]] <- tibble(alpha = NA_real_, beta = NA_real_)
+  } else {
+    coefs <- coef(model)
+    rolling_list[[i]] <- tibble(alpha = coefs[1], beta = coefs[2])
+  }
+}
+
+# Combine and add aligned dates
+rolling_capm_df <- bind_rows(rolling_list) %>%
+  mutate(Date = rolling_data$Date[window:nrow(rolling_data)])
+
+# Global means
+mean_alpha <- mean(rolling_capm_df$alpha, na.rm = TRUE)
+mean_beta  <- mean(rolling_capm_df$beta,  na.rm = TRUE)
+
+p3 <- ggplot(rolling_capm_df, aes(x = Date)) +
+  geom_line(aes(y = alpha * 252, color = "Alpha (Annualized)"), linewidth = 0.7) +
+  geom_line(aes(y = beta, color = "Beta"), linewidth = 0.7) +
+  geom_hline(yintercept = mean_alpha * 252, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = mean_beta, linetype = "dashed", color = "orange") +
+  annotate("text", x = min(rolling_capm_df$Date), y = mean_alpha * 252,
+           label = paste0("Mean Alpha: ", sprintf("%.2f", mean_alpha * 252)),
+           vjust = -1, hjust = 0, color = "blue", size = 3.5) +
+  annotate("text", x = min(rolling_capm_df$Date), y = mean_beta,
+           label = paste0("Mean Beta: ", sprintf("%.2f", mean_beta)),
+           vjust = -1, hjust = 0, color = "orange", size = 3.5) +
+  scale_color_manual(values = c("Alpha (Annualized)" = "blue", "Beta" = "orange")) +
+  labs(
+    title = "50-Day Rolling Alpha and Beta",
+    x = "Date", y = "Value", color = "Metric"
+  ) +
+  theme_minimal()
+
+
+
+# --- Combine plots
+p1 / p2 / p3
+
+}
+```
+
+```{r}
+#| fig-asp: 1.8
+#| warning: false
+#| message: false
+#| echo: false
+log <- run_orb_backtest(df)
+summarize_orb_performance(log, df)
+```
