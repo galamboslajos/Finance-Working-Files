@@ -1,0 +1,502 @@
+---
+title: "Quantamental Investment Management"
+author: "Lajos Galambos"
+format: html
+---
+In this file I make notes on the most important steps and approaches on "Qunatamental" investing, a sophisticated approach summarised by Vorobets (2025). It is for learning purposes. 
+
+## Wide Data from Yahoo Finance (multiple tickers)
+
+Following the structure of Vorobets (2025), I fetch multiple series from Yahoo Finance using `tidyquant::tq_get()`, including interest rates, the key volatility index and industry indicies of the S&P 500 inex.
+
+| Ticker | Description            |
+|:------:|:-----------------------|
+|  XLB   | Materials              |
+|  XLE   | Energy                 |
+|  XLF   | Financial              |
+|  XLI   | Industrial             |
+|  XLK   | Technology             |
+|  XLP   | Consumer Staples       |
+|  XLU   | Utilities              |
+|  XLV   | Health Care            |
+|  XLY   | Consumer Discretionary |
+| \^GSPC | S&P 500                |
+| \^IRX  | 13w yield              |
+| \^TNX  | 2y yield               |
+| \^TYX  | 30y yield              |
+| \^VIX  | VIX                    |
+
+The data that we fetch is units; non stationary at the moment which later must be transformed to stationary versions.
+
+```{r}
+# install.packages(c("tidyquant","dplyr","tidyr"))  # if needed
+library(tidyquant)
+library(dplyr)
+library(tidyr)
+
+tickers <- c(
+  "XLB","XLE","XLF","XLI","XLK","XLP","XLU","XLV","XLY",
+  "^GSPC","^IRX","^TNX","^TYX","^VIX"
+)
+
+start <- as.Date("1998-12-22")
+end   <- as.Date("2024-10-12")
+
+# 1) Fetch daily prices from Yahoo Finance
+prices_long <- tq_get(tickers, from = start, to = end, get = "stock.prices") %>%
+  select(symbol, date, close)
+
+# 2) Wide matrix of Close prices (date + one column per ticker)
+data <- prices_long %>%
+  pivot_wider(names_from = symbol, values_from = close) %>%
+  arrange(date)
+
+# 3) Rename columns like your Python names_dict
+names_map <- c(
+  "XLB"="Materials", "XLE"="Energy", "XLF"="Financial", "XLI"="Industrial",
+  "XLK"="Technology", "XLP"="Consumer Staples", "XLU"="Utilities",
+  "XLV"="Health Care", "XLY"="Consumer Discretionary",
+  "^GSPC"="S&P 500", "^IRX"="13w yield", "^TNX"="2y yield",
+  "^TYX"="30y yield", "^VIX"="VIX"
+)
+
+cols_to_rename <- intersect(names(names_map), colnames(data))
+colnames(data)[match(cols_to_rename, colnames(data))] <- names_map[cols_to_rename]
+
+# 4) Print observation count (like your Python f-string)
+cat(sprintf("The number of daily observations is %d.\n", nrow(data)))
+
+# data now mirrors yf.download(...)[["Close"]] with your column names
+head(data)
+tail(data)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+# `data` is your wide table from earlier (date + columns per series)
+
+# ---- 1) Long format for plotting; drop NAs ----
+plot_df <- data %>%
+  pivot_longer(-date, names_to = "series", values_to = "value") %>%
+  drop_na(value)
+
+# ---- 2) Small-multiple line plots (raw levels) ----
+ggplot(plot_df, aes(x = date, y = value)) +
+  geom_line(linewidth = 0.3) +
+  facet_wrap(~ series, scales = "free_y", ncol = 4) +
+  scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  labs(title = "Small-multiple mosaic of closes", x = NULL, y = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(
+    strip.text = element_text(size = 9),
+    axis.text  = element_text(size = 7),
+    panel.grid.minor = element_blank()
+  )
+
+# ---- 3) OPTIONAL: Same plot but indexed to 100 at first available date ----
+plot_df_idx <- plot_df %>%
+  group_by(series) %>%
+  mutate(value_100 = 100 * value / first(value)) %>%
+  ungroup()
+
+ggplot(plot_df_idx, aes(x = date, y = value_100)) +
+  geom_line(linewidth = 0.3) +
+  facet_wrap(~ series, scales = "free_y", ncol = 4) +
+  scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  labs(title = "Indexed (100 at first available date)",
+       x = NULL, y = "Index") +
+  theme_minimal(base_size = 10) +
+  theme(
+    strip.text = element_text(size = 9),
+    axis.text  = element_text(size = 7),
+    panel.grid.minor = element_blank()
+  )
+
+```
+### Stationarity Transformation: Log-Differencing the VIX Series
+Here is an example of stationarity transformation (log-differencing) on the VIX series only, with plots of the level and stationary version stacked vertically.
+
+```{r}
+#| warnings: false
+suppressPackageStartupMessages({
+  library(quantmod)
+  library(lubridate)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(patchwork)
+  library(tibble)
+})
+
+# 1) Fetch daily VIX (^VIX from Yahoo Finance) -> df
+vix_xts <- getSymbols("^VIX", src = "yahoo", auto.assign = FALSE)
+
+df <- vix_xts %>%
+  as.data.frame() %>%
+  rownames_to_column("date") %>%
+  as_tibble() %>%
+  mutate(date = as.Date(date)) %>%
+  transmute(date, vix = VIX.Adjusted) %>%
+  drop_na()   # <- drop missing values right here
+
+# 2) Stationarity transform (log-diff) -> df_st
+df_st <- df %>%
+  arrange(date) %>%
+  mutate(vix_log = log(vix),
+         vix_log_diff = vix_log - lag(vix_log)) %>%
+  drop_na() %>%
+  select(date, vix_log_diff)
+
+# 3) Plots
+p1 <- ggplot(df, aes(date, vix)) +
+  geom_line(color = "steelblue") +
+  labs(title = "VIX (Level)", x = NULL, y = "VIX") +
+  theme_minimal()
+
+p2 <- ggplot(df_st, aes(date, vix_log_diff)) +
+  geom_line(color = "darkred") +
+  labs(title = "VIX (Log-differenced, Stationary)", x = NULL, y = "Δ log(VIX)") +
+  theme_minimal()
+
+p1 / p2
+```
+
+Because of of log-differencing, the number of observations in `df_st` (which is our stationarity data-frame) is 1 less than in `df` (the original, unit level data set).
+
+```{r}
+# Comparing the number of observations in the df and transformed df_st
+print(paste("df:",    nrow(df)))
+print(paste("df_st:", nrow(df_st)))
+```
+### Different Frequency: Monthly VIX (month-end close) And Its Stationary Sersion
+
+```{r}
+# 1) Create monthly series from df (daily VIX)
+df_m <- df %>%
+  mutate(year_month = floor_date(date, "month")) %>%
+  group_by(year_month) %>%
+  # take month-end value
+  summarise(vix_m = last(vix, order_by = date), .groups = "drop") %>%
+  rename(date = year_month)
+
+# 2) Stationarity transform (log-diff) on monthly VIX
+df_m_st <- df_m %>%
+  arrange(date) %>%
+  mutate(
+    vix_m_log      = log(vix_m),
+    vix_m_log_diff = vix_m_log - lag(vix_m_log)
+  ) %>%
+  drop_na() %>%
+  select(date, vix_m_log_diff)
+
+# 3) Plots (monthly level + stationary version stacked)
+p_month_level <- ggplot(df_m, aes(x = date, y = vix_m)) +
+  geom_line(color = "steelblue") +
+  labs(title = "VIX (Monthly, Month-End Close)", x = NULL, y = "VIX") +
+  theme_minimal()
+
+p_month_st <- ggplot(df_m_st, aes(x = date, y = vix_m_log_diff)) +
+  geom_line(color = "darkred") +
+  labs(title = "VIX (Monthly, Log-Differenced)", x = NULL, y = "Δ log(VIX)") +
+  theme_minimal()
+
+p_month_level / p_month_st
+
+```
+
+
+```{r}
+#| eval: false
+#| echo: false
+# Back-transform monthly log-diff VIX to levels
+# Assumes df_m (date, vix_m) and df_m_st (date, vix_m_log_diff) already exist
+
+first_diff_date <- min(df_m_st$date)
+
+# Base = last month BEFORE the first diff date
+base_row <- df_m %>%
+  dplyr::filter(date < first_diff_date) %>%
+  dplyr::slice_tail(n = 1)
+
+base_date  <- base_row$date
+base_level <- base_row$vix_m
+
+# Rebuild levels from diffs: log(V_t) = log(V_base) + cumsum(diff)
+df_vix_recon <- df_m_st %>%
+  dplyr::arrange(date) %>%
+  dplyr::mutate(
+    log_vix  = log(base_level) + cumsum(vix_m_log_diff),
+    vix_back = exp(log_vix)
+  )
+
+# Optional: include the base point and compare with original
+df_vix_back_full <- dplyr::bind_rows(
+  tibble::tibble(date = base_date, vix_back = base_level),
+  dplyr::select(df_vix_recon, date, vix_back)
+) %>%
+  dplyr::arrange(date)
+
+# Quick sanity check (should be ~0 except for float noise)
+check <- df_vix_back_full %>%
+  dplyr::inner_join(df_m, by = "date") %>%
+  dplyr::mutate(err = vix_back - vix_m)
+
+# --- rebuild from log-diffs (safe to re-run) ---
+first_diff_date <- min(df_m_st$date)
+
+base_row <- df_m %>%
+  filter(date < first_diff_date) %>%
+  slice_tail(n = 1)
+
+base_level <- base_row$vix_m
+
+df_vix_back_full <- df_m_st %>%
+  arrange(date) %>%
+  mutate(vix_back = base_level * exp(cumsum(vix_m_log_diff))) %>%
+  select(date, vix_back) %>%
+  bind_rows(tibble(date = base_row$date, vix_back = base_level)) %>%
+  arrange(date)
+
+# --- compare with original levels ---
+cmp <- df_m %>%
+  select(date, vix_m) %>%
+  inner_join(df_vix_back_full, by = "date")
+
+# --- plots ---
+p_levels <- ggplot(cmp, aes(x = date)) +
+  geom_line(aes(y = vix_m, linetype = "Original")) +
+  geom_line(aes(y = vix_back, linetype = "Reconstructed")) +
+  scale_linetype_manual(values = c("Original" = "solid", "Reconstructed" = "dashed"), name = NULL) +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  labs(title = "VIX (Monthly): Original vs. Back-Transformed", x = NULL, y = "VIX level") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+p_error <- ggplot(cmp, aes(x = date, y = vix_back - vix_m)) +
+  geom_hline(yintercept = 0, linetype = 2, linewidth = 0.3) +
+  geom_line() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  labs(title = "Reconstruction Error (Back − Original)", x = NULL, y = "Level difference") +
+  theme_minimal()
+
+p_levels / p_error
+```
+
+## Statistical Properties
+
+Historical equity returns are clearly non-normal, often with fat tails (negative skewness) and excess kurtosis (larger than 3).
+
+```{r}
+
+
+library(moments)
+
+# install.packages("moments")  # if needed
+# Assumes `data` is a wide price table with a Date column `date`
+# and columns for equities (either tickers or friendly names).
+data <- data %>% mutate(date = as.Date(date))
+
+# Which columns count as equities (exclude VIX & yields)
+equity_candidates <- c(
+  "Materials","Energy","Financial","Industrial","Technology",
+  "Consumer Staples","Utilities","Health Care","Consumer Discretionary",
+  "S&P 500",
+  "XLB","XLE","XLF","XLI","XLK","XLP","XLU","XLV","XLY","^GSPC"
+)
+eq_cols <- intersect(equity_candidates, names(data))
+if (length(eq_cols) == 0) stop("No equity index columns found in `data`.")
+
+# Daily simple returns r_t = P_t / P_{t-1} - 1
+rets_long <- data %>%
+  select(date, all_of(eq_cols)) %>%
+  pivot_longer(-date, names_to = "series", values_to = "price") %>%
+  group_by(series) %>%
+  arrange(date, .by_group = TRUE) %>%
+  mutate(ret = price / lag(price) - 1) %>%
+  tidyr::drop_na(ret) %>%
+  ungroup()
+
+# Four-moment summary by series
+summary_tbl <- rets_long %>%
+  group_by(series) %>%
+  summarise(
+    Obs      = n(),
+    Mean     = mean(ret),
+    SD       = sd(ret),
+    Skewness = moments::skewness(ret, na.rm = TRUE),
+    ExcessK  = moments::kurtosis(ret, na.rm = TRUE) - 3,   # excess kurtosis
+    .groups = "drop"
+  ) %>%
+  arrange(series)
+
+# Nicely formatted view (Mean/SD in %)
+summary_tbl_pretty <- summary_tbl %>%
+  mutate(
+    Mean = percent(Mean, accuracy = 0.01),
+    SD   = percent(SD,   accuracy = 0.01),
+    Skewness = round(Skewness, 3),
+    ExcessK  = round(ExcessK, 3)
+  )
+
+summary_tbl_pretty
+# If you want the raw numeric version for export, use `summary_tbl`.
+
+```
+
+
+```{r}
+# 0) Make sure date is Date
+data <- data %>% mutate(date = as.Date(date))
+
+# 1) Build daily simple returns for ALL series
+price_long <- data %>%
+  pivot_longer(-date, names_to = "series", values_to = "price")
+
+rets_long <- price_long %>%
+  group_by(series) %>%
+  arrange(date, .by_group = TRUE) %>%
+  mutate(ret = price / lag(price) - 1) %>%
+  drop_na(ret) %>%
+  ungroup()
+
+# 2) Aggregate to YEARLY simple returns: R_y = Π_t (1 + r_t) - 1
+yearly_rets <- rets_long %>%
+  mutate(year = year(date)) %>%
+  group_by(series, year) %>%
+  summarise(year_ret = prod(1 + ret) - 1, .groups = "drop")
+
+# 3) Pick a target index by POSITION (like your Python equity_index)
+#    Change this to the series you want (1-based index into the *original data* columns)
+series_names <- setdiff(names(data), "date")
+equity_index <- 8L   # <- set as desired (1..length(series_names))
+stopifnot(equity_index >= 1, equity_index <= length(series_names))
+index_name <- series_names[equity_index]
+
+yr_idx <- yearly_rets %>% filter(series == index_name)
+
+# 4) Fit normal on yearly returns
+mu    <- mean(yr_idx$year_ret)
+sigma <- sd(yr_idx$year_ret)
+
+# x-range for calibration curve (±20% beyond min/max)
+xmin <- 1.2 * min(yr_idx$year_ret)
+xmax <- 1.2 * max(yr_idx$year_ret)
+
+# 5) Plot: KDE (historical) + Normal calibration curve
+ggplot(yr_idx, aes(x = year_ret)) +
+  geom_density(aes(color = "Historical"), linewidth = 1) +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = mu, sd = sigma),
+    aes(color = "Normal calibration"),
+    linewidth = 1
+  ) +
+  coord_cartesian(xlim = c(xmin, xmax)) +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  scale_y_continuous() +
+  scale_color_manual(values = c("Historical" = "#1f77b4", "Normal calibration" = "#d62728"), name = NULL) +
+  labs(
+    title = sprintf("Yearly return distribution for %s", index_name),
+    subtitle = sprintf("Fitted Normal: mean = %.2f%%, sd = %.2f%%", mu*100, sigma*100),
+    x = "Return in %",
+    y = "Density"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# (Optional) Print a quick summary
+cat(sprintf("\nSeries: %s | Years: %d | mean = %.2f%% | sd = %.2f%%\n",
+            index_name, nrow(yr_idx), mu*100, sigma*100))
+
+```
+## Cross Sectional Relations Are Not Static: VIX States
+
+The following scatter plots show the daily log-returns of the S&P 500 index vs the daily log-returns of a 2-year zero-coupon bond (approximated as −2 × Δy, where Δy is the daily change in the 2-year yield). The points are colored by "VIX states", defined by whether the daily log-difference of the VIX index is above or below its 90th percentile threshold.
+
+The plot shows that cross asset correlations are not static conditional on market volatility (proxied by VIX). 
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+# Assumes `data` is your wide daily Close table with `date` + columns:
+# "S&P 500" or "^GSPC", "2y yield" (or "^UST2Y"/"^TNX"), and "VIX" or "^VIX".
+data <- data %>% mutate(date = as.Date(date))
+
+spx_col <- intersect(c("S&P 500", "^GSPC"), names(data))[1]
+y2_col  <- intersect(c("2y yield", "^UST2Y", "^TNX"), names(data))[1]
+vix_col <- intersect(c("VIX", "^VIX"), names(data))[1]
+if (any(is.na(c(spx_col, y2_col, vix_col))))
+  stop("Missing one of: S&P 500, 2y yield, VIX.")
+
+tau <- 2  # 2-year ZC bond maturity (years)
+
+df <- data %>%
+  transmute(date,
+            spx = .data[[spx_col]],
+            y2  = .data[[y2_col]],   # typically percent (e.g., 4.25)
+            vix = .data[[vix_col]]) %>%
+  arrange(date) %>%
+  mutate(
+    spx_ret       = log(spx / lag(spx)),          # S&P 500 daily log return
+    dy_dec        = (y2 - lag(y2)) / 100,         # yield change in decimals
+    zc2y_ret      = -tau * dy_dec,                # ZC bond log return ≈ -T * Δy
+    vix_log_diff  = log(vix / lag(vix))
+  ) %>%
+  drop_na(spx_ret, zc2y_ret, vix_log_diff)
+
+# VIX spike threshold (90th percentile of daily log-diffs)
+thr <- quantile(df$vix_log_diff, 0.90, na.rm = TRUE)
+
+df <- df %>%
+  mutate(state = if_else(vix_log_diff > thr,
+                         "VIX > 90th percentile",
+                         "VIX \u2264 90th percentile"))
+
+# --- Fit lines per state (for quick reference) ---
+fits <- df %>%
+  group_by(state) %>%
+  summarise(
+    Intercept = coef(lm(spx_ret ~ zc2y_ret))[1],
+    Slope     = coef(lm(spx_ret ~ zc2y_ret))[2],
+    R2        = summary(lm(spx_ret ~ zc2y_ret))$r.squared,
+    n         = dplyr::n(),
+    .groups = "drop"
+  )
+print(fits)
+
+# --- Scatter + state-wise OLS lines ---
+ggplot(df, aes(x = zc2y_ret, y = spx_ret, color = state)) +
+  geom_point(alpha = 0.6, size = 1.6) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  scale_color_manual(values = c("VIX \u2264 90th percentile" = "#1f77b4",
+                                "VIX > 90th percentile"      = "#d62728"),
+                     name = NULL) +
+  scale_x_continuous(labels = percent_format(accuracy = 0.1)) +
+  scale_y_continuous(labels = percent_format(accuracy = 0.1)) +
+  labs(
+    x = "2Y zero-coupon daily log return (≈ −2 × Δy)",
+    y = "S&P 500 daily log return",
+    title = "S&P 500 vs 2Y ZC bond daily returns",
+    subtitle = "Colored by VIX spike state; lines are OLS fits within each state"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
+## Implied Volatility from Options Data
+
+Vorobets (2025) uses implied volatility from options data which are not available for us, since the source of his data is not disclosed. Alpaca as a market maker and data provider has options data too. Here is the historical 30 day implied volatility for mostly ATM (`Strike` price is set close to `Spot` price) SPY from 2021. 
+
+```{r}
+# read the csv file downloaded from Alpaca
+iv_df <- read.csv("~/Desktop/Quantitative_Investments_Management/output.csv")
+```
