@@ -34,7 +34,7 @@ The portfolio's **maximum acceptable loss** is defined as a **-50% loss to equit
 
 The chart below shows the trade-off between the strategy's Net Return and its CVaR 95% tail risk as leverage increases.
 
-
+![Net Return vs. CVaR by Leverage Cap](Leverage.png)
 
 As shown, while returns (blue line) increase with leverage, the tail risk (orange line) accelerates. The mandate's **-50% budget (green line)** is breached at approximately **2.2x leverage**.
 
