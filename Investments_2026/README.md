@@ -44,24 +44,51 @@ Therefore, any leveraged implementation of this strategy must operate at or belo
 
 We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR optimum on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
  # Sectors
-    'Technology': ['AAPL', 'MSFT', 'NVDA', 'AMD', 'INTC', 'CSCO', 'ORCL', 'IBM', 'ADBE', 'CRM', 
-                   'NOW', 'INTU', 'AMAT', 'LRCX', 'KLAC', 'MCHP', 'TXN', 'ADI', 'QCOM', 'AVGO',
-                   'NXPI', 'MU', 'STX', 'WDC', 'HPQ', 'HPE', 'DELL', 'ANET', 'FFIV', 'JNPR',
-                   'CTSH', 'IT', 'ACN', 'EPAM', 'FTNT', 'PANW', 'CRWD', 'SNPS', 'CDNS', 'ANSS',
-                   'KEYS', 'TER', 'IPGP', 'GLW', 'APH', 'TEL', 'AKAM', 'ADSK', 'CIEN', 'SMCI',
-                   'APP', 'DDOG', 'PLTR', 'FICO', 'GEN', 'BR', 'JKHY', 'FIS', 'FI', 'CSGP',
-                   'TYL', 'MPWR', 'ON', 'SWKS', 'MXIM', 'XLNX', 'ALTR', 'LLTC', 'BRCM', 'CA',
-                   'EMC', 'NVLS', 'LSI'],
+    'Technology': # Active tech stocks
+    'AAPL', 'MSFT', 'NVDA', 'AMD', 'INTC', 'CSCO', 'ORCL', 'IBM', 'ADBE', 'CRM', 
+    'NOW', 'INTU', 'AMAT', 'LRCX', 'KLAC', 'MCHP', 'TXN', 'ADI', 'QCOM', 'AVGO',
+    'NXPI', 'MU', 'STX', 'WDC', 'HPQ', 'HPE', 'DELL', 'ANET', 'FFIV', 'JNPR',
+    'CTSH', 'IT', 'ACN', 'EPAM', 'FTNT', 'PANW', 'CRWD', 'SNPS', 'CDNS', 'ANSS',
+    'KEYS', 'TER', 'IPGP', 'GLW', 'APH', 'TEL', 'AKAM', 'ADSK', 'CIEN', 'SMCI',
+    'APP', 'DDOG', 'PLTR', 'FICO', 'GEN', 'BR', 'JKHY', 'FIS', 'FI', 'CSGP',
+    'TYL', 'MPWR', 'ON', 'SWKS'
+]
+
+Removed (delisted/acquired):
+MXIM - acquired by ADI (2021)
+XLNX - acquired by AMD (2022)
+ALTR - acquired by Intel (2015)
+LLTC - acquired by ADI (2017)
+BRCM - acquired by Avago/Broadcom (2016)
+CA - acquired by Broadcom (2018)
+EMC - acquired by Dell (2016)
+NVLS - acquired by Lam Research (2012)
+LSI - acquired by Avago (2014)  
     
     # Health Care
     'Health Care': ['JNJ', 'UNH', 'PFE', 'MRK', 'ABBV', 'LLY', 'BMY', 'AMGN', 'GILD', 'BIIB',
-                    'REGN', 'VRTX', 'MRNA', 'ABT', 'MDT', 'SYK', 'BSX', 'EW', 'ISRG', 'DHR',
-                    'TMO', 'A', 'IDXX', 'IQV', 'CRL', 'BIO', 'HOLX', 'DXCM', 'PODD', 'ALGN',
-                    'ZBH', 'BAX', 'BDX', 'COO', 'XRAY', 'HSIC', 'CAH', 'MCK', 'CVS', 'CI',
-                    'HUM', 'CNC', 'MOH', 'DVA', 'HCA', 'UHS', 'THC', 'DGX', 'LH', 'TECH',
-                    'RVTY', 'MTD', 'WAT', 'ILMN', 'INCY', 'ALXN', 'CELG', 'CERN', 'PRGO',
-                    'ENDP', 'NKTR', 'AET', 'ESRX', 'BCR', 'STJ', 'VAR', 'LIFE', 'FRX', 'BEAM',
-                    'ABMD', 'ELV', 'COR', 'VTRS', 'CTLT', 'OGN', 'GEHC', 'KVUE', 'SOLV'],
+    'REGN', 'VRTX', 'MRNA', 'ABT', 'MDT', 'SYK', 'BSX', 'EW', 'ISRG', 'DHR',
+    'TMO', 'A', 'IDXX', 'IQV', 'CRL', 'BIO', 'HOLX', 'DXCM', 'PODD', 'ALGN',
+    'ZBH', 'BAX', 'BDX', 'COO', 'XRAY', 'HSIC', 'CAH', 'MCK', 'CVS', 'CI',
+    'HUM', 'CNC', 'MOH', 'DVA', 'HCA', 'UHS', 'THC', 'DGX', 'LH', 'TECH',
+    'RVTY', 'MTD', 'WAT', 'ILMN', 'INCY', 'PRGO', 'NKTR', 'ELV', 'COR', 
+    'VTRS', 'CTLT', 'OGN', 'GEHC', 'KVUE', 'SOLV'
+]
+
+Removed (delisted/acquired):
+ALXN - acquired by AstraZeneca (2021)
+CELG - acquired by Bristol-Myers Squibb (2019)
+CERN - acquired by Oracle (2022)
+AET - acquired by CVS Health (2018)
+ESRX - acquired by Cigna (2018)
+BCR - acquired by Becton Dickinson (2017)
+STJ - acquired by Abbott (2017)
+VAR - acquired by Siemens Healthineers (2021)
+LIFE - acquired by Thermo Fisher (2014)
+FRX - acquired by Actavis (2014)
+BEAM - acquired by Daiichi Sankyo (2019)
+ABMD - acquired by Johnson & Johnson (2023)
+ENDP - bankruptcy (2022)
     
     # Financials
     'Financials': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'BLK', 'SCHW', 'AXP', 'COF', 'DFS',
