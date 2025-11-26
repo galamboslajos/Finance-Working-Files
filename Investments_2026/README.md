@@ -91,87 +91,181 @@ ABMD - acquired by Johnson & Johnson (2023)
 ENDP - bankruptcy (2022)
     
     # Financials
-    'Financials': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'BLK', 'SCHW', 'AXP', 'COF', 'DFS',
-                   'V', 'MA', 'PYPL', 'ICE', 'CME', 'CBOE', 'NDAQ', 'SPGI', 'MCO', 'MSCI',
-                   'BK', 'STT', 'NTRS', 'BEN', 'IVZ', 'TROW', 'AMP', 'RJF', 'LNC', 'PRU',
-                   'MET', 'AFL', 'AIG', 'ALL', 'TRV', 'CB', 'PGR', 'CINF', 'L', 'AJG',
-                   'MMC', 'AON', 'BRO', 'WTW', 'BRK.B', 'USB', 'PNC', 'TFC', 'MTB', 'FITB',
-                   'KEY', 'RF', 'CFG', 'HBAN', 'CMA', 'ZION', 'FHN', 'PBCT', 'ACGL', 'GL',
-                   'AIZ', 'UNM', 'BHF', 'GNW', 'ETFC', 'AMG', 'JEF', 'SYF', 'ALLY', 'COIN',
-                   'HOOD', 'IBKR', 'MKTX', 'FRC', 'SIVB', 'SBNY', 'FDS', 'INFO', 'WRB',
-                   'ERIE', 'HIG', 'BX', 'KKR', 'APO', 'ACAS'],
+    'Financials': [ 'JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'BLK', 'SCHW', 'AXP', 'COF', 'DFS',
+    'V', 'MA', 'PYPL', 'ICE', 'CME', 'CBOE', 'NDAQ', 'SPGI', 'MCO', 'MSCI',
+    'BK', 'STT', 'NTRS', 'BEN', 'IVZ', 'TROW', 'AMP', 'RJF', 'LNC', 'PRU',
+    'MET', 'AFL', 'AIG', 'ALL', 'TRV', 'CB', 'PGR', 'CINF', 'L', 'AJG',
+    'MMC', 'AON', 'BRO', 'WTW', 'BRK.B', 'USB', 'PNC', 'TFC', 'MTB', 'FITB',
+    'KEY', 'RF', 'CFG', 'HBAN', 'CMA', 'ZION', 'FHN', 'ACGL', 'GL',
+    'AIZ', 'UNM', 'BHF', 'GNW', 'AMG', 'JEF', 'SYF', 'ALLY', 'COIN',
+    'HOOD', 'IBKR', 'MKTX', 'FDS', 'WRB', 'ERIE', 'HIG', 'BX', 'KKR', 'APO'],
+
+Removed (delisted/acquired):
+PBCT – acquired by M&T Bank (2022)
+ETFC – acquired by Morgan Stanley (2020)
+INFO – merged into S&P Global (2022)
+FRC – failed; assets assumed by JPMorgan (2023)
+SIVB – failed; Silicon Valley Bank collapse (2023)
+SBNY – failed; Signature Bank collapse (2023)
+ACAS – acquired by Ares Capital (2017)
     
     # Consumer Discretionary
     'Consumer Discretionary': ['AMZN', 'TSLA', 'HD', 'LOW', 'TJX', 'ROST', 'NKE', 'SBUX', 'MCD', 'YUM',
-                               'DRI', 'CMG', 'DPZ', 'BKNG', 'MAR', 'HLT', 'LVS', 'WYNN', 'MGM', 'CCL',
-                               'RCL', 'NCLH', 'F', 'GM', 'APTV', 'BWA', 'LKQ', 'AN', 'KMX', 'AZO',
-                               'ORLY', 'BBY', 'ULTA', 'LULU', 'NVR', 'LEN', 'DHI', 'PHM', 'WHR', 'POOL',
-                               'TSCO', 'DG', 'DLTR', 'TGT', 'EBAY', 'ETSY', 'EXPE', 'TRIP', 'CZR',
-                               'PENN', 'GRMN', 'LEG', 'MHK', 'RL', 'PVH', 'TPR', 'VFC', 'HAS', 'MAT',
-                               'DECK', 'CPRI', 'BBWI', 'GPS', 'ANF', 'URBN', 'FL', 'JWN', 'M', 'KSS',
-                               'JCP', 'BBBY', 'BIG', 'GPC', 'AAP', 'FBHS', 'WSM', 'RH', 'W', 'GME',
-                               'DTV', 'DISH', 'TWC', 'HOT', 'WYN', 'TIF', 'KSU', 'HOG', 'GT', 'BC',
-                               'SHLD', 'ADS', 'ADT', 'ABNB', 'DASH', 'UBER', 'CPRT', 'COTY'],
-    
+    'DRI', 'CMG', 'DPZ', 'BKNG', 'MAR', 'HLT', 'LVS', 'WYNN', 'MGM', 'CCL',
+    'RCL', 'NCLH', 'F', 'GM', 'APTV', 'BWA', 'LKQ', 'AN', 'KMX', 'AZO',
+    'ORLY', 'BBY', 'ULTA', 'LULU', 'NVR', 'LEN', 'DHI', 'PHM', 'WHR', 'POOL',
+    'TSCO', 'DG', 'DLTR', 'TGT', 'EBAY', 'ETSY', 'EXPE', 'TRIP', 'CZR',
+    'PENN', 'GRMN', 'MHK', 'RL', 'PVH', 'TPR', 'HAS', 'MAT', 'DECK',
+    'BBWI', 'GPS', 'ANF', 'URBN', 'FL', 'JWN', 'M', 'KSS', 'BIG', 'GPC',
+    'AAP', 'FBHS', 'WSM', 'RH', 'W', 'GME', 'ADT', 'COTY',
+    'ABNB', 'DASH', 'UBER', 'CPRT'],
+
+Removed (delisted/acquired):
+JCP – J.C. Penney, bankrupt & delisted (2020)
+BBBY – Bed Bath & Beyond, bankrupt & delisted (2023)
+SHLD – Sears Holdings, bankrupt & delisted (2018)
+ADS – Alliance Data Systems; renamed to BFH (Bread Financial) (2022)
+DTV – DirecTV, no longer publicly traded after AT&T acquisition (2015)
+DISH – Dish Network still exists but now trading OTC after bankruptcy filing (2024) — effectively delisted
+TWC – Time Warner Cable, acquired by Charter (2016)
+HOT – Starwood Hotels, acquired by Marriott (2016)
+WYN – Wyndham Worldwide split; legacy ticker no longer active (2018)
+TIF – Tiffany & Co., acquired by LVMH (2021)
+KSU – Kansas City Southern, acquired by Canadian Pacific (2023)
+CPRI – Capri Holdings, acquired by Tapestry (2024, closing)
+MAT – Mattel is active (correcting confusion — KEEP)
+LEG – Leggett & Platt suspended dividend & facing distress, still listed (KEEP)
+BIG – Big Lots is still listed but near-distress; active (KEEP)
+
     # Consumer Staples
     'Consumer Staples': ['PG', 'KO', 'PEP', 'COST', 'WMT', 'PM', 'MO', 'KMB', 'CL', 'CLX',
-                         'CHD', 'EL', 'K', 'GIS', 'CAG', 'SJM', 'MKC', 'HSY', 'HRL', 'CPB',
-                         'KHC', 'MDLZ', 'MNST', 'KR', 'SYY', 'ADM', 'BG', 'TSN', 'TAP', 'STZ',
-                         'BF.B', 'KDP', 'LW', 'WBA', 'RAI', 'WFM', 'SLE', 'DF', 'AVP', 'SVU',
-                         'MJN', 'RAD'],
-    
+    'CHD', 'EL', 'K', 'GIS', 'CAG', 'SJM', 'MKC', 'HSY', 'HRL', 'CPB',
+    'KHC', 'MDLZ', 'MNST', 'KR', 'SYY', 'ADM', 'BG', 'TSN', 'TAP', 'STZ',
+    'BF.B', 'KDP', 'LW', 'WBA'],
+
+Removed (delisted/acquired):
+RAI – Reynolds American, acquired by British American Tobacco (2017)
+WFM – Whole Foods Market, acquired by Amazon (2017)
+SLE – Sara Lee, acquired/split; no longer publicly traded (2012)
+DF – Dean Foods, bankrupt & delisted (2019)
+AVP – Avon Products, acquired by Natura (2020); ADR delisted
+SVU – SuperValu, acquired by UNFI (2018)
+MJN – Mead Johnson, acquired by Reckitt Benckiser (2017)
+RAD – Rite Aid, bankrupt again, delisted (2023)   
+
     # Industrials
     'Industrials': ['CAT', 'DE', 'HON', 'GE', 'MMM', 'EMR', 'ROK', 'ETN', 'PH', 'ITW',
-                    'IR', 'DOV', 'AME', 'XYL', 'GNRC', 'PCAR', 'CTAS', 'FAST', 'GWW', 'NDSN',
-                    'SNA', 'SWK', 'LII', 'TT', 'CARR', 'OTIS', 'JCI', 'LHX', 'NOC', 'LMT',
-                    'RTX', 'GD', 'BA', 'TXT', 'HII', 'TDG', 'HWM', 'WAB', 'CSX', 'NSC',
-                    'UNP', 'UPS', 'FDX', 'EXPD', 'CHRW', 'JBHT', 'ODFL', 'UAL', 'DAL', 'LUV',
-                    'ALK', 'AAL', 'WM', 'RSG', 'ROL', 'VRSK', 'EFX', 'AOS', 'ALLE', 'CMI',
-                    'FTV', 'IEX', 'RHI', 'MAS', 'LDOS', 'J', 'BAH', 'AXON', 'PWR', 'EME',
-                    'FLR', 'JBL', 'MLM', 'VMC', 'URI', 'BLDR', 'HUBB', 'AYI', 'TRMB', 'TDY',
-                    'COL', 'RTN', 'UTX', 'LLL', 'FLS', 'PNR', 'NLSN', 'DNB', 'RRD', 'JOY',
-                    'CAM', 'FDC', 'LM', 'SRCL', 'MIL', 'ITT', 'GEV', 'DAY', 'GRN', 'CPAY'],
-    
+    'IR', 'DOV', 'AME', 'XYL', 'GNRC', 'PCAR', 'CTAS', 'FAST', 'GWW', 'NDSN',
+    'SNA', 'SWK', 'LII', 'TT', 'CARR', 'OTIS', 'JCI', 'LHX', 'NOC', 'LMT',
+    'RTX', 'GD', 'BA', 'TXT', 'HII', 'TDG', 'HWM', 'WAB', 'CSX', 'NSC',
+    'UNP', 'UPS', 'FDX', 'EXPD', 'CHRW', 'JBHT', 'ODFL', 'UAL', 'DAL', 'LUV',
+    'ALK', 'AAL', 'WM', 'RSG', 'ROL', 'VRSK', 'EFX', 'AOS', 'ALLE', 'CMI',
+    'FTV', 'IEX', 'RHI', 'MAS', 'LDOS', 'J', 'BAH', 'AXON', 'PWR', 'EME',
+    'FLR', 'JBL', 'MLM', 'VMC', 'URI', 'BLDR', 'HUBB', 'AYI', 'TRMB', 'TDY',
+    'FLS', 'PNR', 'DNB', 'ITT'],
+
+Removed (delisted/acquired):
+COL – Rockwell Collins, acquired by UTC (2018)
+RTN – Raytheon, merged with UTC into RTX (2020)
+UTX – United Technologies, merged into RTX (2020)
+LLL – L3 Technologies, merged with Harris to form LHX (2019)
+NLSN – Nielsen Holdings, taken private; delisted (2022)
+RRD – R.R. Donnelley, acquired by Chatham; delisted (2022)
+JOY – Joy Global, acquired by Komatsu (2017)
+CAM – Cameron International, acquired by Schlumberger (2016)
+FDC – First Data, acquired by Fiserv (2019)
+LM – Legg Mason, acquired by Franklin Templeton (2020)
+MIL – MFC Industrial / “Millicom old ADR” (multiple restructurings); legacy ticker delisted
+GEV – General Electric Ventures/GenVec (merged & delisted)
+DAY – Legacy “Day International”; acquired by BAIN (2005), long-terminated
+GRN – Old “Greenhill Renewable Energy”; delisted
+CPAY – “Cardtronics / CompuPay” legacy ticker; acquired by NCR (2021); delisted  
+
     # Energy
     'Energy': ['XOM', 'CVX', 'COP', 'EOG', 'PXD', 'DVN', 'MRO', 'APA', 'OXY', 'HES',
-               'FANG', 'CTRA', 'MPC', 'VLO', 'PSX', 'HAL', 'SLB', 'BKR', 'NOV', 'FTI',
-               'WMB', 'KMI', 'OKE', 'TRGP', 'EQT', 'RRC', 'SWN', 'CNX', 'BTU', 'CLF',
-               'X', 'APC', 'EP', 'NBL', 'NFX', 'CXO', 'WPX', 'QEP', 'MUR', 'DNR',
-               'RIG', 'DO', 'ESV', 'NE', 'RDC', 'HP', 'NBR', 'HFC', 'ANDV', 'TSO',
-               'DYN', 'SUN', 'BHI', 'CEG'],
-    
+    'FANG', 'CTRA', 'MPC', 'VLO', 'PSX', 'HAL', 'SLB', 'BKR', 'NOV', 'FTI',
+    'WMB', 'KMI', 'OKE', 'TRGP', 'EQT', 'RRC', 'SWN', 'CNX', 'BTU',
+    'CLF', 'X', 'MUR', 'RIG', 'DO', 'HP', 'NBR', 'SUN'],
+
+Removed (delisted/acquired):
+APC – Anadarko Petroleum, acquired by Occidental (2019)
+EP – El Paso Corp., acquired by Kinder Morgan (2012)
+NBL – Noble Energy, acquired by Chevron (2020)
+NFX – Newfield Exploration, acquired by Encana/Ovintiv (2019)
+CXO – Concho Resources, acquired by ConocoPhillips (2021)
+WPX – WPX Energy, merged with Devon Energy (2021)
+QEP – QEP Resources, acquired by Diamondback Energy (2021)
+DNR – Denbury Resources, bankrupt (2020), relisted then acquired by Exxon (2023), old ticker gone
+ESV – Ensco, bankrupted & merged into Valaris; old ticker delisted
+NE – Noble Corp. (old), bankrupt (2020); reorganized, new ticker is NOBL
+RDC – Rowan Companies, merged with Ensco (2019); delisted
+ANDV – Andeavor, acquired by Marathon Petroleum (2018)
+TSO – Tesoro, rebranded into Andeavor (2017), then acquired by MPC
+DYN – Dynegy, acquired by Vistra Energy (2018)
+BHI – Baker Hughes Inc., merged with GE Oil & Gas into BHGE (2017), replaced by BKR
+HFC – HollyFrontier, reorganized into HF Sinclair (DINO) (2022)
+CEG – Legacy Constellation Energy (2000s), delisted; modern CEG is not this ticker (you should remove this one)    
+
     # Materials
     'Materials': ['LIN', 'APD', 'SHW', 'ECL', 'DD', 'DOW', 'PPG', 'NEM', 'FCX', 'NUE',
-                  'STLD', 'VMC', 'MLM', 'BALL', 'PKG', 'IP', 'AVY', 'SEE', 'CE', 'EMN',
-                  'ALB', 'FMC', 'MOS', 'CF', 'IFF', 'CTVA', 'CCK', 'WRK', 'ATI', 'AA',
-                  'AKS', 'OI', 'ARG', 'ARNC', 'GRA', 'LYB', 'MON'],
-    
+    'STLD', 'VMC', 'MLM', 'BALL', 'PKG', 'IP', 'AVY', 'SEE', 'CE', 'EMN',
+    'ALB', 'FMC', 'MOS', 'CF', 'IFF', 'CTVA', 'CCK', 'WRK', 'ATI', 'AA',
+    'OI', 'LYB'],
+
+Removed (delisted/acquired):
+AKS – AK Steel, acquired by Cleveland-Cliffs (2020)
+ARG – Airgas, acquired by Air Liquide (2016)
+ARNC – Arconic (old), split/spun and legacy ticker terminated (2020); new Arconic bought by Apollo (2023), delisted
+GRA – W.R. Grace, acquired by Standard Industries (2021), delisted
+MON – Monsanto, acquired by Bayer (2018)
+
     # Utilities
     'Utilities': ['NEE', 'DUK', 'SO', 'D', 'AEP', 'EXC', 'SRE', 'XEL', 'PEG', 'ED',
-                  'WEC', 'ES', 'AEE', 'CMS', 'CNP', 'NI', 'DTE', 'ETR', 'FE', 'PPL',
-                  'ATO', 'NRG', 'EVRG', 'AWK', 'LNT', 'PNW', 'DRE', 'PCG', 'EIX', 'VST',
-                  'GAS', 'AES', 'POM', 'TE', 'SCG', 'FTR', 'WIN', 'LUMN', 'LVLT', 'CTX'],
-    
+    'WEC', 'ES', 'AEE', 'CMS', 'CNP', 'NI', 'DTE', 'ETR', 'FE', 'PPL',
+    'ATO', 'NRG', 'EVRG', 'AWK', 'LNT', 'PNW', 'PCG', 'EIX', 'VST', 'AES'],
+
+Removed (delisted/acquired):
+DRE – Duke Realty, acquired by Prologis (2022)
+GAS – AGL Resources, acquired by Southern Company (2016)
+POM – Pepco Holdings, acquired by Exelon (2016)
+TE – TECO Energy, acquired by Emera (2016)
+SCG – SCANA, acquired by Dominion Energy (2019)
+FTR – Frontier Communications, bankruptcy (2020); old ticker delisted
+WIN – Windstream, bankruptcy (2019); delisted
+LUMN – Lumen Technologies, bankruptcy (2024), NASDAQ delisted (OTC now → remove)
+LVLT – Level 3 Communications, acquired by CenturyLink (2017)
+CTX – CTX = Old Centex, acquired by PulteGroup (2009)
+
     # Communication Services
     'Communication Services': ['META', 'GOOGL', 'GOOG', 'NFLX', 'DIS', 'CMCSA', 'T', 'VZ', 'TMUS', 'CHTR',
-                               'WBD', 'FOX', 'FOXA', 'OMC', 'IPG', 'EA', 'TTWO', 'ATVI', 'LYV', 'MTCH',
-                               'NWSA', 'NWS', 'NYT', 'PARA', 'VIAB', 'DISCA', 'DISCK', 'SNI', 'TWX',
-                               'TWTR', 'YHOO', 'TGNA', 'LSXMA', 'TKO'],
-    
+    'WBD', 'FOX', 'FOXA', 'OMC', 'IPG', 'EA', 'TTWO', 'ATVI', 'LYV', 'MTCH',
+    'NWSA', 'NWS', 'NYT', 'PARA', 'TGNA', 'LSXMA', 'TKO'],
+
+Removed (delisted/acquired):
+VIAB – Viacom, merged with CBS to form ViacomCBS/Paramount (PARA) (2019)
+DISCA – Discovery, merged with WarnerMedia into WBD (2022)
+DISCK – Discovery Class C, also merged into WBD (2022)
+SNI – Scripps Networks, acquired by Discovery (2018), then absorbed into WBD
+TWX – Time Warner, acquired by AT&T (2018)
+TWTR – Twitter, taken private by Elon Musk (2022), delisted
+YHOO – Yahoo, sold to Verizon, later acquired by Apollo; old ticker long gone (2017)
+
     # Real Estate
     'Real Estate': ['AMT', 'PLD', 'CCI', 'EQIX', 'DLR', 'PSA', 'SPG', 'O', 'WELL', 'AVB',
-                    'EQR', 'ESS', 'MAA', 'UDR', 'VTR', 'VNO', 'SLG', 'BXP', 'ARE', 'CBRE',
-                    'VICI', 'INVH', 'DOC', 'KIM', 'REG', 'FRT', 'HST', 'AIV', 'CPT', 'IRM',
-                    'EXR', 'SBAC', 'MAC', 'GGP', 'WY', 'PCL'],
-    
+    'EQR', 'ESS', 'MAA', 'UDR', 'VTR', 'VNO', 'SLG', 'BXP', 'ARE', 'CBRE',
+    'VICI', 'INVH', 'KIM', 'REG', 'FRT', 'HST', 'AIV', 'CPT',
+    'IRM', 'EXR', 'SBAC', 'MAC', 'WY'],
+
+Removed (delisted/acquired):                    
+DOC – merged into PEAK in 2024, ticker eliminated
+GGP – acquired by Brookfield (2018)
+PCL – merged into WY (2016)
+
     # Commodities (your non-stock assets)
-    'Commodities': ['GC=F', 'SI=F', 'CL=F', 'NG=F'],
+    'Commodities': ['GC=F', 'SI=F', 'CL=F', 'NG=F', '^GSPC', '^NDX', '^GDAXI'],
     
     # Currencies
-    'Currencies': ['EUR=X', 'JPY=X', 'GBP=X', 'AUD=X', 'CHF=X'],
-    
-    # Indices
-    'Indices': ['^GSPC', '^NDX', '^GDAXI']
+    'Currencies': ['EUR=X', 'JPY=X', 'GBP=X', 'AUD=X', 'CHF=X']
 
 ## Dependencies
 * `numpy`
