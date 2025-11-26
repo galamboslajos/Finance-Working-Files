@@ -40,6 +40,112 @@ As shown, while returns (blue line) increase with leverage, the tail risk (orang
 
 Therefore, any leveraged implementation of this strategy must operate at or below this 2.2x cap to remain compliant with the core risk mandate.
 
+## Practical Roadmap to Narrow Down Portfolio Size
+
+We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR optimum on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
+ # Secotors
+    'Technology': ['AAPL', 'MSFT', 'NVDA', 'AMD', 'INTC', 'CSCO', 'ORCL', 'IBM', 'ADBE', 'CRM', 
+                   'NOW', 'INTU', 'AMAT', 'LRCX', 'KLAC', 'MCHP', 'TXN', 'ADI', 'QCOM', 'AVGO',
+                   'NXPI', 'MU', 'STX', 'WDC', 'HPQ', 'HPE', 'DELL', 'ANET', 'FFIV', 'JNPR',
+                   'CTSH', 'IT', 'ACN', 'EPAM', 'FTNT', 'PANW', 'CRWD', 'SNPS', 'CDNS', 'ANSS',
+                   'KEYS', 'TER', 'IPGP', 'GLW', 'APH', 'TEL', 'AKAM', 'ADSK', 'CIEN', 'SMCI',
+                   'APP', 'DDOG', 'PLTR', 'FICO', 'GEN', 'BR', 'JKHY', 'FIS', 'FI', 'CSGP',
+                   'TYL', 'MPWR', 'ON', 'SWKS', 'MXIM', 'XLNX', 'ALTR', 'LLTC', 'BRCM', 'CA',
+                   'EMC', 'NVLS', 'LSI'],
+    
+    # Health Care
+    'Health Care': ['JNJ', 'UNH', 'PFE', 'MRK', 'ABBV', 'LLY', 'BMY', 'AMGN', 'GILD', 'BIIB',
+                    'REGN', 'VRTX', 'MRNA', 'ABT', 'MDT', 'SYK', 'BSX', 'EW', 'ISRG', 'DHR',
+                    'TMO', 'A', 'IDXX', 'IQV', 'CRL', 'BIO', 'HOLX', 'DXCM', 'PODD', 'ALGN',
+                    'ZBH', 'BAX', 'BDX', 'COO', 'XRAY', 'HSIC', 'CAH', 'MCK', 'CVS', 'CI',
+                    'HUM', 'CNC', 'MOH', 'DVA', 'HCA', 'UHS', 'THC', 'DGX', 'LH', 'TECH',
+                    'RVTY', 'MTD', 'WAT', 'ILMN', 'INCY', 'ALXN', 'CELG', 'CERN', 'PRGO',
+                    'ENDP', 'NKTR', 'AET', 'ESRX', 'BCR', 'STJ', 'VAR', 'LIFE', 'FRX', 'BEAM',
+                    'ABMD', 'ELV', 'COR', 'VTRS', 'CTLT', 'OGN', 'GEHC', 'KVUE', 'SOLV'],
+    
+    # Financials
+    'Financials': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'BLK', 'SCHW', 'AXP', 'COF', 'DFS',
+                   'V', 'MA', 'PYPL', 'ICE', 'CME', 'CBOE', 'NDAQ', 'SPGI', 'MCO', 'MSCI',
+                   'BK', 'STT', 'NTRS', 'BEN', 'IVZ', 'TROW', 'AMP', 'RJF', 'LNC', 'PRU',
+                   'MET', 'AFL', 'AIG', 'ALL', 'TRV', 'CB', 'PGR', 'CINF', 'L', 'AJG',
+                   'MMC', 'AON', 'BRO', 'WTW', 'BRK.B', 'USB', 'PNC', 'TFC', 'MTB', 'FITB',
+                   'KEY', 'RF', 'CFG', 'HBAN', 'CMA', 'ZION', 'FHN', 'PBCT', 'ACGL', 'GL',
+                   'AIZ', 'UNM', 'BHF', 'GNW', 'ETFC', 'AMG', 'JEF', 'SYF', 'ALLY', 'COIN',
+                   'HOOD', 'IBKR', 'MKTX', 'FRC', 'SIVB', 'SBNY', 'FDS', 'INFO', 'WRB',
+                   'ERIE', 'HIG', 'BX', 'KKR', 'APO', 'ACAS'],
+    
+    # Consumer Discretionary
+    'Consumer Discretionary': ['AMZN', 'TSLA', 'HD', 'LOW', 'TJX', 'ROST', 'NKE', 'SBUX', 'MCD', 'YUM',
+                               'DRI', 'CMG', 'DPZ', 'BKNG', 'MAR', 'HLT', 'LVS', 'WYNN', 'MGM', 'CCL',
+                               'RCL', 'NCLH', 'F', 'GM', 'APTV', 'BWA', 'LKQ', 'AN', 'KMX', 'AZO',
+                               'ORLY', 'BBY', 'ULTA', 'LULU', 'NVR', 'LEN', 'DHI', 'PHM', 'WHR', 'POOL',
+                               'TSCO', 'DG', 'DLTR', 'TGT', 'EBAY', 'ETSY', 'EXPE', 'TRIP', 'CZR',
+                               'PENN', 'GRMN', 'LEG', 'MHK', 'RL', 'PVH', 'TPR', 'VFC', 'HAS', 'MAT',
+                               'DECK', 'CPRI', 'BBWI', 'GPS', 'ANF', 'URBN', 'FL', 'JWN', 'M', 'KSS',
+                               'JCP', 'BBBY', 'BIG', 'GPC', 'AAP', 'FBHS', 'WSM', 'RH', 'W', 'GME',
+                               'DTV', 'DISH', 'TWC', 'HOT', 'WYN', 'TIF', 'KSU', 'HOG', 'GT', 'BC',
+                               'SHLD', 'ADS', 'ADT', 'ABNB', 'DASH', 'UBER', 'CPRT', 'COTY'],
+    
+    # Consumer Staples
+    'Consumer Staples': ['PG', 'KO', 'PEP', 'COST', 'WMT', 'PM', 'MO', 'KMB', 'CL', 'CLX',
+                         'CHD', 'EL', 'K', 'GIS', 'CAG', 'SJM', 'MKC', 'HSY', 'HRL', 'CPB',
+                         'KHC', 'MDLZ', 'MNST', 'KR', 'SYY', 'ADM', 'BG', 'TSN', 'TAP', 'STZ',
+                         'BF.B', 'KDP', 'LW', 'WBA', 'RAI', 'WFM', 'SLE', 'DF', 'AVP', 'SVU',
+                         'MJN', 'RAD'],
+    
+    # Industrials
+    'Industrials': ['CAT', 'DE', 'HON', 'GE', 'MMM', 'EMR', 'ROK', 'ETN', 'PH', 'ITW',
+                    'IR', 'DOV', 'AME', 'XYL', 'GNRC', 'PCAR', 'CTAS', 'FAST', 'GWW', 'NDSN',
+                    'SNA', 'SWK', 'LII', 'TT', 'CARR', 'OTIS', 'JCI', 'LHX', 'NOC', 'LMT',
+                    'RTX', 'GD', 'BA', 'TXT', 'HII', 'TDG', 'HWM', 'WAB', 'CSX', 'NSC',
+                    'UNP', 'UPS', 'FDX', 'EXPD', 'CHRW', 'JBHT', 'ODFL', 'UAL', 'DAL', 'LUV',
+                    'ALK', 'AAL', 'WM', 'RSG', 'ROL', 'VRSK', 'EFX', 'AOS', 'ALLE', 'CMI',
+                    'FTV', 'IEX', 'RHI', 'MAS', 'LDOS', 'J', 'BAH', 'AXON', 'PWR', 'EME',
+                    'FLR', 'JBL', 'MLM', 'VMC', 'URI', 'BLDR', 'HUBB', 'AYI', 'TRMB', 'TDY',
+                    'COL', 'RTN', 'UTX', 'LLL', 'FLS', 'PNR', 'NLSN', 'DNB', 'RRD', 'JOY',
+                    'CAM', 'FDC', 'LM', 'SRCL', 'MIL', 'ITT', 'GEV', 'DAY', 'GRN', 'CPAY'],
+    
+    # Energy
+    'Energy': ['XOM', 'CVX', 'COP', 'EOG', 'PXD', 'DVN', 'MRO', 'APA', 'OXY', 'HES',
+               'FANG', 'CTRA', 'MPC', 'VLO', 'PSX', 'HAL', 'SLB', 'BKR', 'NOV', 'FTI',
+               'WMB', 'KMI', 'OKE', 'TRGP', 'EQT', 'RRC', 'SWN', 'CNX', 'BTU', 'CLF',
+               'X', 'APC', 'EP', 'NBL', 'NFX', 'CXO', 'WPX', 'QEP', 'MUR', 'DNR',
+               'RIG', 'DO', 'ESV', 'NE', 'RDC', 'HP', 'NBR', 'HFC', 'ANDV', 'TSO',
+               'DYN', 'SUN', 'BHI', 'CEG'],
+    
+    # Materials
+    'Materials': ['LIN', 'APD', 'SHW', 'ECL', 'DD', 'DOW', 'PPG', 'NEM', 'FCX', 'NUE',
+                  'STLD', 'VMC', 'MLM', 'BALL', 'PKG', 'IP', 'AVY', 'SEE', 'CE', 'EMN',
+                  'ALB', 'FMC', 'MOS', 'CF', 'IFF', 'CTVA', 'CCK', 'WRK', 'ATI', 'AA',
+                  'AKS', 'OI', 'ARG', 'ARNC', 'GRA', 'LYB', 'MON'],
+    
+    # Utilities
+    'Utilities': ['NEE', 'DUK', 'SO', 'D', 'AEP', 'EXC', 'SRE', 'XEL', 'PEG', 'ED',
+                  'WEC', 'ES', 'AEE', 'CMS', 'CNP', 'NI', 'DTE', 'ETR', 'FE', 'PPL',
+                  'ATO', 'NRG', 'EVRG', 'AWK', 'LNT', 'PNW', 'DRE', 'PCG', 'EIX', 'VST',
+                  'GAS', 'AES', 'POM', 'TE', 'SCG', 'FTR', 'WIN', 'LUMN', 'LVLT', 'CTX'],
+    
+    # Communication Services
+    'Communication Services': ['META', 'GOOGL', 'GOOG', 'NFLX', 'DIS', 'CMCSA', 'T', 'VZ', 'TMUS', 'CHTR',
+                               'WBD', 'FOX', 'FOXA', 'OMC', 'IPG', 'EA', 'TTWO', 'ATVI', 'LYV', 'MTCH',
+                               'NWSA', 'NWS', 'NYT', 'PARA', 'VIAB', 'DISCA', 'DISCK', 'SNI', 'TWX',
+                               'TWTR', 'YHOO', 'TGNA', 'LSXMA', 'TKO'],
+    
+    # Real Estate
+    'Real Estate': ['AMT', 'PLD', 'CCI', 'EQIX', 'DLR', 'PSA', 'SPG', 'O', 'WELL', 'AVB',
+                    'EQR', 'ESS', 'MAA', 'UDR', 'VTR', 'VNO', 'SLG', 'BXP', 'ARE', 'CBRE',
+                    'VICI', 'INVH', 'DOC', 'KIM', 'REG', 'FRT', 'HST', 'AIV', 'CPT', 'IRM',
+                    'EXR', 'SBAC', 'MAC', 'GGP', 'WY', 'PCL'],
+    
+    # Commodities (your non-stock assets)
+    'Commodities': ['GC=F', 'SI=F', 'CL=F', 'NG=F'],
+    
+    # Currencies
+    'Currencies': ['EUR=X', 'JPY=X', 'GBP=X', 'AUD=X', 'CHF=X'],
+    
+    # Indices
+    'Indices': ['^GSPC', '^NDX', '^GDAXI']
+
 ## Dependencies
 * `numpy`
 * `pandas`
