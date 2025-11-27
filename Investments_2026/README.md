@@ -51,8 +51,7 @@ We want to achive proper diversification in the portfolio, but also, we do not w
     'CTSH', 'IT', 'ACN', 'EPAM', 'FTNT', 'PANW', 'CRWD', 'SNPS', 'CDNS', 'ANSS',
     'KEYS', 'TER', 'IPGP', 'GLW', 'APH', 'TEL', 'AKAM', 'ADSK', 'CIEN', 'SMCI',
     'APP', 'DDOG', 'PLTR', 'FICO', 'GEN', 'BR', 'JKHY', 'FIS', 'FI', 'CSGP',
-    'TYL', 'MPWR', 'ON', 'SWKS'
-]
+    'TYL', 'MPWR', 'ON', 'SWKS'],
 
 Removed (delisted/acquired):
 MXIM - acquired by ADI (2021)
@@ -72,8 +71,7 @@ LSI - acquired by Avago (2014)
     'ZBH', 'BAX', 'BDX', 'COO', 'XRAY', 'HSIC', 'CAH', 'MCK', 'CVS', 'CI',
     'HUM', 'CNC', 'MOH', 'DVA', 'HCA', 'UHS', 'THC', 'DGX', 'LH', 'TECH',
     'RVTY', 'MTD', 'WAT', 'ILMN', 'INCY', 'PRGO', 'NKTR', 'ELV', 'COR', 
-    'VTRS', 'CTLT', 'OGN', 'GEHC', 'KVUE', 'SOLV'
-]
+    'VTRS', 'CTLT', 'OGN', 'GEHC', 'KVUE', 'SOLV'],
 
 Removed (delisted/acquired):
 ALXN - acquired by AstraZeneca (2021)
