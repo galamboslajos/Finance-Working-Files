@@ -44,6 +44,22 @@ Therefore, any leveraged implementation of this strategy must operate at or belo
 
 We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR optimum on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
  # Sectors
+
+| Sector                     | Count  |
+| -------------------------- | ------ |
+| **Technology**             | **66** |
+| **Health Care**            | **69** |
+| **Financials**             | **79** |
+| **Consumer Discretionary** | **92** |
+| **Consumer Staples**       | **34** |
+| **Industrials**            | **95** |
+| **Energy**                 | **38** |
+| **Materials**              | **33** |
+| **Utilities**              | **30** |
+| **Communication Services** | **27** |
+| **Real Estate**            | **33** |
+
+ 
     'Technology': # Active tech stocks
     'AAPL', 'MSFT', 'NVDA', 'AMD', 'INTC', 'CSCO', 'ORCL', 'IBM', 'ADBE', 'CRM', 
     'NOW', 'INTU', 'AMAT', 'LRCX', 'KLAC', 'MCHP', 'TXN', 'ADI', 'QCOM', 'AVGO',
