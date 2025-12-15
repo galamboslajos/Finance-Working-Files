@@ -24,22 +24,6 @@ This model is built on several key hypotheses about the nature of financial mark
 * **Hypothesis:** Volatility (variance) is an incomplete measure of risk. It treats upside and downside deviation equally and, by assuming a normal distribution, fails to capture the true risk of extreme, non-normal losses.
 * **Implication:** We use **CVaR (Expected Shortfall)** as the core risk measure. CVaR focuses on the *average magnitude of losses in the tail*, providing a more coherent and realistic measure of true risk.
 
----
-
-## Investment Mandate: The Risk-Based Leverage Cap
-
-The primary mandate of this strategy is not to just maximize returns, but to do so within a **strictly defined tail-risk budget.**
-
-The portfolio's **maximum acceptable loss** is defined as a **-50% loss to equity** in a "worst 5%" (CVaR 95%) annual scenario. This non-negotiable risk budget is the ultimate constraint that determines the strategy's leverage cap.
-
-The chart below shows the trade-off between the strategy's Net Return and its CVaR 95% tail risk as leverage increases.
-
-![Net Return vs. CVaR by Leverage Cap](Leverage.png)
-
-As shown, while returns (blue line) increase with leverage, the tail risk (orange line) accelerates. The mandate's **-50% budget (green line)** is breached at approximately **2.2x leverage**.
-
-Therefore, any leveraged implementation of this strategy must operate at or below this 2.2x cap to remain compliant with the core risk mandate.
-
 ## Practical Roadmap to Narrow Down Portfolio Size
 
 We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR optimum on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
