@@ -6,28 +6,25 @@ The core objective is to generate an optimal portfolio that is **conditioned on 
 
 ## Theoretical Framework & Key Assumptions
 
-This model is built on several key hypotheses about the nature of financial markets.
+This model is built on several key hypotheses about the nature of financial markets (based on Vorobets, 2025: https://github.com/fortitudo-tech/pcrm-book)
 
-### 1. Markets are Not Stationary (Regime-Switching)
-* **Hypothesis:** The statistical properties of asset returns (mean, volatility, correlation) are not constant over time. They are functions of the underlying market regime.
-* **Implication:** A static "long-term optimal" portfolio is suboptimal. The "best" portfolio is tactical and must adapt to the current regime. This model explicitly uses the VIX to identify the regime and condition the portfolio accordingly.
-
-### 2. The Future is Uncertain (Parameter Uncertainty)
+### 1. The Future is Uncertain (Parameter Uncertainty)
 * **Hypothesis:** Even if we correctly identify the regime, the *true* expected returns for the next period are unknowable. Using a single historical average ("point estimate") is brittle and leads to "noise-mining."
 * **Implication:** We must model our uncertainty. The model uses a Monte Carlo bootstrap to generate a *distribution* of plausible future return scenarios, building a portfolio that is robust across many of those futures, not just one.
 
-### 3. History is Biased (Time-Weighting)
-* **Hypothesis:** The recent past is more relevant for forecasting the near-term future than the distant past.
+### 2. Time and State Conditional Framework 
+* **Hypothesis:** The recent past is more relevant for forecasting the near-term future than the distant past/ and different market regimes suggest different PnL outcomes
 * **Implication:** We use an exponentially-weighted time-decay prior (`p_exp`) as our baseline, making the model more responsive to recent market dynamics.
 
-### 4. Risk is in the Tail (CVaR, not Variance)
+### 3. Risk is in the Tail (CVaR, not Variance)
 * **Hypothesis:** Volatility (variance) is an incomplete measure of risk. It treats upside and downside deviation equally and, by assuming a normal distribution, fails to capture the true risk of extreme, non-normal losses.
 * **Implication:** We use **CVaR (Expected Shortfall)** as the core risk measure. CVaR focuses on the *average magnitude of losses in the tail*, providing a more coherent and realistic measure of true risk.
 
 ## Practical Roadmap to Narrow Down Portfolio Size
 
 We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR optimum on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
- # Sectors
+
+# Sectors
 
 | Sector                     | Count  |
 | -------------------------- | ------ |
@@ -267,9 +264,5 @@ PCL – merged into WY (2016)
     'Currencies': ['EUR=X', 'JPY=X', 'GBP=X', 'AUD=X', 'CHF=X']
 
 ## Dependencies
-* `numpy`
-* `pandas`
-* `yfinance`
-* `cvxopt`
-* `matplotlib`
-* `fortitudo.tech` (Custom library for Entropy Pooling & Mean-CVaR)
+
+ `fortitudo.tech` (Custom library for Entropy Pooling & Mean-CVaR) and Anton Vorobets' Portfolio Construction and Risk Management: https://github.com/fortitudo-tech/pcrm-book 
