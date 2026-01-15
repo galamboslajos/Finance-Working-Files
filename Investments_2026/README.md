@@ -14,7 +14,11 @@ Based on the results of the stacked/cross validated portfolio exposures, there i
 
 [Backtest](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/Backtest_Strategic.ipynb)
 
+* **Experimental Stress Test Analysis:** In this section, I define some left tail scenarios that I conceptualise with joint distribution analysis. What could be tail risk stories?
 
+S&P500 crash/or any heavy stress. Stress is defined (following the logic of Vorobets, 2025) based on relative enotropy and effective number of scenarios. Stress cases would show high relative entropy (even>100%) and low number of effective scenarios.
+
+[Portfolio Performance given S&P500 crash]()
 
 
 
