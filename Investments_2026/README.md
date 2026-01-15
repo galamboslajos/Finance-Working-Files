@@ -1,6 +1,6 @@
 # About this directory
 
-* **Strategic layer of the portfolio:** The objective was to have a layer of the portfolio that has robust out of sample features. Stacked/cross validated portfolio weights over different splits and simulatied paths. The strategic layer therefore serves as the spine of the asset allocation (read more on the asset preselection logic bellow).
+* **Strategic Layer of the Portfolio:** The objective was to have a layer of the portfolio that has robust out of sample features. Stacked/cross validated portfolio weights over different splits and simulatied paths. The strategic layer therefore serves as the spine of the asset allocation (read more on the asset preselection logic bellow). The strategic layer is defined this way since robust weights give little reason for high turnover (unless a tail risk event), frequent regime based rebalancing (that will be done by the **Regime Tilting Layer** of the portfolio). 
 
 [Preselection](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/Preselection_accross_splits.ipynb)
 
@@ -8,7 +8,11 @@
 
 More insight on the logic/ benefit of resmapling and weight stacking can be lerned from:
 
-[How stacking works on selected assets]
+[How stacking works on selected assets](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/9_PortfolioOpt_ParamUncertainty.ipynb)
+
+Based on the results of the stacked/cross validated portfolio weights, there is backtests that takes a simulated paths to methodologically correctly acquire insights on the performance of the strategic layer of the portfolio:
+
+[Backtest]()
 
 
 
