@@ -12,7 +12,7 @@ More insight on the logic/ benefit of resmapling and weight stacking can be lern
 
 Based on the results of the stacked/cross validated portfolio exposures, there is backtests that takes a simulated paths to methodologically correctly acquire insights on the performance of the strategic layer of the portfolio. The backtest assumes quartlerly rebalancing to the target/robust exposures.
 
-[Backtest]()
+[Backtest](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/Backtest_Strategic.ipynb)
 
 
 
