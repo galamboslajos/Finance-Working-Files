@@ -3,7 +3,8 @@
 * **Strategic layer of the portfolio:** The objective was to have a layer of the portfolio that has robust out of sample features. Stacked/cross validated portfolio weights over different splits and simulatied paths. The strategic layer therefore serves as the spine of the asset allocation (read more on the asset preselection logic bellow).
 
 Preselection: Investments_2026/Preselection_accross_splits.ipynb
-Robust Weights for Strategic Layer of the Portfolio:
+
+Robust Weights for Strategic Layer of the Portfolio:Investments_2026/10_PortOpt_ParamUncertainty.ipynb
 
 
 
