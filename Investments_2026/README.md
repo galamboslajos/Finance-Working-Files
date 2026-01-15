@@ -6,7 +6,9 @@
 
 [Robust Weights for Strategic Layer of the Portfolio](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/10_PortOpt_ParamUncertainty.ipynb)
 
+More insight on the logic/ benefit of resmapling and weight stacking can be lerned from:
 
+[How stacking works on selected assets]
 
 
 
