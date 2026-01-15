@@ -7,5 +7,5 @@ Welcome to the **Finance-Working-Files** repository! This collection is dedicate
 The repository is organized into the following directories:
 
 - **Investment_2025**: Contains textbook examples of mean-variance portfolio optimisation, elementary intraday trading framework on the Nasdaq index, some further analysis, fundamental (DCF) approach and simplistic time series analysis. 
-- **Investment_2026**: This repository contains my recent project in which I engage with new investment framework inspired by Kirstense, Vorobets. 
+- **Investment_2026**: This repository contains my recent project in which I engage with new investment framework inspired by [Kirstensen, Vorobets](https://fortitudo.tech). 
 
