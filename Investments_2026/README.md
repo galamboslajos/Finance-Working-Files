@@ -313,4 +313,4 @@ PCL – merged into WY (2016)
 
 ## Dependencies
 
- `fortitudo.tech` (Custom library for Entropy Pooling & Mean-CVaR) and Anton Vorobets' Portfolio Construction and Risk Management: https://github.com/fortitudo-tech/pcrm-book 
+ `fortitudo.tech` and Anton Vorobets' Portfolio Construction and Risk Management: https://github.com/fortitudo-tech/pcrm-book 
