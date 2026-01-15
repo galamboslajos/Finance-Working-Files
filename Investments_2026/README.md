@@ -1,4 +1,23 @@
-# State-Aware Strategic Asset Allocation Model
+# About this directory
+
+* **Strategic layer of the portfolio:** The objective was to have a layer of the portfolio that has robust out of sample features. Stacked/cross validated portfolio weights over different splits and simulatied paths. The strategic layer therefore serves as the spine of the asset allocation (read more on the asset preselection logic bellow).
+* Preselection:
+* Robust Weights for Strategic Layer of the Portfolio:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## State-Aware Strategic Asset Allocation Model
 
 This project implements a quantitative portfolio construction framework from Kristensen and Vorobets. Unlike traditional static optimizers, this model uses a dynamic, regime-aware approach to build tactical portfolios.
 
