@@ -18,7 +18,22 @@ Based on the results of the stacked/cross validated portfolio exposures, there i
 
 S&P500 crash/or any heavy stress. Stress is defined (following the logic of Vorobets, 2025) based on relative enotropy and effective number of scenarios. Stress cases would show high relative entropy (even>100%) and low number of effective scenarios.
 
-[Portfolio Performance given S&P500 crash]()
+[Portfolio Performance Given S&P500 Crash](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/PortfolioStressTest.ipynb)
+
+Bond Market stress is getting even more pronaunced amid Trump's attack on the independent FED plus budget fears.
+
+[Bond Market Stress]
+
+Continued Inflation
+
+Tech shock/Vix spike
+
+
+* **Regime Tilting Layer of the Portfolio:**
+
+
+
+
 
 
 
