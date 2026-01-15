@@ -70,7 +70,7 @@ This model is built on several key hypotheses about the nature of financial mark
 
 ## Practical Roadmap to Narrow Down Portfolio Size
 
-We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR optimum on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
+We want to achive proper diversification in the portfolio, but also, we do not want over diversification. To tackle this we would select single best (Mean-CVaR profile candidates on resmapled data) allocations sector-by-sector. That leaves us with a feasible amount of participants for the final portfolio optimisation, stress testings.
 
 # Sectors
 
