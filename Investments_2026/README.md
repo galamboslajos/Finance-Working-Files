@@ -22,7 +22,7 @@ S&P500 crash/or any heavy stress. Stress is defined (following the logic of Voro
 
 Bond Market stress is getting even more pronaunced amid Trump's attack on the independent FED plus budget fears.
 
-[Bond Market Stress]
+[Bond Market Stress](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/PortfolioBondStressTest.ipynb)
 
 Continued Inflation
 
