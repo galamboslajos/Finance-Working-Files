@@ -90,7 +90,7 @@ We want to achive proper diversification in the portfolio, but also, we do not w
 
 All together, there 596 tickers alicve in the specified sets.
 
-    'Technology': # Active tech stocks
+    'Technology': 
     'AAPL', 'MSFT', 'NVDA', 'AMD', 'INTC', 'CSCO', 'ORCL', 'IBM', 'ADBE', 'CRM', 
     'NOW', 'INTU', 'AMAT', 'LRCX', 'KLAC', 'MCHP', 'TXN', 'ADI', 'QCOM', 'AVGO',
     'NXPI', 'MU', 'STX', 'WDC', 'HPQ', 'HPE', 'DELL', 'ANET', 'FFIV', 'JNPR',
