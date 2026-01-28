@@ -2,7 +2,7 @@
 
 * **Strategic Layer of the Portfolio:** The objective was to have a layer of the portfolio that has robust out of sample features. Stacked/cross validated portfolio exposures over different splits and simulatied paths. The strategic layer therefore serves as the spine of the asset allocation (read more on the asset preselection logic bellow). The strategic layer is defined this way since robust exposures give little reason for high turnover (unless a tail risk event), frequent regime based rebalancing (that will be done by the **Regime Tilting Layer** of the portfolio). 
 
-[Preselection](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/Preselection_accross_splits.ipynb)
+[Preselection](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/preselect_resampling_convergence.ipynb)
 
 [Robust Exposures for Strategic Layer of the Portfolio](https://github.com/galamboslajos/Finance-Working-Files/blob/main/Investments_2026/10_PortOpt_ParamUncertainty.ipynb)
 
