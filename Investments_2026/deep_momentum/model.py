@@ -146,7 +146,10 @@ def compute_class_returns(df, date, lookback_years=CLASS_RETURN_LOOKBACK_YEARS):
 
     class_returns = {}
     for k in range(1, N_CLASSES + 1):
-        class_data = hist[hist["LABEL"] == k]["return"]
+        # LABEL is assigned based on fwd_return (next month's return).
+        # mu_k = average forward return of stocks in class k.
+        col = "fwd_return" if "fwd_return" in hist.columns else "return"
+        class_data = hist[hist["LABEL"] == k][col]
         if len(class_data) > 0:
             class_returns[k] = class_data.mean()
         else:
@@ -207,7 +210,8 @@ def compute_class_stds(df, date, lookback_years=CLASS_RETURN_LOOKBACK_YEARS):
 
     class_stds = {}
     for k in range(1, N_CLASSES + 1):
-        class_data = hist[hist["LABEL"] == k]["return"]
+        col = "fwd_return" if "fwd_return" in hist.columns else "return"
+        class_data = hist[hist["LABEL"] == k][col]
         if len(class_data) > 1:
             class_stds[k] = class_data.std()
         else:
