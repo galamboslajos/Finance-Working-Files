@@ -159,19 +159,19 @@ def daily_to_monthly(df):
         return pd.DataFrame()
 
     df = df.copy()
-    df["year_month"] = df["date"].dt.to_period("M")
+    df["_ym"] = df["date"].dt.to_period("M")
 
     # Last trading day per month
-    monthly = df.groupby("year_month").last().reset_index()
-
-    # Convert Period to string for parquet compatibility
-    monthly["year_month"] = monthly["year_month"].astype(str)
+    monthly = df.groupby("_ym").last().reset_index()
 
     # Sum volume over month (for zero-volume filter)
-    vol_sum = df.groupby("year_month")["volume"].sum().reset_index()
-    vol_sum.columns = ["year_month", "volume_month"]
+    vol_sum = df.groupby("_ym")["volume"].sum().reset_index()
+    vol_sum.columns = ["_ym", "volume_month"]
+    monthly = monthly.merge(vol_sum, on="_ym", how="left")
 
-    monthly = monthly.merge(vol_sum, on="year_month", how="left")
+    # Convert Period to string for parquet compatibility
+    monthly["year_month"] = monthly["_ym"].astype(str)
+    monthly = monthly.drop(columns=["_ym"])
 
     # Previous month volume (for the filter: "trading volumes in current and previous months")
     monthly = monthly.sort_values("date")
