@@ -164,6 +164,9 @@ def daily_to_monthly(df):
     # Last trading day per month
     monthly = df.groupby("year_month").last().reset_index()
 
+    # Convert Period to string for parquet compatibility
+    monthly["year_month"] = monthly["year_month"].astype(str)
+
     # Sum volume over month (for zero-volume filter)
     vol_sum = df.groupby("year_month")["volume"].sum().reset_index()
     vol_sum.columns = ["year_month", "volume_month"]
