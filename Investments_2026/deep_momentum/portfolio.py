@@ -20,7 +20,43 @@ Portfolio construction:
 
 import pandas as pd
 import numpy as np
-from config import N_CLASSES, OOS_START
+from config import N_CLASSES, OOS_START, TC_BPS
+
+
+def compute_turnover_cost(prev_long, prev_short, curr_long, curr_short, tc_bps=TC_BPS):
+    """
+    Compute turnover and transaction cost for one rebalance.
+
+    Turnover = fraction of portfolio that changed (both legs).
+    Equal-weighted: turnover = (stocks_traded / total_stocks) for each leg.
+    Cost = turnover * tc_bps / 10000 (applied to both legs).
+
+    Returns cost as a fraction of portfolio value (to subtract from return).
+    """
+    if not prev_long or not prev_short:
+        return 0.0  # first month, no turnover
+
+    # Long leg turnover
+    prev_l = set(prev_long)
+    curr_l = set(curr_long)
+    n_long = max(len(prev_l), len(curr_l), 1)
+    long_sold = len(prev_l - curr_l)
+    long_bought = len(curr_l - prev_l)
+    long_turnover = (long_sold + long_bought) / (2 * n_long)
+
+    # Short leg turnover
+    prev_s = set(prev_short)
+    curr_s = set(curr_short)
+    n_short = max(len(prev_s), len(curr_s), 1)
+    short_sold = len(prev_s - curr_s)
+    short_bought = len(curr_s - prev_s)
+    short_turnover = (short_sold + short_bought) / (2 * n_short)
+
+    # Average turnover across both legs, apply cost
+    avg_turnover = (long_turnover + short_turnover) / 2
+    cost = avg_turnover * tc_bps / 10000
+
+    return cost
 
 
 def construct_mom_portfolio(df):
@@ -47,6 +83,9 @@ def construct_mom_portfolio(df):
         return pd.DataFrame()
 
     results = []
+    prev_long_syms = []
+    prev_short_syms = []
+
     for date, group in df.groupby(df["date"].dt.to_period("M")):
         if len(group) < N_CLASSES:
             continue
@@ -64,20 +103,33 @@ def construct_mom_portfolio(df):
         if long_stocks.empty or short_stocks.empty:
             continue
 
+        curr_long_syms = long_stocks["symbol"].tolist()
+        curr_short_syms = short_stocks["symbol"].tolist()
+
+        # Transaction cost from turnover
+        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
+                                   curr_long_syms, curr_short_syms)
+
         # Equal-weighted returns
         long_ret = long_stocks["fwd_return"].mean()
         short_ret = short_stocks["fwd_return"].mean()
         ls_ret = long_ret - short_ret
+        ls_ret_net = ls_ret - tc
 
         results.append({
             "date": group["date"].iloc[0],
             "long_ret": long_ret,
             "short_ret": short_ret,
-            "ls_ret": ls_ret,
+            "ls_ret": ls_ret_net,
+            "ls_ret_gross": ls_ret,
+            "tc": tc,
             "n_long": len(long_stocks),
             "n_short": len(short_stocks),
             "strategy": "MOM",
         })
+
+        prev_long_syms = curr_long_syms
+        prev_short_syms = curr_short_syms
 
     return pd.DataFrame(results)
 
@@ -99,6 +151,9 @@ def construct_xgb_portfolio(predictions):
         return pd.DataFrame()
 
     results = []
+    prev_long_syms = []
+    prev_short_syms = []
+
     for date, group in df.groupby(df["date"].dt.to_period("M")):
         long_stocks = group[group["xgb_class"] == N_CLASSES]
         short_stocks = group[group["xgb_class"] == 1]
@@ -106,19 +161,31 @@ def construct_xgb_portfolio(predictions):
         if long_stocks.empty or short_stocks.empty:
             continue
 
+        curr_long_syms = long_stocks["symbol"].tolist()
+        curr_short_syms = short_stocks["symbol"].tolist()
+
+        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
+                                   curr_long_syms, curr_short_syms)
+
         long_ret = long_stocks["fwd_return"].mean()
         short_ret = short_stocks["fwd_return"].mean()
         ls_ret = long_ret - short_ret
+        ls_ret_net = ls_ret - tc
 
         results.append({
             "date": group["date"].iloc[0],
             "long_ret": long_ret,
             "short_ret": short_ret,
-            "ls_ret": ls_ret,
+            "ls_ret": ls_ret_net,
+            "ls_ret_gross": ls_ret,
+            "tc": tc,
             "n_long": len(long_stocks),
             "n_short": len(short_stocks),
             "strategy": "XGB",
         })
+
+        prev_long_syms = curr_long_syms
+        prev_short_syms = curr_short_syms
 
     return pd.DataFrame(results)
 
@@ -140,6 +207,9 @@ def construct_ret_portfolio(predictions):
         return pd.DataFrame()
 
     results = []
+    prev_long_syms = []
+    prev_short_syms = []
+
     for date, group in df.groupby(df["date"].dt.to_period("M")):
         if len(group) < N_CLASSES:
             continue
@@ -155,19 +225,31 @@ def construct_ret_portfolio(predictions):
         if long_stocks.empty or short_stocks.empty:
             continue
 
+        curr_long_syms = long_stocks["symbol"].tolist()
+        curr_short_syms = short_stocks["symbol"].tolist()
+
+        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
+                                   curr_long_syms, curr_short_syms)
+
         long_ret = long_stocks["fwd_return"].mean()
         short_ret = short_stocks["fwd_return"].mean()
         ls_ret = long_ret - short_ret
+        ls_ret_net = ls_ret - tc
 
         results.append({
             "date": group["date"].iloc[0],
             "long_ret": long_ret,
             "short_ret": short_ret,
-            "ls_ret": ls_ret,
+            "ls_ret": ls_ret_net,
+            "ls_ret_gross": ls_ret,
+            "tc": tc,
             "n_long": len(long_stocks),
             "n_short": len(short_stocks),
             "strategy": "RET",
         })
+
+        prev_long_syms = curr_long_syms
+        prev_short_syms = curr_short_syms
 
     return pd.DataFrame(results)
 
@@ -185,6 +267,9 @@ def construct_srp_portfolio(predictions):
         return pd.DataFrame()
 
     results = []
+    prev_long_syms = []
+    prev_short_syms = []
+
     for date, group in df.groupby(df["date"].dt.to_period("M")):
         if len(group) < N_CLASSES:
             continue
@@ -200,19 +285,31 @@ def construct_srp_portfolio(predictions):
         if long_stocks.empty or short_stocks.empty:
             continue
 
+        curr_long_syms = long_stocks["symbol"].tolist()
+        curr_short_syms = short_stocks["symbol"].tolist()
+
+        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
+                                   curr_long_syms, curr_short_syms)
+
         long_ret = long_stocks["fwd_return"].mean()
         short_ret = short_stocks["fwd_return"].mean()
         ls_ret = long_ret - short_ret
+        ls_ret_net = ls_ret - tc
 
         results.append({
             "date": group["date"].iloc[0],
             "long_ret": long_ret,
             "short_ret": short_ret,
-            "ls_ret": ls_ret,
+            "ls_ret": ls_ret_net,
+            "ls_ret_gross": ls_ret,
+            "tc": tc,
             "n_long": len(long_stocks),
             "n_short": len(short_stocks),
             "strategy": "SRP",
         })
+
+        prev_long_syms = curr_long_syms
+        prev_short_syms = curr_short_syms
 
     return pd.DataFrame(results)
 
@@ -333,17 +430,20 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
 def print_performance_table(results):
     """Print a formatted comparison table of all strategies."""
     print(f"\n{'Strategy':<10s} {'Ann.Ret':>10s} {'Ann.Vol':>10s} {'Sharpe':>8s} "
-          f"{'Cum.Ret':>10s} {'MaxDD':>8s} {'t-stat':>8s} {'Months':>7s}")
-    print("-" * 75)
+          f"{'Cum.Ret':>10s} {'MaxDD':>8s} {'t-stat':>8s} {'Months':>7s} {'Avg TC':>8s}")
+    print("-" * 83)
 
     for name in ["MOM", "XGB", "RET", "SRP"]:
         if name not in results or not results[name]["metrics"]:
             print(f"{name:<10s} {'N/A':>10s}")
             continue
         m = results[name]["metrics"]
+        port = results[name]["portfolio"]
+        avg_tc = port["tc"].mean() * 10000 if "tc" in port.columns else 0
         print(f"{name:<10s} {m['mean_annual']:>9.1%} {m['std_annual']:>9.1%} "
               f"{m['sharpe']:>8.3f} {m['cum_return']:>9.1%} "
-              f"{m['max_drawdown']:>7.1%} {m['t_stat']:>8.2f} {m['n_months']:>7d}")
+              f"{m['max_drawdown']:>7.1%} {m['t_stat']:>8.2f} {m['n_months']:>7d} "
+              f"{avg_tc:>6.1f}bp")
 
 
 # ═══════════════════════════════════════════════════════

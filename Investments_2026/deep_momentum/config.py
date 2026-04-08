@@ -95,6 +95,10 @@ PORTFOLIO_DECILE_LONG = 10   # buy top decile
 PORTFOLIO_DECILE_SHORT = 1   # sell bottom decile
 OOS_START = "2010-01-31"     # "out-of-sample period of January 2010 to December 2023"
 
+# Transaction costs (not in paper — paper reports break-even costs instead)
+# 15 bps one-way is conservative for liquid stocks post-2010
+TC_BPS = 15
+
 # ═══ RECLASSIFICATION — Section 3.3.2 ═════════════════
 CLASS_RETURN_LOOKBACK_YEARS = 10  # "sample analogue over the past ten years"
 
