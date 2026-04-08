@@ -211,44 +211,52 @@ def process_one_stock(symbol, min_date="1990-01-01"):
         return pd.DataFrame()
 
 
-def fetch_country(suffix, country_name, max_stocks=None, min_date="1990-01-01"):
+def fetch_country(suffix, country_name, max_stocks=None, min_date="1990-01-01",
+                  n_workers=20):
     """
     Fetch all stocks for one country (exchange suffix).
+    Uses thread pool to parallelize API calls.
 
     Args:
         suffix: FMP exchange suffix (e.g., 'L' for UK, 'T' for Japan)
         country_name: for logging
         max_stocks: limit for testing (None = all)
         min_date: earliest date to fetch
+        n_workers: number of parallel threads
 
     Returns:
         DataFrame with all monthly observations for the country.
     """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     print(f"\n{'='*60}")
     print(f"Fetching {country_name} (.{suffix})")
     print(f"{'='*60}")
 
     # Get symbol list
     symbols = get_stock_list_for_suffix(suffix)
-    print(f"  Found {len(symbols)} symbols")
+    print(f"  Found {len(symbols)} symbols, using {n_workers} threads")
 
     if max_stocks is not None:
         symbols = symbols[:max_stocks]
         print(f"  Limited to {max_stocks} for testing")
 
-    # Rate limiter: simple sleep
-    delay = 1.0 / FMP_RATE_LIMIT
-
     all_monthly = []
     errors = 0
 
-    for sym in tqdm(symbols, desc=f"  {suffix}", ncols=80):
-        result = process_one_stock(sym, min_date=min_date)
-        if not result.empty:
-            all_monthly.append(result)
-        else:
-            errors += 1
-        time.sleep(delay)  # rate limit
+    with ThreadPoolExecutor(max_workers=n_workers) as executor:
+        futures = {
+            executor.submit(process_one_stock, sym, min_date): sym
+            for sym in symbols
+        }
+
+        for future in tqdm(as_completed(futures), total=len(futures),
+                           desc=f"  {suffix}", ncols=80):
+            result = future.result()
+            if not result.empty:
+                all_monthly.append(result)
+            else:
+                errors += 1
 
     if not all_monthly:
         print(f"  No data retrieved for {country_name}")
