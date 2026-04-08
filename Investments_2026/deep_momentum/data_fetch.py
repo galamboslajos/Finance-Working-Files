@@ -370,6 +370,14 @@ def fetch_all_countries(suffixes=None, max_stocks_per_country=None,
             df["country_code"] = COUNTRIES[suffix][0]
             df["country_name"] = country_name
 
+            # Force numeric columns to float to avoid pyarrow mixed-type errors
+            numeric_cols = ["open", "high", "low", "close", "volume", "change",
+                           "changePercent", "vwap", "volume_month",
+                           "volume_prev_month", "return", "marketCap"]
+            for col in numeric_cols:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors="coerce")
+
             if save:
                 path = Path(DATA_DIR) / f"monthly_{suffix}.parquet"
                 df.to_parquet(path, index=False)
