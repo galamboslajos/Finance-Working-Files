@@ -31,16 +31,79 @@ def fmp_get(endpoint, **params):
     return r.json()
 
 
+def get_etf_set():
+    """Get the set of all ETF symbols from FMP for filtering."""
+    data = fmp_get("etf-list")
+    if isinstance(data, list):
+        return {d["symbol"] for d in data}
+    return set()
+
+
+def is_ordinary_share(symbol):
+    """
+    Filter for ordinary shares only.
+    Paper: "Only ordinary shares (typecode='EQ') and primary quotes"
+
+    Exclude:
+    - ETFs (checked against FMP etf-list)
+    - Warrants (symbols containing .WS, .WT, -WT, -WS)
+    - Preferred shares (symbols containing -P, .PR, -PA, -PB, etc.)
+    - Rights (symbols containing -R, .R at end)
+    - Units (symbols containing -UN, .UN, -U)
+    - Debentures (symbols containing .DB)
+    """
+    sym_upper = symbol.upper()
+
+    # Warrant patterns
+    warrant_patterns = [".WS", ".WT", "-WT", "-WS", "/WS", "/WT"]
+    if any(p in sym_upper for p in warrant_patterns):
+        return False
+
+    # Preferred share patterns
+    pref_patterns = ["-PA", "-PB", "-PC", "-PD", "-PE", "-PF", "-PG", "-PH",
+                     "-PI", "-PJ", "-PK", "-PL", "-PM", "-PN", "-PO", "-PP",
+                     "-PR", "-PS", "-PT", "-PU", ".PR"]
+    if any(sym_upper.endswith(p) or f"{p}." in sym_upper for p in pref_patterns):
+        return False
+
+    # Units
+    unit_patterns = ["-UN", ".UN", "-U"]
+    if any(sym_upper.endswith(p) or f"{p}." in sym_upper for p in unit_patterns):
+        return False
+
+    # Debentures
+    if ".DB" in sym_upper:
+        return False
+
+    # Rights
+    if sym_upper.endswith("-R") or sym_upper.endswith(".R"):
+        return False
+
+    return True
+
+
 def get_stock_list_for_suffix(suffix):
-    """Get all stock symbols for a given exchange suffix from FMP stock list."""
+    """
+    Get all ordinary share symbols for a given exchange suffix.
+    Filters out ETFs, warrants, preferred shares, units, rights.
+    Paper: "Only ordinary shares and primary country-level quotes"
+    """
     data = fmp_get("stock-list")
     df = pd.DataFrame(data)
     if suffix == "US":
-        # US stocks have no suffix
         mask = ~df["symbol"].str.contains(r"\.", na=False)
     else:
         mask = df["symbol"].str.endswith(f".{suffix}")
-    return df.loc[mask, "symbol"].tolist()
+    symbols = df.loc[mask, "symbol"].tolist()
+
+    # Filter out ETFs
+    etf_set = get_etf_set()
+    symbols = [s for s in symbols if s not in etf_set]
+
+    # Filter out warrants, preferreds, units, rights, debentures
+    symbols = [s for s in symbols if is_ordinary_share(s)]
+
+    return symbols
 
 
 def fetch_daily_prices(symbol, from_date="1990-01-01", to_date="2026-12-31"):

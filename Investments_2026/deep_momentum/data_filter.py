@@ -69,30 +69,28 @@ def filter_market_cap_missing(df):
 
 def filter_market_cap_bottom(df):
     """
-    Paper: "the market capitalization is below the bottom 5% within a country in any month"
+    Paper: "Observations are excluded from the sample if the market capitalization
+    is below the bottom 5% within a country in any month"
 
-    For each month, compute the 5th percentile of market cap.
-    Remove stocks that fall below it in ANY month.
+    Per-observation filter: for each month, compute the 5th percentile of
+    market cap and remove only those observations below it in that month.
     """
     n_before = len(df)
 
-    # Compute bottom 5% threshold per month
-    df["year_month_key"] = df["date"].dt.to_period("M")
-    thresholds = df.groupby("year_month_key")["marketCap"].quantile(MCAP_BOTTOM_PCT)
-    thresholds.name = "mcap_threshold"
-    df = df.merge(thresholds, left_on="year_month_key", right_index=True, how="left")
+    df = df.copy()
+    df["_ym"] = df["date"].dt.to_period("M")
+    df["_mcap_threshold"] = df.groupby("_ym")["marketCap"].transform(
+        lambda x: x.quantile(MCAP_BOTTOM_PCT)
+    )
 
-    # Flag stocks that are below threshold in any month
-    df["below_threshold"] = df["marketCap"] < df["mcap_threshold"]
-    bad_stocks = df.loc[df["below_threshold"], "symbol"].unique()
+    mask = df["marketCap"] < df["_mcap_threshold"]
+    n_dropped = mask.sum()
+    df = df[~mask].copy()
+    df = df.drop(columns=["_ym", "_mcap_threshold"])
 
-    df = df[~df["symbol"].isin(bad_stocks)].copy()
-    df = df.drop(columns=["year_month_key", "mcap_threshold", "below_threshold"])
-
-    n_dropped = n_before - len(df)
     if n_dropped > 0:
         print(f"    MCap bottom 5% filter: dropped {n_dropped} obs "
-              f"({100*n_dropped/n_before:.1f}%), removed {len(bad_stocks)} stocks")
+              f"({100*n_dropped/n_before:.1f}%)")
 
     return df
 
