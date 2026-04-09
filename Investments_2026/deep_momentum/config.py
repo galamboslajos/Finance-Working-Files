@@ -67,7 +67,11 @@ WINSORIZE_LOWER = 0.01
 WINSORIZE_UPPER = 0.99
 
 # "the market capitalization is below the bottom 5% within a country in any month"
+# Paper uses 5% on clean exchange-listed data (Datastream/CRSP).
+# FMP includes OTC/pink sheets for US, so we use 25% for US to approximate
+# the same universe. Other countries use 5% (their symbols are exchange-specific).
 MCAP_BOTTOM_PCT = 0.05
+MCAP_BOTTOM_PCT_US = 0.25
 
 # ═══ MODEL — Section 3.3 of the paper ═════════════════
 N_CLASSES = 10              # "ten return classes" (deciles)

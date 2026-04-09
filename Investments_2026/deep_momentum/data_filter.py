@@ -21,7 +21,7 @@ from pathlib import Path
 from config import (
     MAX_MONTHLY_RETURN, MIN_MONTHLY_RETURN,
     WINSORIZE_LOWER, WINSORIZE_UPPER,
-    MCAP_BOTTOM_PCT, DATA_DIR, CACHE_DIR,
+    MCAP_BOTTOM_PCT, MCAP_BOTTOM_PCT_US, DATA_DIR, CACHE_DIR,
     COUNTRIES, MIN_TRAIN_YEARS,
 )
 
@@ -67,20 +67,25 @@ def filter_market_cap_missing(df):
     return df
 
 
-def filter_market_cap_bottom(df):
+def filter_market_cap_bottom(df, mcap_pct=None):
     """
     Paper: "Observations are excluded from the sample if the market capitalization
     is below the bottom 5% within a country in any month"
 
-    Per-observation filter: for each month, compute the 5th percentile of
+    Per-observation filter: for each month, compute the threshold percentile of
     market cap and remove only those observations below it in that month.
+
+    mcap_pct: override threshold (e.g., 0.25 for US to remove OTC junk)
     """
+    if mcap_pct is None:
+        mcap_pct = MCAP_BOTTOM_PCT
+
     n_before = len(df)
 
     df = df.copy()
     df["_ym"] = df["date"].dt.to_period("M")
     df["_mcap_threshold"] = df.groupby("_ym")["marketCap"].transform(
-        lambda x: x.quantile(MCAP_BOTTOM_PCT)
+        lambda x: x.quantile(mcap_pct)
     )
 
     mask = df["marketCap"] < df["_mcap_threshold"]
@@ -89,7 +94,7 @@ def filter_market_cap_bottom(df):
     df = df.drop(columns=["_ym", "_mcap_threshold"])
 
     if n_dropped > 0:
-        print(f"    MCap bottom 5% filter: dropped {n_dropped} obs "
+        print(f"    MCap bottom {mcap_pct:.0%} filter: dropped {n_dropped} obs "
               f"({100*n_dropped/n_before:.1f}%)")
 
     return df
@@ -127,7 +132,7 @@ def winsorize_returns(df):
     return df
 
 
-def filter_country(df, country_name):
+def filter_country(df, country_name, suffix=""):
     """
     Apply all filters to one country's data.
     Returns filtered DataFrame.
@@ -143,8 +148,9 @@ def filter_country(df, country_name):
     # 2. Market cap missing
     df = filter_market_cap_missing(df)
 
-    # 3. Market cap bottom 5% (remove entire stock if below in any month)
-    df = filter_market_cap_bottom(df)
+    # 3. Market cap bottom % (25% for US to remove OTC, 5% for others)
+    mcap_pct = MCAP_BOTTOM_PCT_US if suffix == "US" else MCAP_BOTTOM_PCT
+    df = filter_market_cap_bottom(df, mcap_pct=mcap_pct)
 
     # 4. Extreme returns
     df = filter_extreme_returns(df)
