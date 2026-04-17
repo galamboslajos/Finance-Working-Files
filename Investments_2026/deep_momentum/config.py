@@ -99,6 +99,10 @@ PORTFOLIO_DECILE_LONG = 10   # buy top decile
 PORTFOLIO_DECILE_SHORT = 1   # sell bottom decile
 OOS_START = "2010-01-31"     # "out-of-sample period of January 2010 to December 2023"
 
+# Fixed-N alternative (practical execution variant): take top N and bottom N
+# stocks per country-month by the signal instead of deciles. None = decile mode.
+TOP_N_FIXED = 10
+
 # Transaction costs (not in paper — paper reports break-even costs instead)
 # 15 bps one-way is conservative for liquid stocks post-2010
 TC_BPS = 15

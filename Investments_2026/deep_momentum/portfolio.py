@@ -20,7 +20,21 @@ Portfolio construction:
 
 import pandas as pd
 import numpy as np
-from config import N_CLASSES, OOS_START, TC_BPS
+from config import N_CLASSES, OOS_START, TC_BPS, TOP_N_FIXED
+
+
+def _pick_top_bottom(group, score_col, top_n):
+    """
+    Fixed-N selection: rank `group` by `score_col` desc and return
+    (long_stocks, short_stocks) as the top-N and bottom-N rows.
+    Returns (None, None) if the group doesn't have at least 2*top_n rows.
+    """
+    if len(group) < 2 * top_n:
+        return None, None
+    ranked = group.sort_values(score_col, ascending=False)
+    long_stocks = ranked.head(top_n)
+    short_stocks = ranked.tail(top_n)
+    return long_stocks, short_stocks
 
 
 def compute_turnover_cost(prev_long, prev_short, curr_long, curr_short, tc_bps=TC_BPS):
@@ -59,7 +73,7 @@ def compute_turnover_cost(prev_long, prev_short, curr_long, curr_short, tc_bps=T
     return cost
 
 
-def construct_mom_portfolio(df):
+def construct_mom_portfolio(df, top_n=None):
     """
     Traditional momentum strategy.
 
@@ -70,6 +84,10 @@ def construct_mom_portfolio(df):
 
     MOM_12 in our features = cumulative return from t-11 to t-1 (11 months,
     skip current month). This is exactly the Jegadeesh-Titman momentum signal.
+
+    Args:
+        top_n: if None, decile selection (paper). If int, pick top_n/bottom_n
+               stocks by MOM_12 instead.
 
     Returns DataFrame with monthly long-short returns.
     """
@@ -87,18 +105,23 @@ def construct_mom_portfolio(df):
     prev_short_syms = []
 
     for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if len(group) < N_CLASSES:
-            continue
+        if top_n is None:
+            if len(group) < N_CLASSES:
+                continue
 
-        # Sort into deciles by MOM_12
-        group = group.copy()
-        group["mom_decile"] = pd.qcut(
-            group["MOM_12"], q=N_CLASSES, labels=False, duplicates="drop"
-        ) + 1
+            # Sort into deciles by MOM_12
+            group = group.copy()
+            group["mom_decile"] = pd.qcut(
+                group["MOM_12"], q=N_CLASSES, labels=False, duplicates="drop"
+            ) + 1
 
-        # Long = top decile, Short = bottom decile
-        long_stocks = group[group["mom_decile"] == N_CLASSES]
-        short_stocks = group[group["mom_decile"] == 1]
+            # Long = top decile, Short = bottom decile
+            long_stocks = group[group["mom_decile"] == N_CLASSES]
+            short_stocks = group[group["mom_decile"] == 1]
+        else:
+            long_stocks, short_stocks = _pick_top_bottom(group, "MOM_12", top_n)
+            if long_stocks is None:
+                continue
 
         if long_stocks.empty or short_stocks.empty:
             continue
@@ -134,7 +157,7 @@ def construct_mom_portfolio(df):
     return pd.DataFrame(results)
 
 
-def construct_xgb_portfolio(predictions):
+def construct_xgb_portfolio(predictions, top_n=None):
     """
     Naive ML strategy.
 
@@ -143,6 +166,11 @@ def construct_xgb_portfolio(predictions):
 
     "buy stocks classified into highest class (10),
      sell stocks classified into lowest class (1)"
+
+    Args:
+        top_n: if None, class-membership selection (paper). If int, rank by
+               scalar score `prob_10 - prob_1` and pick top_n/bottom_n —
+               a symmetric fixed-N analogue to RET/SRP.
     """
     df = predictions.copy()
     df = df.dropna(subset=["xgb_class", "fwd_return"])
@@ -154,9 +182,18 @@ def construct_xgb_portfolio(predictions):
     prev_long_syms = []
     prev_short_syms = []
 
+    if top_n is not None:
+        df = df.copy()
+        df["_xgb_score"] = df[f"prob_{N_CLASSES}"] - df["prob_1"]
+
     for date, group in df.groupby(df["date"].dt.to_period("M")):
-        long_stocks = group[group["xgb_class"] == N_CLASSES]
-        short_stocks = group[group["xgb_class"] == 1]
+        if top_n is None:
+            long_stocks = group[group["xgb_class"] == N_CLASSES]
+            short_stocks = group[group["xgb_class"] == 1]
+        else:
+            long_stocks, short_stocks = _pick_top_bottom(group, "_xgb_score", top_n)
+            if long_stocks is None:
+                continue
 
         if long_stocks.empty or short_stocks.empty:
             continue
@@ -190,7 +227,7 @@ def construct_xgb_portfolio(predictions):
     return pd.DataFrame(results)
 
 
-def construct_ret_portfolio(predictions):
+def construct_ret_portfolio(predictions, top_n=None):
     """
     Deep Momentum (RET) strategy.
 
@@ -199,6 +236,10 @@ def construct_ret_portfolio(predictions):
     predicted return" (i.e., predicted expected return from reclassification)
 
     Sort stocks by ret_score, buy top decile, sell bottom decile.
+
+    Args:
+        top_n: if None, decile selection (paper). If int, pick top_n/bottom_n
+               stocks by ret_score instead.
     """
     df = predictions.copy()
     df = df.dropna(subset=["ret_score", "fwd_return"])
@@ -211,16 +252,21 @@ def construct_ret_portfolio(predictions):
     prev_short_syms = []
 
     for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if len(group) < N_CLASSES:
-            continue
+        if top_n is None:
+            if len(group) < N_CLASSES:
+                continue
 
-        group = group.copy()
-        group["ret_decile"] = pd.qcut(
-            group["ret_score"], q=N_CLASSES, labels=False, duplicates="drop"
-        ) + 1
+            group = group.copy()
+            group["ret_decile"] = pd.qcut(
+                group["ret_score"], q=N_CLASSES, labels=False, duplicates="drop"
+            ) + 1
 
-        long_stocks = group[group["ret_decile"] == N_CLASSES]
-        short_stocks = group[group["ret_decile"] == 1]
+            long_stocks = group[group["ret_decile"] == N_CLASSES]
+            short_stocks = group[group["ret_decile"] == 1]
+        else:
+            long_stocks, short_stocks = _pick_top_bottom(group, "ret_score", top_n)
+            if long_stocks is None:
+                continue
 
         if long_stocks.empty or short_stocks.empty:
             continue
@@ -254,11 +300,15 @@ def construct_ret_portfolio(predictions):
     return pd.DataFrame(results)
 
 
-def construct_srp_portfolio(predictions):
+def construct_srp_portfolio(predictions, top_n=None):
     """
     Deep Momentum (SRP) strategy — Sharpe ratio reclassification.
 
     Same as RET but sorts by predicted Sharpe ratio instead of expected return.
+
+    Args:
+        top_n: if None, decile selection (paper). If int, pick top_n/bottom_n
+               stocks by srp_score instead.
     """
     df = predictions.copy()
     df = df.dropna(subset=["srp_score", "fwd_return"])
@@ -271,16 +321,21 @@ def construct_srp_portfolio(predictions):
     prev_short_syms = []
 
     for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if len(group) < N_CLASSES:
-            continue
+        if top_n is None:
+            if len(group) < N_CLASSES:
+                continue
 
-        group = group.copy()
-        group["srp_decile"] = pd.qcut(
-            group["srp_score"], q=N_CLASSES, labels=False, duplicates="drop"
-        ) + 1
+            group = group.copy()
+            group["srp_decile"] = pd.qcut(
+                group["srp_score"], q=N_CLASSES, labels=False, duplicates="drop"
+            ) + 1
 
-        long_stocks = group[group["srp_decile"] == N_CLASSES]
-        short_stocks = group[group["srp_decile"] == 1]
+            long_stocks = group[group["srp_decile"] == N_CLASSES]
+            short_stocks = group[group["srp_decile"] == 1]
+        else:
+            long_stocks, short_stocks = _pick_top_bottom(group, "srp_score", top_n)
+            if long_stocks is None:
+                continue
 
         if long_stocks.empty or short_stocks.empty:
             continue
@@ -378,7 +433,7 @@ def compute_performance(portfolio_df, strategy_name=""):
     }
 
 
-def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
+def run_all_strategies(features_df, predictions_df, oos_start=OOS_START, top_n=None):
     """
     Construct portfolios for all strategies and compute performance.
 
@@ -386,6 +441,8 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
         features_df: DataFrame with features (needs MOM_12, fwd_return)
         predictions_df: DataFrame with model predictions (xgb_class, ret_score, srp_score)
         oos_start: start of out-of-sample period
+        top_n: if None, paper-faithful decile selection. If int (e.g. 10),
+               fixed top-N / bottom-N per country-month for all strategies.
 
     Returns:
         dict with portfolio DataFrames and performance metrics
@@ -393,7 +450,7 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
     results = {}
 
     # MOM
-    mom_port = construct_mom_portfolio(features_df)
+    mom_port = construct_mom_portfolio(features_df, top_n=top_n)
     mom_oos = filter_oos(mom_port, oos_start)
     results["MOM"] = {
         "portfolio": mom_oos,
@@ -401,7 +458,7 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
     }
 
     # XGB
-    xgb_port = construct_xgb_portfolio(predictions_df)
+    xgb_port = construct_xgb_portfolio(predictions_df, top_n=top_n)
     xgb_oos = filter_oos(xgb_port, oos_start)
     results["XGB"] = {
         "portfolio": xgb_oos,
@@ -409,7 +466,7 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
     }
 
     # RET
-    ret_port = construct_ret_portfolio(predictions_df)
+    ret_port = construct_ret_portfolio(predictions_df, top_n=top_n)
     ret_oos = filter_oos(ret_port, oos_start)
     results["RET"] = {
         "portfolio": ret_oos,
@@ -417,7 +474,7 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START):
     }
 
     # SRP
-    srp_port = construct_srp_portfolio(predictions_df)
+    srp_port = construct_srp_portfolio(predictions_df, top_n=top_n)
     srp_oos = filter_oos(srp_port, oos_start)
     results["SRP"] = {
         "portfolio": srp_oos,
