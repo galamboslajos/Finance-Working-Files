@@ -20,7 +20,24 @@ Portfolio construction:
 
 import pandas as pd
 import numpy as np
-from config import N_CLASSES, OOS_START, TC_BPS, TOP_N_FIXED
+from config import N_CLASSES, OOS_START, TC_BPS, TOP_N_FIXED, FX_TC_BPS
+
+
+def apply_fx_cost(portfolio_df, fx_tc_bps=FX_TC_BPS, tc_bps=TC_BPS):
+    """
+    Deduct FX roundtrip cost from an existing portfolio's ls_ret.
+    Assumes the portfolio was built with compute_turnover_cost, so we can
+    recover monthly turnover from the stored `tc` column:
+        turnover = tc * 10000 / tc_bps
+        fx_cost  = turnover * fx_tc_bps / 10000
+    """
+    if portfolio_df.empty or "tc" not in portfolio_df.columns:
+        return portfolio_df
+    df = portfolio_df.copy()
+    turnover = df["tc"] * 10000 / tc_bps if tc_bps else 0.0
+    df["fx_cost"] = turnover * fx_tc_bps / 10000
+    df["ls_ret"] = df["ls_ret"] - df["fx_cost"]
+    return df
 
 
 def _pick_top_bottom(group, score_col, top_n):

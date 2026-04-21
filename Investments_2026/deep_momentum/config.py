@@ -101,11 +101,28 @@ OOS_START = "2010-01-31"     # "out-of-sample period of January 2010 to December
 
 # Fixed-N alternative (practical execution variant): take top N and bottom N
 # stocks per country-month by the signal instead of deciles. None = decile mode.
-TOP_N_FIXED = 10
+TOP_N_FIXED = 5
 
 # Transaction costs (not in paper — paper reports break-even costs instead)
 # 15 bps one-way is conservative for liquid stocks post-2010
 TC_BPS = 15
+
+# FX roundtrip cost (for USD-base investor trading non-USD markets).
+# 5 bps one-way — typical spread for liquid G10 pairs via a prime broker.
+FX_TC_BPS = 5
+
+# Country suffix → ISO 4217 currency code. Used by fx.py to pull the right
+# Yahoo pair (e.g. CADUSD=X) and apply FX to that country's returns.
+COUNTRY_CURRENCY = {
+    "US": "USD", "L":  "GBP", "AX": "AUD", "AT": "EUR", "BR": "EUR",
+    "SA": "BRL", "TO": "CAD", "SS": "CNY", "SZ": "CNY", "CO": "DKK",
+    "HE": "EUR", "PA": "EUR", "DE": "EUR", "HK": "HKD", "BO": "INR",
+    "NS": "INR", "JK": "IDR", "TA": "ILS", "MI": "EUR", "T":  "JPY",
+    "KS": "KRW", "KL": "MYR", "MX": "MXN", "AS": "EUR", "NZ": "NZD",
+    "OL": "NOK", "WA": "PLN", "LS": "EUR", "SI": "SGD", "JO": "ZAR",
+    "MC": "EUR", "ST": "SEK", "SW": "CHF", "TW": "TWD", "BK": "THB",
+    "IS": "TRY",
+}
 
 # ═══ RECLASSIFICATION — Section 3.3.2 ═════════════════
 CLASS_RETURN_LOOKBACK_YEARS = 10  # "sample analogue over the past ten years"
