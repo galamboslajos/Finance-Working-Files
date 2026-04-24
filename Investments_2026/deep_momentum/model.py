@@ -31,6 +31,7 @@ from config import (
     N_CLASSES, N_ENSEMBLE, TRAIN_VAL_RATIO,
     MIN_TRAIN_YEARS, RETRAIN_FREQUENCY,
     CLASS_RETURN_LOOKBACK_YEARS,
+    CVAR_ALPHA,
 )
 
 
@@ -173,6 +174,39 @@ def reclassify_ret(probs, class_returns):
     mu = np.array([class_returns.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
     expected_returns = probs @ mu
     return expected_returns
+
+
+def reclassify_cvr(probs, class_returns, alpha=CVAR_ALPHA):
+    """
+    CVR (extension, not in paper) — return-over-CVaR score.
+
+    score_i = E[r_i] / |CVaR_alpha(r_i)|
+
+    CVaR_alpha computed from the predicted discrete distribution:
+    accumulate probability from class 1 (lowest mu_k) upward until the
+    cumulative probability reaches alpha; CVaR is the probability-weighted
+    mean of those classes (normalised by alpha).
+
+    Higher positive score = attractive long (high E[r] per unit tail risk).
+    Lowest score = attractive short.
+
+    Assumes classes 1..N_CLASSES are ordered low-to-high in mu_k, which holds
+    because LABEL assignment uses ascending deciles of realised fwd_return.
+    """
+    mu = np.array([class_returns.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
+    expected_returns = probs @ mu
+
+    # Partial-inclusion CVaR: for each class k, include min(p_k, alpha - cum_prev)
+    # of its probability mass; normalize sum-of-contributions by alpha.
+    cumprob = np.cumsum(probs, axis=1)
+    cum_prev = np.concatenate(
+        [np.zeros((probs.shape[0], 1)), cumprob[:, :-1]], axis=1
+    )
+    included = np.minimum(probs, np.maximum(alpha - cum_prev, 0.0))
+    cvar = (included * mu[None, :]).sum(axis=1) / alpha
+
+    eps = 1e-6
+    return expected_returns / (np.abs(cvar) + eps)
 
 
 def reclassify_srp(probs, class_returns, class_stds):
@@ -361,6 +395,9 @@ def run_walk_forward(df, feature_cols, n_ensemble=N_ENSEMBLE, verbose=True):
             # SRP reclassification
             srp_score = reclassify_srp(probs, class_returns, class_stds)
 
+            # CVR reclassification (return-over-CVaR, extension)
+            cvr_score = reclassify_cvr(probs, class_returns)
+
             # Store results
             for i, idx in enumerate(pred_idx):
                 row = {
@@ -371,6 +408,7 @@ def run_walk_forward(df, feature_cols, n_ensemble=N_ENSEMBLE, verbose=True):
                     "xgb_class": int(xgb_class[i]),
                     "ret_score": ret_score[i],
                     "srp_score": srp_score[i],
+                    "cvr_score": cvr_score[i],
                 }
                 # Store individual class probabilities
                 for k in range(N_CLASSES):

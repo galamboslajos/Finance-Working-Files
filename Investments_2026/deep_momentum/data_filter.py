@@ -152,11 +152,13 @@ def filter_country(df, country_name, suffix=""):
     mcap_pct = MCAP_BOTTOM_PCT_US if suffix == "US" else MCAP_BOTTOM_PCT
     df = filter_market_cap_bottom(df, mcap_pct=mcap_pct)
 
-    # 4. Extreme returns
-    df = filter_extreme_returns(df)
-
-    # 5. Winsorize within country
-    df = winsorize_returns(df)
+    # 4. Extreme-returns filter + winsorize REMOVED.
+    # Reason: winsorize inflates Sharpe and understates tail risk in realised
+    # P&L (per-stock returns used for fwd_return are clipped). Extreme-returns
+    # drop is also paper-faithful but dropped together for honest backtesting.
+    # Risk: a single moonshot in the short leg can blow monthly ls_ret < −100%
+    # and break multiplicative compounding — known issue in AX micro-cap-heavy
+    # universes. Current pilot (TO/AT/OL) is mature/small markets, low risk.
 
     print(f"    After all filters: {df['symbol'].nunique()} stocks, {len(df)} obs")
 

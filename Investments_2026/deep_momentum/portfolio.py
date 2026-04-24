@@ -386,6 +386,75 @@ def construct_srp_portfolio(predictions, top_n=None):
     return pd.DataFrame(results)
 
 
+def construct_cvr_portfolio(predictions, top_n=None):
+    """
+    CVR strategy (extension, not in paper) — return-over-CVaR reclassification.
+
+    Same decile / fixed-N logic as RET and SRP, but sorts by cvr_score
+    (predicted E[r] divided by predicted |CVaR_alpha|).
+
+    Args:
+        top_n: if None, decile selection. If int, pick top_n/bottom_n by cvr_score.
+    """
+    df = predictions.copy()
+    df = df.dropna(subset=["cvr_score", "fwd_return"])
+
+    if df.empty:
+        return pd.DataFrame()
+
+    results = []
+    prev_long_syms = []
+    prev_short_syms = []
+
+    for date, group in df.groupby(df["date"].dt.to_period("M")):
+        if top_n is None:
+            if len(group) < N_CLASSES:
+                continue
+
+            group = group.copy()
+            group["cvr_decile"] = pd.qcut(
+                group["cvr_score"], q=N_CLASSES, labels=False, duplicates="drop"
+            ) + 1
+
+            long_stocks = group[group["cvr_decile"] == N_CLASSES]
+            short_stocks = group[group["cvr_decile"] == 1]
+        else:
+            long_stocks, short_stocks = _pick_top_bottom(group, "cvr_score", top_n)
+            if long_stocks is None:
+                continue
+
+        if long_stocks.empty or short_stocks.empty:
+            continue
+
+        curr_long_syms = long_stocks["symbol"].tolist()
+        curr_short_syms = short_stocks["symbol"].tolist()
+
+        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
+                                   curr_long_syms, curr_short_syms)
+
+        long_ret = long_stocks["fwd_return"].mean()
+        short_ret = short_stocks["fwd_return"].mean()
+        ls_ret = long_ret - short_ret
+        ls_ret_net = ls_ret - tc
+
+        results.append({
+            "date": group["date"].iloc[0],
+            "long_ret": long_ret,
+            "short_ret": short_ret,
+            "ls_ret": ls_ret_net,
+            "ls_ret_gross": ls_ret,
+            "tc": tc,
+            "n_long": len(long_stocks),
+            "n_short": len(short_stocks),
+            "strategy": "CVR",
+        })
+
+        prev_long_syms = curr_long_syms
+        prev_short_syms = curr_short_syms
+
+    return pd.DataFrame(results)
+
+
 def filter_oos(portfolio_df, oos_start=OOS_START):
     """
     Paper: "All empirical results in this section are from the out-of-sample
@@ -498,6 +567,14 @@ def run_all_strategies(features_df, predictions_df, oos_start=OOS_START, top_n=N
         "metrics": compute_performance(srp_oos, "SRP"),
     }
 
+    # CVR (extension — return-over-CVaR)
+    cvr_port = construct_cvr_portfolio(predictions_df, top_n=top_n)
+    cvr_oos = filter_oos(cvr_port, oos_start)
+    results["CVR"] = {
+        "portfolio": cvr_oos,
+        "metrics": compute_performance(cvr_oos, "CVR"),
+    }
+
     return results
 
 
@@ -507,7 +584,7 @@ def print_performance_table(results):
           f"{'Cum.Ret':>10s} {'MaxDD':>8s} {'t-stat':>8s} {'Months':>7s} {'Avg TC':>8s}")
     print("-" * 83)
 
-    for name in ["MOM", "XGB", "RET", "SRP"]:
+    for name in ["MOM", "XGB", "RET", "SRP", "CVR"]:
         if name not in results or not results[name]["metrics"]:
             print(f"{name:<10s} {'N/A':>10s}")
             continue

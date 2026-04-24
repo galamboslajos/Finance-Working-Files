@@ -127,6 +127,10 @@ COUNTRY_CURRENCY = {
 # ═══ RECLASSIFICATION — Section 3.3.2 ═════════════════
 CLASS_RETURN_LOOKBACK_YEARS = 10  # "sample analogue over the past ten years"
 
+# CVR score (extension, not in paper): E[r] / |CVaR_alpha(r)| from the
+# predicted class distribution. Alpha is the tail mass used for CVaR.
+CVAR_ALPHA = 0.10
+
 # ═══ PATHS ═════════════════════════════════════════════
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(PROJECT_DIR, "data")
