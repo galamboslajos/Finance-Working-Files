@@ -1,7 +1,13 @@
-data/
 cache/
 results/
-.env
 __pycache__/
 *.pyc
 .DS_Store
+.env
+
+# Norgate raw exports — single-user license, do NOT commit
+norgate_exports/
+norgate_exports.zip
+
+# Legacy FMP-era stash kept locally for reference; don't push
+_legacy/

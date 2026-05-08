@@ -1,465 +1,309 @@
 """
-Deep Momentum — Step 4: Model
-XGBoost multiclass classifier + 100x ensemble + RET reclassification.
+Deep Momentum — Step 5: XGBoost walk-forward training & prediction.
 
-Paper reference: Sections 3.3.1, 3.3.2, 3.3.3
+Reads:
+  cache/ca_features_monthly.parquet   (output of features.py)
 
-Training procedure (Section 3.3.3):
-- Require at least 10 years of data before first prediction
-- Retrain every year, accumulating the sample
-- 80/20 random train/val split (NOT chronological — paper is explicit about this)
-- Train 100 times per training month, average predicted probabilities
-- XGBoost with default hyperparameters, only early stopping
+Writes:
+  cache/ca_predictions_monthly.parquet
 
-Prediction (Section 3.3.1):
-- XGBoost multiclass classifier: objective = multi:softprob, 10 classes
-- Output: P(class=k) for k=1..10 for each stock
+Paper-faithful walk-forward (Section 3.3.3):
+  - Require at least MIN_TRAIN_YEARS (10) of history before first prediction
+  - Retrain every RETRAIN_FREQUENCY (12) months, accumulating the sample
+  - Train N_ENSEMBLE (100) times per training date with different random
+    80/20 train/val splits; average predicted probabilities
+  - XGBoost with default hyperparameters except early stopping
 
-Reclassification (Section 3.3.2):
-- XGB (naive): classify into mode class (highest probability)
-- RET: compute expected return = sum(P(class=k) * mu_k) where mu_k is
-  the average historical return of class k over the past 10 years
-- SRP: compute Sharpe ratio from predicted distribution
+Reclassifications (Section 3.3.2 + extension):
+  XGB    = mode class of predicted probability distribution
+  RET    = E[r] = Σ p_k · μ_k         where μ_k is past-10y mean of class k
+  SRP    = E[r] / σ_r  using law of total variance
+  CVR    = E[r] / |CVaR_α|            (extension; α = 10%)
+
+All operates on the new schema: assetid as the row key, date_mt / LABEL_mt /
+fwd_return_mt with `_mt` suffixes. Uses the canonical 16-feature list from
+features.get_feature_columns().
 """
+
+import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 
-from config import (
-    N_CLASSES, N_ENSEMBLE, TRAIN_VAL_RATIO,
-    MIN_TRAIN_YEARS, RETRAIN_FREQUENCY,
-    CLASS_RETURN_LOOKBACK_YEARS,
-    CVAR_ALPHA,
+from features import get_feature_columns
+
+
+PROJECT_DIR = Path(__file__).resolve().parent
+CACHE_DIR   = PROJECT_DIR / "cache"
+
+FEATURES_PATH    = CACHE_DIR / "ca_features_monthly.parquet"
+PREDICTIONS_PATH = CACHE_DIR / "ca_predictions_monthly.parquet"
+
+# Paper hyperparameters (Section 3.3)
+N_CLASSES                  = 10
+MIN_TRAIN_YEARS            = 10
+N_ENSEMBLE                 = 100
+TRAIN_VAL_RATIO            = 0.8
+RETRAIN_FREQUENCY          = 12   # months
+CLASS_RETURN_LOOKBACK_YEARS = 10
+CVAR_ALPHA                 = 0.10  # extension (CVR)
+
+XGB_PARAMS = dict(
+    objective="multi:softprob",
+    num_class=N_CLASSES,
+    eval_metric="mlogloss",
+    verbosity=0,
+    n_estimators=10000,
+    early_stopping_rounds=50,
 )
 
 
+# ─── Training primitives ─────────────────────────────────────────────────────
+
 def train_single_xgb(X_train, y_train, X_val, y_val, random_state=0):
-    """
-    Train one XGBoost classifier.
-
-    Paper: "XGBoost is trained using its default hyperparameters,
-    except for early stopping"
-    """
-    model = xgb.XGBClassifier(
-        objective="multi:softprob",
-        num_class=N_CLASSES,
-        eval_metric="mlogloss",
-        verbosity=0,
-        n_estimators=10000,
-        early_stopping_rounds=50,
-        random_state=random_state,
-        use_label_encoder=False,
-    )
-
-    model.fit(
-        X_train, y_train,
-        eval_set=[(X_val, y_val)],
-        verbose=False,
-    )
-
+    """One XGBoost fit with early stopping on the validation set."""
+    model = xgb.XGBClassifier(random_state=random_state, **XGB_PARAMS)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
     return model
 
 
 def train_ensemble(X, y, n_ensemble=N_ENSEMBLE):
     """
-    Paper Section 3.3.3:
-    "we train the algorithm 100 times in each training month and use the
-    average probabilities as the final predicted probabilities"
-
-    "The training sample is randomly split into a training set and a
-    validation set in a ratio of 8:2"
-
-    Each of the 100 trainings uses a different random split.
+    100 fits with different random 80/20 train/val splits (paper-faithful).
+    Returns list of fitted models.
     """
     models = []
-
     for i in range(n_ensemble):
-        X_train, X_val, y_train, y_val = train_test_split(
-            X, y,
-            test_size=1 - TRAIN_VAL_RATIO,
-            random_state=i,  # different split each time
+        X_tr, X_val, y_tr, y_val = train_test_split(
+            X, y, test_size=1 - TRAIN_VAL_RATIO, random_state=i
         )
-
-        # Only vary the data split (random_state=i above), keep XGBoost
-        # tree internals fixed. Paper only mentions randomizing the split.
-        model = train_single_xgb(X_train, y_train, X_val, y_val, random_state=0)
-        models.append(model)
-
+        models.append(train_single_xgb(X_tr, y_tr, X_val, y_val, random_state=0))
     return models
 
 
 def predict_ensemble(models, X):
     """
-    Average predicted probabilities across all ensemble members.
-    Returns: array of shape (n_samples, N_CLASSES)
-
-    Note: if training data didn't contain all N_CLASSES,
-    XGBoost only outputs columns for seen classes. We pad to N_CLASSES.
+    Average probabilities across ensemble. Pads to N_CLASSES if a sub-fit
+    saw fewer classes (small training samples can hit this).
     """
-    all_probs = []
-    for model in models:
-        probs = model.predict_proba(X)
+    probs_stack = []
+    for m in models:
+        p = m.predict_proba(X)
+        if p.shape[1] < N_CLASSES:
+            padded = np.zeros((p.shape[0], N_CLASSES))
+            for j, c in enumerate(m.classes_):
+                padded[:, int(c)] = p[:, j]
+            p = padded
+        probs_stack.append(p)
+    return np.mean(probs_stack, axis=0)
 
-        # Pad to N_CLASSES if needed (small samples may not have all classes)
-        if probs.shape[1] < N_CLASSES:
-            padded = np.zeros((probs.shape[0], N_CLASSES))
-            seen_classes = model.classes_
-            for i, c in enumerate(seen_classes):
-                padded[:, int(c)] = probs[:, i]
-            probs = padded
 
-        all_probs.append(probs)
-
-    avg_probs = np.mean(all_probs, axis=0)
-    return avg_probs
-
+# ─── Reclassification ────────────────────────────────────────────────────────
 
 def naive_classify(probs):
+    """XGB strategy — mode class. Returns 1..N_CLASSES."""
+    return np.argmax(probs, axis=1) + 1
+
+
+def compute_class_stats(df, date, lookback_years=CLASS_RETURN_LOOKBACK_YEARS):
     """
-    XGB strategy (naive): assign each stock to its mode class.
-    Returns class labels (1-10).
-    """
-    return np.argmax(probs, axis=1) + 1  # +1 because classes are 1-indexed
-
-
-def compute_class_returns(df, date, lookback_years=CLASS_RETURN_LOOKBACK_YEARS):
-    """
-    Paper Section 3.3.2 (RET method):
-    "The return of class k is defined as the average return of the stocks
-    belonging to the class, and the estimate of mu_k is their time-series
-    average over the past ten years."
-
-    For each class k (1-10), compute the average monthly return of stocks
-    that were assigned to class k, averaged over the past 10 years.
-
-    Args:
-        df: DataFrame with 'date', 'LABEL', 'return' columns
-        date: current date (compute lookback from here)
-        lookback_years: number of years to look back (default 10)
-
-    Returns:
-        dict {class_k: mean_return} for k=1..N_CLASSES
+    Past-10y per-class mean and std of fwd_return, by LABEL_mt.
+    Strictly past data: only rows with date_mt < `date`.
     """
     cutoff = date - pd.DateOffset(years=lookback_years)
-    hist = df[(df["date"] >= cutoff) & (df["date"] < date)]
+    hist = df[(df["date_mt"] >= cutoff) & (df["date_mt"] < date)]
 
-    class_returns = {}
+    mu = {}
+    sigma = {}
     for k in range(1, N_CLASSES + 1):
-        # LABEL is assigned based on fwd_return (next month's return).
-        # mu_k = average forward return of stocks in class k.
-        col = "fwd_return" if "fwd_return" in hist.columns else "return"
-        class_data = hist[hist["LABEL"] == k][col]
-        if len(class_data) > 0:
-            class_returns[k] = class_data.mean()
-        else:
-            class_returns[k] = 0.0
-
-    return class_returns
+        cls = hist.loc[hist["LABEL_mt"] == k, "fwd_return_mt"].dropna()
+        mu[k]    = cls.mean() if len(cls) > 0 else 0.0
+        sigma[k] = cls.std()  if len(cls) > 1 else 0.01
+    return mu, sigma
 
 
-def reclassify_ret(probs, class_returns):
+def reclassify_ret(probs, mu_dict):
+    mu = np.array([mu_dict.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
+    return probs @ mu
+
+
+def reclassify_srp(probs, mu_dict, sigma_dict):
+    mu    = np.array([mu_dict.get(k, 0.0)    for k in range(1, N_CLASSES + 1)])
+    sigma = np.array([sigma_dict.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
+    e_r = probs @ mu
+    var = probs @ (sigma**2 + mu**2) - e_r**2
+    var = np.maximum(var, 1e-10)
+    return e_r / np.sqrt(var)
+
+
+def reclassify_cvr(probs, mu_dict, alpha=CVAR_ALPHA):
     """
-    Paper Section 3.3.2 (RET — Reclassification on expected return):
-    mu_i = sum_{k=1}^{10} P(class=k) * mu_k
-
-    Args:
-        probs: array (n_samples, N_CLASSES) — predicted probabilities
-        class_returns: dict {k: mu_k} for k=1..N_CLASSES
-
-    Returns:
-        array of expected returns, shape (n_samples,)
+    Return-over-CVaR score (extension):
+        score_i = E[r_i] / |CVaR_α(r_i)|
+    where CVaR is computed from the predicted discrete distribution.
     """
-    mu = np.array([class_returns.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
-    expected_returns = probs @ mu
-    return expected_returns
-
-
-def reclassify_cvr(probs, class_returns, alpha=CVAR_ALPHA):
-    """
-    CVR (extension, not in paper) — return-over-CVaR score.
-
-    score_i = E[r_i] / |CVaR_alpha(r_i)|
-
-    CVaR_alpha computed from the predicted discrete distribution:
-    accumulate probability from class 1 (lowest mu_k) upward until the
-    cumulative probability reaches alpha; CVaR is the probability-weighted
-    mean of those classes (normalised by alpha).
-
-    Higher positive score = attractive long (high E[r] per unit tail risk).
-    Lowest score = attractive short.
-
-    Assumes classes 1..N_CLASSES are ordered low-to-high in mu_k, which holds
-    because LABEL assignment uses ascending deciles of realised fwd_return.
-    """
-    mu = np.array([class_returns.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
-    expected_returns = probs @ mu
-
-    # Partial-inclusion CVaR: for each class k, include min(p_k, alpha - cum_prev)
-    # of its probability mass; normalize sum-of-contributions by alpha.
+    mu = np.array([mu_dict.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
+    e_r = probs @ mu
     cumprob = np.cumsum(probs, axis=1)
     cum_prev = np.concatenate(
         [np.zeros((probs.shape[0], 1)), cumprob[:, :-1]], axis=1
     )
     included = np.minimum(probs, np.maximum(alpha - cum_prev, 0.0))
     cvar = (included * mu[None, :]).sum(axis=1) / alpha
-
-    eps = 1e-6
-    return expected_returns / (np.abs(cvar) + eps)
+    return e_r / (np.abs(cvar) + 1e-6)
 
 
-def reclassify_srp(probs, class_returns, class_stds):
+# ─── Walk-forward orchestration ──────────────────────────────────────────────
+
+def get_training_schedule(df):
     """
-    Paper Section 3.3.2 (SRP — Reclassification on Sharpe ratio):
-    sigma_i^2 = sum P(k) * (sigma_k^2 + mu_k^2) - mu_i^2
-    SRP_i = mu_i / sigma_i
-
-    Args:
-        probs: array (n_samples, N_CLASSES)
-        class_returns: dict {k: mu_k}
-        class_stds: dict {k: sigma_k}
-
-    Returns:
-        array of Sharpe ratios, shape (n_samples,)
+    First train = first_date + 10 years. Retrain every 12 months thereafter.
+    Returns list of dicts: {train_date, train_idx, predict_months}.
     """
-    mu = np.array([class_returns.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
-    sigma = np.array([class_stds.get(k, 0.0) for k in range(1, N_CLASSES + 1)])
+    months = sorted(df["date_mt"].dt.to_period("M").unique())
+    if not months:
+        return [], months
 
-    expected_returns = probs @ mu
-    variance = probs @ (sigma**2 + mu**2) - expected_returns**2
-    variance = np.maximum(variance, 1e-10)  # avoid division by zero
-    sharpe = expected_returns / np.sqrt(variance)
-
-    return sharpe
-
-
-def compute_class_stds(df, date, lookback_years=CLASS_RETURN_LOOKBACK_YEARS):
-    """
-    Compute standard deviation of returns per class over lookback window.
-    Used for SRP reclassification.
-    """
-    cutoff = date - pd.DateOffset(years=lookback_years)
-    hist = df[(df["date"] >= cutoff) & (df["date"] < date)]
-
-    class_stds = {}
-    for k in range(1, N_CLASSES + 1):
-        col = "fwd_return" if "fwd_return" in hist.columns else "return"
-        class_data = hist[hist["LABEL"] == k][col]
-        if len(class_data) > 1:
-            class_stds[k] = class_data.std()
-        else:
-            class_stds[k] = 0.01  # small default
-
-    return class_stds
-
-
-def get_training_months(df):
-    """
-    Paper Section 3.3.3:
-    "We require at least ten years of data to train XGBoost and retrain
-    the algorithm every year"
-
-    Returns list of (train_date, predict_months) tuples.
-    train_date: the month when the model is trained
-    predict_months: list of months to predict using this model (up to 12)
-    """
-    dates = sorted(df["date"].unique())
-    first_date = pd.Timestamp(dates[0])
-
-    # First training date: 10 years after first data
+    first_date  = pd.Timestamp(months[0].to_timestamp())
     first_train = first_date + pd.DateOffset(years=MIN_TRAIN_YEARS)
 
-    # Get all unique year-months
-    all_months = sorted(df["date"].dt.to_period("M").unique())
-
-    # Find training months (January of each year, starting from first eligible)
-    training_schedule = []
-    current_train_idx = None
-
-    for i, ym in enumerate(all_months):
-        month_date = ym.to_timestamp()
-        if month_date < first_train:
+    schedule = []
+    cur_idx = None
+    for i, ym in enumerate(months):
+        d = ym.to_timestamp()
+        if d < first_train:
             continue
+        if cur_idx is None or i - cur_idx >= RETRAIN_FREQUENCY:
+            cur_idx = i
+            schedule.append({"train_date": d, "train_idx": i})
 
-        if current_train_idx is None:
-            # First training
-            current_train_idx = i
-            training_schedule.append({
-                "train_date": month_date,
-                "train_idx": i,
-            })
-        elif i - current_train_idx >= RETRAIN_FREQUENCY:
-            # Retrain every 12 months
-            current_train_idx = i
-            training_schedule.append({
-                "train_date": month_date,
-                "train_idx": i,
-            })
-
-    # Assign prediction months to each training
-    for j, sched in enumerate(training_schedule):
-        if j + 1 < len(training_schedule):
-            next_train_idx = training_schedule[j + 1]["train_idx"]
-        else:
-            next_train_idx = len(all_months)
-
-        sched["predict_months"] = all_months[sched["train_idx"]:next_train_idx]
-
-    return training_schedule, all_months
+    for j, sched in enumerate(schedule):
+        next_idx = schedule[j + 1]["train_idx"] if j + 1 < len(schedule) else len(months)
+        sched["predict_months"] = months[sched["train_idx"]:next_idx]
+    return schedule, months
 
 
-def run_walk_forward(df, feature_cols, n_ensemble=N_ENSEMBLE, verbose=True):
+def run_walk_forward(df: pd.DataFrame, feature_cols: list[str] | None = None,
+                     n_ensemble: int = N_ENSEMBLE, verbose: bool = True) -> pd.DataFrame:
     """
-    Full walk-forward procedure for one country.
-
-    Paper Section 3.3.3:
-    - Train with all data up to training date (accumulating)
-    - Retrain every year
-    - Predict monthly using latest model
-    - 100x ensemble, average probabilities
-
-    Returns DataFrame with predictions:
-    - symbol, date, probs (P(k) for each class), xgb_class, ret_score, srp_score
+    Full walk-forward over the panel. One model trained per year, predicts the
+    next 12 months. Returns predictions DataFrame with all four scores
+    (xgb_class, ret_score, srp_score, cvr_score) plus per-class probs.
     """
-    training_schedule, all_months = get_training_months(df)
+    if feature_cols is None:
+        feature_cols = get_feature_columns()
 
-    if not training_schedule:
-        print("    No training months found (not enough history)")
+    schedule, all_months = get_training_schedule(df)
+    if not schedule:
+        print("    No training months found (insufficient history).")
         return pd.DataFrame()
 
     if verbose:
-        print(f"    Training schedule: {len(training_schedule)} retrainings")
-        print(f"    First train: {training_schedule[0]['train_date'].date()}")
-        print(f"    Last train: {training_schedule[-1]['train_date'].date()}")
+        print(f"    Training schedule: {len(schedule)} retrainings")
+        print(f"    First train: {schedule[0]['train_date'].date()}")
+        print(f"    Last train:  {schedule[-1]['train_date'].date()}")
 
-    all_predictions = []
+    rows = []
+    t0 = time.time()
 
-    for sched in training_schedule:
+    for sched in schedule:
         train_date = sched["train_date"]
         predict_months = sched["predict_months"]
 
         if verbose:
-            print(f"    Training at {train_date.date()}, "
-                  f"predicting {len(predict_months)} months...")
+            print(f"    Training at {train_date.date()}, predicting {len(predict_months)} months...")
 
-        # Training data: all data up to (and including) training date
-        train_mask = df["date"] <= train_date
-        train_df = df[train_mask].copy()
-
-        # Must have complete features and label
-        train_complete = train_df[feature_cols + ["LABEL"]].dropna()
-        train_idx = train_complete.index
-
-        if len(train_idx) < 100:
+        # Training rows: everything up to and including the train_date
+        mask_train = df["date_mt"] <= train_date
+        sub = df.loc[mask_train, feature_cols + ["LABEL_mt"]].dropna()
+        if len(sub) < 100:
             if verbose:
-                print(f"      Skipping: only {len(train_idx)} training samples")
+                print(f"      skip: only {len(sub)} complete training rows")
             continue
 
-        X_train = train_df.loc[train_idx, feature_cols].values
-        y_train = train_df.loc[train_idx, "LABEL"].values.astype(int) - 1  # 0-indexed for XGBoost
+        X_train = sub[feature_cols].values
+        y_train = sub["LABEL_mt"].astype(int).values - 1  # 0-indexed for XGBoost
 
-        # Train ensemble
         models = train_ensemble(X_train, y_train, n_ensemble=n_ensemble)
 
-        # Compute class returns and stds for RET/SRP reclassification
-        class_returns = compute_class_returns(df, train_date)
-        class_stds = compute_class_stds(df, train_date)
+        # Past-10y class stats — used by RET / SRP / CVR
+        mu_dict, sigma_dict = compute_class_stats(df, train_date)
 
-        # Predict for each month in the prediction window
+        # Predict month-by-month over the prediction window
         for ym in predict_months:
-            month_date = ym.to_timestamp()
-            month_mask = df["date"].dt.to_period("M") == ym
-            month_df = df[month_mask].copy()
-
-            if month_df.empty:
+            month_d = ym.to_timestamp()
+            month_mask = df["date_mt"].dt.to_period("M") == ym
+            month = df.loc[month_mask].copy()
+            if month.empty:
                 continue
 
-            # Complete features for prediction
-            pred_complete = month_df[feature_cols].dropna()
-            if pred_complete.empty:
+            valid = month[feature_cols].dropna()
+            if valid.empty:
                 continue
+            pred_idx = valid.index
 
-            pred_idx = pred_complete.index
-            X_pred = month_df.loc[pred_idx, feature_cols].values
-
-            # Predict probabilities (ensemble average)
+            X_pred = month.loc[pred_idx, feature_cols].values
             probs = predict_ensemble(models, X_pred)
 
-            # Naive classification
             xgb_class = naive_classify(probs)
+            ret_score = reclassify_ret(probs, mu_dict)
+            srp_score = reclassify_srp(probs, mu_dict, sigma_dict)
+            cvr_score = reclassify_cvr(probs, mu_dict)
 
-            # RET reclassification
-            ret_score = reclassify_ret(probs, class_returns)
-
-            # SRP reclassification
-            srp_score = reclassify_srp(probs, class_returns, class_stds)
-
-            # CVR reclassification (return-over-CVaR, extension)
-            cvr_score = reclassify_cvr(probs, class_returns)
-
-            # Store results
             for i, idx in enumerate(pred_idx):
-                row = {
-                    "symbol": month_df.loc[idx, "symbol"],
-                    "date": month_df.loc[idx, "date"],
-                    "fwd_return": month_df.loc[idx, "fwd_return"]
-                        if "fwd_return" in month_df.columns else np.nan,
-                    "xgb_class": int(xgb_class[i]),
-                    "ret_score": ret_score[i],
-                    "srp_score": srp_score[i],
-                    "cvr_score": cvr_score[i],
+                rec = {
+                    "assetid":      int(month.loc[idx, "assetid"]),
+                    "symbol":       month.loc[idx, "symbol"],
+                    "date_mt":      month.loc[idx, "date_mt"],
+                    "fwd_return_mt": month.loc[idx, "fwd_return_mt"]
+                                     if "fwd_return_mt" in month.columns else np.nan,
+                    "xgb_class":    int(xgb_class[i]),
+                    "ret_score":    float(ret_score[i]),
+                    "srp_score":    float(srp_score[i]),
+                    "cvr_score":    float(cvr_score[i]),
                 }
-                # Store individual class probabilities
                 for k in range(N_CLASSES):
-                    row[f"prob_{k+1}"] = probs[i, k]
+                    rec[f"prob_{k+1}"] = float(probs[i, k])
+                rows.append(rec)
 
-                all_predictions.append(row)
+        if verbose:
+            print(f"      done — elapsed {time.time()-t0:.0f}s")
 
-    if not all_predictions:
+    if not rows:
         return pd.DataFrame()
 
-    result = pd.DataFrame(all_predictions)
-    result["date"] = pd.to_datetime(result["date"])
-
+    out = pd.DataFrame(rows).sort_values(["assetid", "date_mt"]).reset_index(drop=True)
+    out["date_mt"] = pd.to_datetime(out["date_mt"])
     if verbose:
-        print(f"    Total predictions: {len(result)}")
-        print(f"    Date range: {result['date'].min().date()} to {result['date'].max().date()}")
+        print(f"    Total predictions: {len(out):,}")
+        print(f"    Date range:        {out['date_mt'].min().date()} → "
+              f"{out['date_mt'].max().date()}")
+    return out
 
-    return result
 
+# ─── Main ────────────────────────────────────────────────────────────────────
 
-# ═══════════════════════════════════════════════════════
 if __name__ == "__main__":
-    from pathlib import Path
-    from config import CACHE_DIR, COUNTRIES
-    from features import build_features
+    print("=" * 70)
+    print("Walk-forward training")
+    print("=" * 70)
 
-    cache_dir = Path(CACHE_DIR)
+    if not FEATURES_PATH.exists():
+        raise FileNotFoundError(f"Missing {FEATURES_PATH}. Run features.py first.")
 
-    # Test on Canada with small ensemble for speed
-    suffix = "TO"
-    _, country_name, _, _ = COUNTRIES[suffix]
+    t0 = time.time()
+    feat = pd.read_parquet(FEATURES_PATH)
+    print(f"  Loaded {FEATURES_PATH.name} in {time.time()-t0:.0f}s "
+          f"({len(feat):,} rows)")
 
-    filtered_path = cache_dir / f"filtered_{suffix}.parquet"
-    if not filtered_path.exists():
-        print(f"No filtered data for {suffix}. Run data_filter.py first.")
-    else:
-        df = pd.read_parquet(filtered_path)
-        df, feature_cols = build_features(df, country_name)
+    preds = run_walk_forward(feat, n_ensemble=N_ENSEMBLE, verbose=True)
 
-        print(f"\n  Running walk-forward for {country_name} (test: 5 ensemble members)...")
-        predictions = run_walk_forward(
-            df, feature_cols,
-            n_ensemble=5,  # small for testing
-            verbose=True,
-        )
+    print(f"\nWriting {PREDICTIONS_PATH}...")
+    preds.to_parquet(PREDICTIONS_PATH, index=False, compression="snappy")
+    size_mb = PREDICTIONS_PATH.stat().st_size / (1024 * 1024)
+    print(f"  wrote {size_mb:.0f} MB")
 
-        if not predictions.empty:
-            out_path = cache_dir / f"predictions_{suffix}.parquet"
-            predictions.to_parquet(out_path, index=False)
-            print(f"\n  Saved: {out_path}")
-
-            print(f"\n  --- Sample predictions ---")
-            print(predictions[["symbol", "date", "xgb_class", "ret_score",
-                             "srp_score", "fwd_return"]].tail(10).to_string(index=False))
+    print(f"\nTotal runtime: {time.time()-t0:.0f}s")

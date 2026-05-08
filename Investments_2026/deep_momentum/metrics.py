@@ -1,321 +1,212 @@
 """
-Deep Momentum — Step 6: Metrics
-Bimodality measure, crash rate, classification accuracy, and reporting.
+Deep Momentum — Metrics & diagnostics.
 
-Paper reference: Sections 3.2, 4.1, 4.2.1
+Paper reference: Sections 3.2, 4.1, 4.2.1.
 
-Bimodality measure (Section 3.2):
-- HH = precision of predicted winners - 0.1
-- HL = proportion of actual losers among predicted winners - 0.1
-- LL = precision of predicted losers - 0.1
-- LH = proportion of actual winners among predicted losers - 0.1
-- BM = -(HH - HL + LL - LH) / 2
+Functions:
+  compute_confusion_matrix(predictions)
+        10x10 matrix of (predicted class, actual class) counts over the full
+        OOS cross-section. Replaces the per-strategy P&L view: this measures
+        the model's classification quality before any 15L/15S selection is
+        applied — i.e., the paper's Section 4.2.1 numbers.
 
-Crash rate (Section 4.1):
-- Number of years where max drawdown > 20%, divided by total years
-- Calculated 12 times shifting by one month, averaged
+  compute_classification_accuracy(predictions)
+        Overall accuracy, per-class precision and recall, and the share of
+        predictions falling in each class. Same paper convention.
 
-Classification accuracy (Section 4.2.1):
-- Overall accuracy = correct predictions / total
-- Precision, recall per class
+  compute_bimodality(...)
+        Section 3.2 / Table 2: HH, HL, LL, LH, BM measure of how much past
+        winners/losers oscillate into the OPPOSITE future class.
+
+  compute_crash_rate(portfolio_df, dd_threshold=0.20)
+        Section 4.1: fraction of years where MDD > 20%, averaged over 12
+        starting-month shifts.
+
+All functions assume the new schema:
+  predictions: assetid, date_mt, xgb_class, fwd_return_mt, prob_1..prob_10
+  features:    assetid, date_mt, fwd_return_mt, LABEL_mt
+  portfolio:   date_mt, ls_ret
 """
 
-import pandas as pd
 import numpy as np
-from config import N_CLASSES
+import pandas as pd
+
+N_CLASSES = 10  # paper's number of return-class deciles
 
 
-def compute_bimodality(predictions_df, actual_col="fwd_return", pred_col="xgb_class"):
+# ─── Confusion matrix (paper Section 4.2.1) ──────────────────────────────────
+
+def compute_confusion_matrix(predictions: pd.DataFrame,
+                              pred_col: str = "xgb_class",
+                              actual_col: str = "LABEL_mt") -> pd.DataFrame:
     """
-    Paper Section 3.2, Equations (1)-(5):
+    10x10 confusion matrix of (predicted class, actual class) counts.
 
-    Stocks are classified based on their PAST return (momentum) into
-    winners (top decile) and losers (bottom decile). Then we check
-    where they end up in FUTURE return deciles.
+    NOTE: this is computed across ALL stock-months in the OOS predictions
+    panel, NOT just the 15L/15S strategy picks. It tells you how well the
+    XGBoost classifier separates the 10 future-return deciles overall.
 
-    HH = TP / (TP + FP) - 0.1  (precision of winners)
-    HL = FP / (TP + FP) - 0.1  (losers among predicted winners)
-    LL = TN / (TN + FN) - 0.1  (precision of losers)
-    LH = FN / (TN + FN) - 0.1  (winners among predicted losers)
+    The diagonal entries (predicted == actual) are correct calls. Random
+    baseline = 1/10 = 10% per cell. The strategy's L/S P&L only depends on
+    the corner cells (1,1) and (10,10), but the full matrix tells you whether
+    the classifier is genuinely discriminating across the whole distribution
+    or just lucky on the extremes.
+    """
+    df = predictions.dropna(subset=[pred_col, actual_col]).copy()
+    if df.empty:
+        return pd.DataFrame()
 
+    df[pred_col]   = df[pred_col].astype(int)
+    df[actual_col] = df[actual_col].astype(int)
+
+    cm = pd.crosstab(df[pred_col], df[actual_col],
+                      rownames=["predicted"], colnames=["actual"],
+                      dropna=False)
+    # Force the 10x10 grid even if some classes have no observations
+    cm = cm.reindex(index=range(1, N_CLASSES + 1),
+                     columns=range(1, N_CLASSES + 1),
+                     fill_value=0)
+    return cm
+
+
+def compute_classification_accuracy(predictions: pd.DataFrame,
+                                     pred_col: str = "xgb_class",
+                                     actual_col: str = "LABEL_mt") -> dict:
+    """
+    Per-class precision and recall + overall accuracy. Paper Section 4.2.1.
+
+    Precision_k = P(actual == k | predicted == k)   — out of stocks the model
+                                                       called class k, what
+                                                       fraction were really k?
+    Recall_k    = P(predicted == k | actual == k)   — out of stocks that ARE
+                                                       class k, what fraction
+                                                       did the model catch?
+    Random baseline = 0.10 for both (1/10 classes).
+    """
+    cm = compute_confusion_matrix(predictions, pred_col, actual_col)
+    if cm.empty:
+        return {}
+
+    total = cm.values.sum()
+    correct = np.trace(cm.values)
+    accuracy = correct / total if total > 0 else 0.0
+
+    precision = {}
+    recall = {}
+    pred_share = {}
+    for k in range(1, N_CLASSES + 1):
+        col_pred_k = cm.loc[k, :].sum()        # how many we predicted as k
+        row_actual_k = cm.loc[:, k].sum()       # how many were actually k
+        tp = cm.loc[k, k]
+        precision[k] = tp / col_pred_k if col_pred_k > 0 else 0.0
+        recall[k]    = tp / row_actual_k if row_actual_k > 0 else 0.0
+        pred_share[k] = col_pred_k / total if total > 0 else 0.0
+
+    return {
+        "accuracy":   accuracy,
+        "precision":  precision,           # dict {k: prec_k}
+        "recall":     recall,              # dict {k: recall_k}
+        "pred_share": pred_share,          # dict {k: share predicted as k}
+        "n_obs":      int(total),
+        # Paper-style summary aliases for H = class N_CLASSES, L = class 1
+        "precision_H": precision[N_CLASSES],
+        "precision_L": precision[1],
+        "recall_H":    recall[N_CLASSES],
+        "recall_L":    recall[1],
+        "pred_ratio_H": pred_share[N_CLASSES],
+        "pred_ratio_L": pred_share[1],
+    }
+
+
+def print_confusion_matrix(cm: pd.DataFrame, normalize: bool = False) -> None:
+    """Pretty-print the 10x10 matrix. If normalize=True, divide each row by its sum."""
+    if cm.empty:
+        print("(empty)")
+        return
+    if normalize:
+        m = cm.div(cm.sum(axis=1).replace(0, 1), axis=0)
+        fmt = lambda v: f"{v:>6.1%}"
+    else:
+        m = cm
+        fmt = lambda v: f"{v:>6d}"
+
+    header = "pred\\actual"
+    print(f"{header:<13s}" + "".join(f"{c:>7d}" for c in m.columns))
+    for r in m.index:
+        print(f"{r:>13d}" + "".join(fmt(m.loc[r, c]) for c in m.columns))
+
+
+# ─── Bimodality (paper Section 3.2 / Eq. 1-5) ────────────────────────────────
+
+def compute_bimodality(panel: pd.DataFrame,
+                        pred_col: str = "xgb_class",
+                        actual_col: str = "LABEL_mt") -> dict:
+    """
+    Cross-sectional bimodality of past winners / losers.
+
+    HH = TP / (TP + FP) - 0.1     precision of predicted winners
+    HL = FP / (TP + FP) - 0.1     fraction of predicted winners who were losers
+    LL = TN / (TN + FN) - 0.1     precision of predicted losers
+    LH = FN / (TN + FN) - 0.1     fraction of predicted losers who were winners
     BM = -(HH - HL + LL - LH) / 2
 
-    Here "positive" = winners (H), "negative" = losers (L)
-    TP = predicted winner, actually winner
-    FP = predicted winner, actually loser
-    TN = predicted loser, actually loser
-    FN = predicted loser, actually winner
+    Higher BM (less negative) = more bimodality (winners reverse, losers reverse).
     """
-    df = predictions_df.copy()
-    df = df.dropna(subset=[actual_col])
-
+    df = panel.dropna(subset=[pred_col, actual_col]).copy()
     if df.empty:
         return {}
 
-    results = []
-
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if len(group) < N_CLASSES:
+    rows = []
+    for ym, grp in df.groupby(df["date_mt"].dt.to_period("M")):
+        if len(grp) < N_CLASSES:
             continue
-
-        # Actual future return deciles
-        group = group.copy()
-        group["actual_decile"] = pd.qcut(
-            group[actual_col], q=N_CLASSES, labels=False, duplicates="drop"
-        ) + 1
-
-        # Predicted class (momentum-based for MOM, or xgb_class for ML)
-        pred_winners = group[group[pred_col] == N_CLASSES]
-        pred_losers = group[group[pred_col] == 1]
-
-        if pred_winners.empty or pred_losers.empty:
+        pred_w = grp[grp[pred_col] == N_CLASSES]
+        pred_l = grp[grp[pred_col] == 1]
+        if pred_w.empty or pred_l.empty:
             continue
-
-        # Among predicted winners: how many are actual winners (H) vs losers (L)?
-        tp = (pred_winners["actual_decile"] == N_CLASSES).sum()
-        fp = (pred_winners["actual_decile"] == 1).sum()
-        n_pred_winners = len(pred_winners)
-
-        # Among predicted losers: how many are actual losers (L) vs winners (H)?
-        tn = (pred_losers["actual_decile"] == 1).sum()
-        fn = (pred_losers["actual_decile"] == N_CLASSES).sum()
-        n_pred_losers = len(pred_losers)
-
-        if n_pred_winners == 0 or n_pred_losers == 0:
+        tp = (pred_w[actual_col] == N_CLASSES).sum()
+        fp = (pred_w[actual_col] == 1).sum()
+        tn = (pred_l[actual_col] == 1).sum()
+        fn = (pred_l[actual_col] == N_CLASSES).sum()
+        n_w, n_l = len(pred_w), len(pred_l)
+        if n_w == 0 or n_l == 0:
             continue
-
-        hh = tp / n_pred_winners - 0.1
-        hl = fp / n_pred_winners - 0.1
-        ll = tn / n_pred_losers - 0.1
-        lh = fn / n_pred_losers - 0.1
-
+        hh, hl = tp / n_w - 0.1, fp / n_w - 0.1
+        ll, lh = tn / n_l - 0.1, fn / n_l - 0.1
         bm = -((hh - hl) + (ll - lh)) / 2
+        rows.append({"HH": hh, "HL": hl, "LL": ll, "LH": lh, "BM": bm})
 
-        results.append({
-            "date": group["date"].iloc[0],
-            "HH": hh, "HL": hl, "LL": ll, "LH": lh, "BM": bm,
-        })
-
-    if not results:
+    if not rows:
         return {}
-
-    res_df = pd.DataFrame(results)
-    return {
-        "HH": res_df["HH"].mean(),
-        "HL": res_df["HL"].mean(),
-        "LL": res_df["LL"].mean(),
-        "LH": res_df["LH"].mean(),
-        "BM": res_df["BM"].mean(),
-    }
+    res = pd.DataFrame(rows).mean()
+    return res.to_dict()
 
 
-def compute_crash_rate(portfolio_df, dd_threshold=0.20):
-    """
-    Paper Section 4.1:
-    "The crash rate is defined as the number of years in which the maximum
-    drawdown (MDD) exceeds 20%, divided by the total number of years in
-    the sample. Since the return could fall more than 20% across two years,
-    the crash rate is calculated twelve times, shifting the sample by a month,
-    and the average is reported."
-    """
+# ─── Crash rate (paper Section 4.1) ──────────────────────────────────────────
+
+def compute_crash_rate(portfolio_df: pd.DataFrame,
+                       dd_threshold: float = 0.20,
+                       date_col: str = "date_mt",
+                       ret_col: str = "ls_ret") -> float:
+    """Fraction of 12-month windows with MDD > dd_threshold, averaged over 12 starting-month shifts."""
     if portfolio_df.empty or len(portfolio_df) < 12:
-        return np.nan
+        return float("nan")
 
-    ret = portfolio_df["ls_ret"].values
-    dates = pd.to_datetime(portfolio_df["date"].values)
-
+    ret = portfolio_df[ret_col].values
     crash_rates = []
-
     for shift in range(12):
-        # Shift the starting month
-        shifted_ret = ret[shift:]
-        shifted_dates = dates[shift:]
-
-        if len(shifted_ret) < 12:
+        shifted = ret[shift:]
+        if len(shifted) < 12:
             continue
-
-        # Group into non-overlapping 12-month windows
-        n_years = len(shifted_ret) // 12
+        n_years = len(shifted) // 12
         crash_count = 0
-
         for y in range(n_years):
-            year_ret = shifted_ret[y * 12:(y + 1) * 12]
+            year_ret = shifted[y * 12:(y + 1) * 12]
             cum = np.cumprod(1 + year_ret)
             peak = np.maximum.accumulate(cum)
-            dd = (cum - peak) / peak
-            mdd = dd.min()
-
+            mdd = ((cum - peak) / peak).min()
             if mdd < -dd_threshold:
                 crash_count += 1
-
         if n_years > 0:
             crash_rates.append(crash_count / n_years)
-
-    if crash_rates:
-        return np.mean(crash_rates)
-    return np.nan
-
-
-def compute_classification_accuracy(predictions_df):
-    """
-    Paper Section 4.2.1:
-    - Overall accuracy = correct predictions / total
-    - Precision of H (highest class) and L (lowest class)
-    - Recall of H and L
-    - Prediction ratio (proportion classified into each class)
-    """
-    df = predictions_df.copy()
-    df = df.dropna(subset=["fwd_return", "xgb_class"])
-
-    if df.empty:
-        return {}
-
-    # Compute actual deciles per month
-    all_results = []
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if len(group) < N_CLASSES:
-            continue
-        group = group.copy()
-        group["actual_decile"] = pd.qcut(
-            group["fwd_return"], q=N_CLASSES, labels=False, duplicates="drop"
-        ) + 1
-        all_results.append(group)
-
-    if not all_results:
-        return {}
-
-    df = pd.concat(all_results, ignore_index=True)
-
-    # Overall accuracy
-    correct = (df["xgb_class"] == df["actual_decile"]).sum()
-    accuracy = correct / len(df)
-
-    # Precision and recall for H (class N_CLASSES) and L (class 1)
-    pred_h = df[df["xgb_class"] == N_CLASSES]
-    pred_l = df[df["xgb_class"] == 1]
-    actual_h = df[df["actual_decile"] == N_CLASSES]
-    actual_l = df[df["actual_decile"] == 1]
-
-    precision_h = (pred_h["actual_decile"] == N_CLASSES).mean() if len(pred_h) > 0 else 0
-    precision_l = (pred_l["actual_decile"] == 1).mean() if len(pred_l) > 0 else 0
-    recall_h = (actual_h["xgb_class"] == N_CLASSES).mean() if len(actual_h) > 0 else 0
-    recall_l = (actual_l["xgb_class"] == 1).mean() if len(actual_l) > 0 else 0
-
-    pred_ratio_h = len(pred_h) / len(df) if len(df) > 0 else 0
-    pred_ratio_l = len(pred_l) / len(df) if len(df) > 0 else 0
-
-    return {
-        "accuracy": accuracy,
-        "precision_H": precision_h,
-        "precision_L": precision_l,
-        "recall_H": recall_h,
-        "recall_L": recall_l,
-        "pred_ratio_H": pred_ratio_h,
-        "pred_ratio_L": pred_ratio_l,
-    }
-
-
-def full_report(features_df, predictions_df, portfolio_results, country_name=""):
-    """
-    Print a comprehensive report matching the paper's tables.
-    """
-    print(f"\n{'='*70}")
-    print(f"FULL REPORT — {country_name}")
-    print(f"{'='*70}")
-
-    # 1. Portfolio performance (Table 5)
-    print(f"\n--- Portfolio Performance (Table 5 equivalent) ---")
-    print(f"{'Strategy':<10s} {'Ann.Ret':>10s} {'Ann.Vol':>10s} {'Sharpe':>8s} "
-          f"{'Cum.Ret':>10s} {'MaxDD':>8s} {'t-stat':>8s} {'Months':>7s}")
-    print("-" * 75)
-
-    for name in ["MOM", "XGB", "RET", "SRP"]:
-        if name not in portfolio_results or not portfolio_results[name]["metrics"]:
-            print(f"{name:<10s} {'N/A':>10s}")
-            continue
-        m = portfolio_results[name]["metrics"]
-        print(f"{name:<10s} {m['mean_annual']:>9.1%} {m['std_annual']:>9.1%} "
-              f"{m['sharpe']:>8.3f} {m['cum_return']:>9.1%} "
-              f"{m['max_drawdown']:>7.1%} {m['t_stat']:>8.2f} {m['n_months']:>7d}")
-
-    # 2. Bimodality (Table 2 equivalent)
-    print(f"\n--- Bimodality (Table 2 equivalent) ---")
-    # MOM bimodality: use MOM_12 decile as predictor
-    if "MOM_12" in features_df.columns and "fwd_return" in features_df.columns:
-        mom_df = features_df.dropna(subset=["MOM_12", "fwd_return"]).copy()
-        # Assign MOM decile per month
-        all_mom = []
-        for date, group in mom_df.groupby(mom_df["date"].dt.to_period("M")):
-            if len(group) < N_CLASSES:
-                continue
-            group = group.copy()
-            group["mom_decile"] = pd.qcut(
-                group["MOM_12"], q=N_CLASSES, labels=False, duplicates="drop"
-            ) + 1
-            all_mom.append(group)
-        if all_mom:
-            mom_df = pd.concat(all_mom, ignore_index=True)
-            mom_bm = compute_bimodality(mom_df, actual_col="fwd_return", pred_col="mom_decile")
-            if mom_bm:
-                print(f"  MOM:  HH={mom_bm['HH']:.3f}  HL={mom_bm['HL']:.3f}  "
-                      f"LL={mom_bm['LL']:.3f}  LH={mom_bm['LH']:.3f}  BM={mom_bm['BM']:.3f}")
-
-    # XGB bimodality
-    if not predictions_df.empty:
-        xgb_bm = compute_bimodality(predictions_df, actual_col="fwd_return", pred_col="xgb_class")
-        if xgb_bm:
-            print(f"  XGB:  HH={xgb_bm['HH']:.3f}  HL={xgb_bm['HL']:.3f}  "
-                  f"LL={xgb_bm['LL']:.3f}  LH={xgb_bm['LH']:.3f}  BM={xgb_bm['BM']:.3f}")
-
-    # 3. Crash rate
-    print(f"\n--- Crash Rate ---")
-    for name in ["MOM", "XGB", "RET", "SRP"]:
-        if name in portfolio_results and not portfolio_results[name]["portfolio"].empty:
-            cr = compute_crash_rate(portfolio_results[name]["portfolio"])
-            print(f"  {name}: {cr:.3f}" if not np.isnan(cr) else f"  {name}: N/A")
-
-    # 4. Classification accuracy (Table IA2 equivalent)
-    if not predictions_df.empty:
-        print(f"\n--- Classification Accuracy (Table IA2 equivalent) ---")
-        acc = compute_classification_accuracy(predictions_df)
-        if acc:
-            print(f"  Overall accuracy: {acc['accuracy']:.1%}")
-            print(f"  Precision H: {acc['precision_H']:.1%}  "
-                  f"Precision L: {acc['precision_L']:.1%}")
-            print(f"  Recall H: {acc['recall_H']:.1%}  "
-                  f"Recall L: {acc['recall_L']:.1%}")
-            print(f"  Pred ratio H: {acc['pred_ratio_H']:.1%}  "
-                  f"Pred ratio L: {acc['pred_ratio_L']:.1%}")
-
-
-# ═══════════════════════════════════════════════════════
-if __name__ == "__main__":
-    from pathlib import Path
-    from config import CACHE_DIR, COUNTRIES
-    from features import build_features
-    from portfolio import run_all_strategies
-
-    cache_dir = Path(CACHE_DIR)
-    suffix = "TO"
-    _, country_name, _, _ = COUNTRIES[suffix]
-
-    filtered_path = cache_dir / f"filtered_{suffix}.parquet"
-    predictions_path = cache_dir / f"predictions_{suffix}.parquet"
-
-    if not filtered_path.exists() or not predictions_path.exists():
-        print("Need filtered data and predictions. Run data_filter.py and model.py first.")
-    else:
-        df = pd.read_parquet(filtered_path)
-        df, feature_cols = build_features(df, country_name)
-        predictions = pd.read_parquet(predictions_path)
-
-        # Merge fwd_return
-        fwd = df[["symbol", "date", "fwd_return"]].dropna()
-        predictions = predictions.drop(columns=["fwd_return"], errors="ignore")
-        predictions = predictions.merge(fwd, on=["symbol", "date"], how="left")
-
-        # Run portfolios (adjusted OOS for test sample)
-        results = run_all_strategies(df, predictions, oos_start="2016-01-01")
-
-        # Full report
-        full_report(df, predictions, results, country_name)
+    return float(np.mean(crash_rates)) if crash_rates else float("nan")

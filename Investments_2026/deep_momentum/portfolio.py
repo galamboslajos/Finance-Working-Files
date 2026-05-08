@@ -1,633 +1,385 @@
 """
-Deep Momentum — Step 5: Portfolio Construction
-Constructs long-short portfolios for MOM, XGB, and RET strategies.
+Deep Momentum — Step 6: Portfolio construction.
 
-Paper reference: Sections 3.2, 4.2.2
+Reads:
+  cache/ca_features_monthly.parquet     (for MOM_12_mt — used by MOM strategy)
+  cache/ca_predictions_monthly.parquet  (for xgb_class, ret_score, srp_score, cvr_score)
 
-Three strategies:
-- MOM: Traditional momentum — buy top decile of past 11-month return (skip 1 month),
-       sell bottom decile. Rebalance monthly.
-- XGB: Naive ML — buy stocks classified into highest class (10),
-       sell stocks classified into lowest class (1).
-- RET: Deep Momentum — sort stocks by predicted expected return,
-       buy top decile, sell bottom decile.
+Writes (when run as __main__):
+  cache/ca_portfolios.parquet           (all five strategies stacked)
 
-Portfolio construction:
-- Long-short: buy top decile, sell bottom decile
-- Equal-weighted (primary analysis)
-- Monthly rebalance
+Strategies (top_n per leg, paper-departing for realism):
+  MOM    long top_n / short bottom_n by MOM_12_mt
+  XGB    long top_n / short bottom_n by (prob_10 - prob_1)
+  RET    long top_n / short bottom_n by ret_score
+  SRP    long top_n / short bottom_n by srp_score
+  CVR    long top_n / short bottom_n by cvr_score        (extension)
+
+Selection is top-N each leg (default 15) — NOT paper's decile cuts, which
+produce hundreds of names and aren't CFD-tradeable in practice.
+
+Cost model (per-stock-month attribution, two-pass; trade-log reconciles):
+  Commission: tc_bps × {entry + exit} events / 10000
+              entry = stock new in current month vs previous
+              exit  = stock not present in next month
+              persistent positions pay 0 commission that month
+  Financing : carry_long_annual  × days/365 on each long
+              carry_short_annual × days/365 EARNED on each short
+              defaults: long 5%/yr (Saxo-style), short 2%/yr (IBKR-style)
+
+All cost params are kwargs and adjustable from run.ipynb.
 """
 
-import pandas as pd
+import time
+from pathlib import Path
+
 import numpy as np
-from config import N_CLASSES, OOS_START, TC_BPS, TOP_N_FIXED, FX_TC_BPS
+import pandas as pd
+
+PROJECT_DIR = Path(__file__).resolve().parent
+CACHE_DIR   = PROJECT_DIR / "cache"
+
+FEATURES_PATH    = CACHE_DIR / "ca_features_monthly.parquet"
+PREDICTIONS_PATH = CACHE_DIR / "ca_predictions_monthly.parquet"
+PORTFOLIOS_PATH  = CACHE_DIR / "ca_portfolios.parquet"
 
 
-def apply_fx_cost(portfolio_df, fx_tc_bps=FX_TC_BPS, tc_bps=TC_BPS):
+# ─── Cost helpers ────────────────────────────────────────────────────────────
+
+def _period_cost(curr: list, prev: list, nxt: list,
+                 tc_bps: float, carry_annual: float, days: int = 30):
     """
-    Deduct FX roundtrip cost from an existing portfolio's ls_ret.
-    Assumes the portfolio was built with compute_turnover_cost, so we can
-    recover monthly turnover from the stored `tc` column:
-        turnover = tc * 10000 / tc_bps
-        fx_cost  = turnover * fx_tc_bps / 10000
+    Commission + financing for one leg over the holding month [t → t+1].
+
+    Entry events: names in curr but not in prev.
+    Exit events:  names in curr but not in nxt (their exit will be charged here).
+
+    Commission per position is multiplied by 1/n_leg because each name carries
+    1/n_leg of the leg's notional under equal weighting. Sum across positions
+    gives the leg-level commission as a fraction of leg notional.
+
+    Returns (commission, financing) — both fractions of leg notional.
     """
-    if portfolio_df.empty or "tc" not in portfolio_df.columns:
-        return portfolio_df
-    df = portfolio_df.copy()
-    turnover = df["tc"] * 10000 / tc_bps if tc_bps else 0.0
-    df["fx_cost"] = turnover * fx_tc_bps / 10000
-    df["ls_ret"] = df["ls_ret"] - df["fx_cost"]
-    return df
+    n_leg = max(len(curr), 1)
+    curr_set, prev_set, nxt_set = set(curr), set(prev), set(nxt)
+    entries = len(curr_set - prev_set)
+    exits   = len(curr_set - nxt_set)
+    commission = (entries + exits) / n_leg * tc_bps / 10000
+    financing  = carry_annual * days / 365
+    return commission, financing
 
 
-def _pick_top_bottom(group, score_col, top_n):
+# ─── Strategy selection ──────────────────────────────────────────────────────
+
+def _select_top_bottom(group: pd.DataFrame, score_col: str, top_n: int):
+    """Sort group desc by score; return (top_n, bottom_n) DataFrames or (None,None)."""
+    if len(group) < 2 * top_n:
+        return None, None
+    g = group.sort_values(score_col, ascending=False)
+    return g.head(top_n), g.tail(top_n)
+
+
+def _select_xgb_class(group: pd.DataFrame, top_n: int, n_classes: int = 10):
     """
-    Fixed-N selection: rank `group` by `score_col` desc and return
-    (long_stocks, short_stocks) as the top-N and bottom-N rows.
-    Returns (None, None) if the group doesn't have at least 2*top_n rows.
+    XGB-specific: rank by (prob_{N} - prob_1) — symmetric class-membership score.
+    Allows top-N selection consistent with the other strategies.
     """
     if len(group) < 2 * top_n:
         return None, None
-    ranked = group.sort_values(score_col, ascending=False)
-    long_stocks = ranked.head(top_n)
-    short_stocks = ranked.tail(top_n)
-    return long_stocks, short_stocks
+    g = group.copy()
+    g["_xgb_score"] = g[f"prob_{n_classes}"] - g["prob_1"]
+    g = g.sort_values("_xgb_score", ascending=False)
+    return g.head(top_n), g.tail(top_n)
 
 
-def compute_turnover_cost(prev_long, prev_short, curr_long, curr_short, tc_bps=TC_BPS):
+# ─── Two-pass strategy runner ────────────────────────────────────────────────
+
+def _build_selections(df: pd.DataFrame, score_col: str, top_n: int,
+                       date_col: str, return_col: str, *,
+                       use_xgb_class: bool = False, n_classes: int = 10):
     """
-    Compute turnover and transaction cost for one rebalance.
-
-    Turnover = fraction of portfolio that changed (both legs).
-    Equal-weighted: turnover = (stocks_traded / total_stocks) for each leg.
-    Cost = turnover * tc_bps / 10000 (applied to both legs).
-
-    Returns cost as a fraction of portfolio value (to subtract from return).
+    Loop months in order, compute long/short rows + names per month.
+    Returns list of dicts: {date, long_df, short_df, long_names, short_names}.
     """
-    if not prev_long or not prev_short:
-        return 0.0  # first month, no turnover
+    sub = df.dropna(subset=[score_col, return_col]) if not use_xgb_class \
+          else df.dropna(subset=[f"prob_{n_classes}", "prob_1", return_col])
+    if sub.empty:
+        return []
 
-    # Long leg turnover
-    prev_l = set(prev_long)
-    curr_l = set(curr_long)
-    n_long = max(len(prev_l), len(curr_l), 1)
-    long_sold = len(prev_l - curr_l)
-    long_bought = len(curr_l - prev_l)
-    long_turnover = (long_sold + long_bought) / (2 * n_long)
+    # Group by CALENDAR MONTH (not raw date_mt) — each stock's last trading day
+    # within a month can vary (holidays, mid-month delistings). Without snapping
+    # to month, a Toronto stock with date_mt=2007-03-30 and a Calgary stock with
+    # date_mt=2007-03-29 would land in two different "months" and get scored in
+    # isolation. We want one cross-section per calendar month.
+    sub = sub.copy()
+    sub["_ym"] = sub[date_col].dt.to_period("M")
 
-    # Short leg turnover
-    prev_s = set(prev_short)
-    curr_s = set(curr_short)
-    n_short = max(len(prev_s), len(curr_s), 1)
-    short_sold = len(prev_s - curr_s)
-    short_bought = len(curr_s - prev_s)
-    short_turnover = (short_sold + short_bought) / (2 * n_short)
+    selections = []
+    for ym, grp in sub.groupby("_ym"):
+        if use_xgb_class:
+            longs, shorts = _select_xgb_class(grp, top_n, n_classes)
+        else:
+            longs, shorts = _select_top_bottom(grp, score_col, top_n)
+        if longs is None or longs.empty or shorts.empty:
+            continue
+        # Use the latest stock-level date_mt within this month as the "rebalance date"
+        rebal_date = grp[date_col].max()
+        selections.append({
+            "date":         rebal_date,
+            "long_df":      longs,
+            "short_df":     shorts,
+            "long_names":   longs["assetid"].tolist(),
+            "short_names":  shorts["assetid"].tolist(),
+        })
+    return selections
 
-    # Average turnover across both legs, apply cost
-    avg_turnover = (long_turnover + short_turnover) / 2
-    cost = avg_turnover * tc_bps / 10000
 
-    return cost
-
-
-def construct_mom_portfolio(df, top_n=None):
+def _run_strategy(selections, strategy_name: str,
+                   tc_bps: float, carry_long_annual: float,
+                   carry_short_annual: float, days: int,
+                   return_col: str = "fwd_return_mt",
+                   long_only: bool = False):
     """
-    Traditional momentum strategy.
+    Aggregate selections into a per-month portfolio DataFrame with cost breakdown.
 
-    Paper Section 3.2:
-    "the momentum strategy makes predictions based on the past eleven-month
-    return with a one-month lag and buys (sells) stocks whose past returns
-    belong to the highest (lowest) decile"
-
-    MOM_12 in our features = cumulative return from t-11 to t-1 (11 months,
-    skip current month). This is exactly the Jegadeesh-Titman momentum signal.
-
-    Args:
-        top_n: if None, decile selection (paper). If int, pick top_n/bottom_n
-               stocks by MOM_12 instead.
-
-    Returns DataFrame with monthly long-short returns.
+    long_only=True drops the short leg entirely: short_ret=0, no short
+    commission, no short financing earned. Useful for diagnosing whether short-leg
+    blow-ups are corrupting the strategy's reported P&L.
     """
-    df = df.copy()
-
-    # Need MOM_12 and forward return
-    required = ["MOM_12", "fwd_return", "date", "symbol"]
-    df = df.dropna(subset=[c for c in required if c in df.columns])
-
-    if df.empty:
+    if not selections:
         return pd.DataFrame()
 
-    results = []
-    prev_long_syms = []
-    prev_short_syms = []
+    rows = []
+    for i, sel in enumerate(selections):
+        prev = selections[i - 1] if i > 0 else None
+        nxt  = selections[i + 1] if i + 1 < len(selections) else None
+        prev_l = prev["long_names"]  if prev else []
+        prev_s = prev["short_names"] if prev else []
+        nxt_l  = nxt["long_names"]   if nxt  else []
+        nxt_s  = nxt["short_names"]  if nxt  else []
 
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if top_n is None:
-            if len(group) < N_CLASSES:
-                continue
-
-            # Sort into deciles by MOM_12
-            group = group.copy()
-            group["mom_decile"] = pd.qcut(
-                group["MOM_12"], q=N_CLASSES, labels=False, duplicates="drop"
-            ) + 1
-
-            # Long = top decile, Short = bottom decile
-            long_stocks = group[group["mom_decile"] == N_CLASSES]
-            short_stocks = group[group["mom_decile"] == 1]
+        comm_l, fin_l = _period_cost(sel["long_names"],  prev_l, nxt_l,
+                                      tc_bps, carry_long_annual,  days)
+        if long_only:
+            comm_s, fin_s = 0.0, 0.0
         else:
-            long_stocks, short_stocks = _pick_top_bottom(group, "MOM_12", top_n)
-            if long_stocks is None:
-                continue
+            comm_s, fin_s = _period_cost(sel["short_names"], prev_s, nxt_s,
+                                          tc_bps, carry_short_annual, days)
 
-        if long_stocks.empty or short_stocks.empty:
-            continue
+        # Long financing is a cost; short financing is earned (subtract from cost).
+        commission = comm_l + comm_s
+        financing  = fin_l - fin_s
+        tc = commission + financing
 
-        curr_long_syms = long_stocks["symbol"].tolist()
-        curr_short_syms = short_stocks["symbol"].tolist()
+        long_ret  = sel["long_df"][return_col].mean()
+        short_ret = 0.0 if long_only else sel["short_df"][return_col].mean()
+        ls_gross  = long_ret - short_ret  # long-only: ls_gross = long_ret
 
-        # Transaction cost from turnover
-        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
-                                   curr_long_syms, curr_short_syms)
-
-        # Equal-weighted returns
-        long_ret = long_stocks["fwd_return"].mean()
-        short_ret = short_stocks["fwd_return"].mean()
-        ls_ret = long_ret - short_ret
-        ls_ret_net = ls_ret - tc
-
-        results.append({
-            "date": group["date"].iloc[0],
-            "long_ret": long_ret,
-            "short_ret": short_ret,
-            "ls_ret": ls_ret_net,
-            "ls_ret_gross": ls_ret,
-            "tc": tc,
-            "n_long": len(long_stocks),
-            "n_short": len(short_stocks),
-            "strategy": "MOM",
+        rows.append({
+            "date_mt":       sel["date"],
+            "strategy":      strategy_name,
+            "n_long":        len(sel["long_names"]),
+            "n_short":       0 if long_only else len(sel["short_names"]),
+            "long_ret":      long_ret,
+            "short_ret":     short_ret,
+            "ls_ret_gross":  ls_gross,
+            "commission":    commission,
+            "financing":     financing,
+            "tc":            tc,
+            "ls_ret":        ls_gross - tc,
         })
 
-        prev_long_syms = curr_long_syms
-        prev_short_syms = curr_short_syms
-
-    return pd.DataFrame(results)
-
-
-def construct_xgb_portfolio(predictions, top_n=None):
-    """
-    Naive ML strategy.
-
-    Paper Section 4.2.2:
-    For XGB, select all stocks classified into the highest or lowest return class.
-
-    "buy stocks classified into highest class (10),
-     sell stocks classified into lowest class (1)"
-
-    Args:
-        top_n: if None, class-membership selection (paper). If int, rank by
-               scalar score `prob_10 - prob_1` and pick top_n/bottom_n —
-               a symmetric fixed-N analogue to RET/SRP.
-    """
-    df = predictions.copy()
-    df = df.dropna(subset=["xgb_class", "fwd_return"])
-
-    if df.empty:
-        return pd.DataFrame()
-
-    results = []
-    prev_long_syms = []
-    prev_short_syms = []
-
-    if top_n is not None:
-        df = df.copy()
-        df["_xgb_score"] = df[f"prob_{N_CLASSES}"] - df["prob_1"]
-
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if top_n is None:
-            long_stocks = group[group["xgb_class"] == N_CLASSES]
-            short_stocks = group[group["xgb_class"] == 1]
-        else:
-            long_stocks, short_stocks = _pick_top_bottom(group, "_xgb_score", top_n)
-            if long_stocks is None:
-                continue
-
-        if long_stocks.empty or short_stocks.empty:
-            continue
-
-        curr_long_syms = long_stocks["symbol"].tolist()
-        curr_short_syms = short_stocks["symbol"].tolist()
-
-        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
-                                   curr_long_syms, curr_short_syms)
-
-        long_ret = long_stocks["fwd_return"].mean()
-        short_ret = short_stocks["fwd_return"].mean()
-        ls_ret = long_ret - short_ret
-        ls_ret_net = ls_ret - tc
-
-        results.append({
-            "date": group["date"].iloc[0],
-            "long_ret": long_ret,
-            "short_ret": short_ret,
-            "ls_ret": ls_ret_net,
-            "ls_ret_gross": ls_ret,
-            "tc": tc,
-            "n_long": len(long_stocks),
-            "n_short": len(short_stocks),
-            "strategy": "XGB",
-        })
-
-        prev_long_syms = curr_long_syms
-        prev_short_syms = curr_short_syms
-
-    return pd.DataFrame(results)
-
-
-def construct_ret_portfolio(predictions, top_n=None):
-    """
-    Deep Momentum (RET) strategy.
-
-    Paper Section 3.3.2 / 4.2.2:
-    "RET selects the top and bottom 10% of all stocks based on their
-    predicted return" (i.e., predicted expected return from reclassification)
-
-    Sort stocks by ret_score, buy top decile, sell bottom decile.
-
-    Args:
-        top_n: if None, decile selection (paper). If int, pick top_n/bottom_n
-               stocks by ret_score instead.
-    """
-    df = predictions.copy()
-    df = df.dropna(subset=["ret_score", "fwd_return"])
-
-    if df.empty:
-        return pd.DataFrame()
-
-    results = []
-    prev_long_syms = []
-    prev_short_syms = []
-
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if top_n is None:
-            if len(group) < N_CLASSES:
-                continue
-
-            group = group.copy()
-            group["ret_decile"] = pd.qcut(
-                group["ret_score"], q=N_CLASSES, labels=False, duplicates="drop"
-            ) + 1
-
-            long_stocks = group[group["ret_decile"] == N_CLASSES]
-            short_stocks = group[group["ret_decile"] == 1]
-        else:
-            long_stocks, short_stocks = _pick_top_bottom(group, "ret_score", top_n)
-            if long_stocks is None:
-                continue
-
-        if long_stocks.empty or short_stocks.empty:
-            continue
-
-        curr_long_syms = long_stocks["symbol"].tolist()
-        curr_short_syms = short_stocks["symbol"].tolist()
-
-        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
-                                   curr_long_syms, curr_short_syms)
-
-        long_ret = long_stocks["fwd_return"].mean()
-        short_ret = short_stocks["fwd_return"].mean()
-        ls_ret = long_ret - short_ret
-        ls_ret_net = ls_ret - tc
-
-        results.append({
-            "date": group["date"].iloc[0],
-            "long_ret": long_ret,
-            "short_ret": short_ret,
-            "ls_ret": ls_ret_net,
-            "ls_ret_gross": ls_ret,
-            "tc": tc,
-            "n_long": len(long_stocks),
-            "n_short": len(short_stocks),
-            "strategy": "RET",
-        })
-
-        prev_long_syms = curr_long_syms
-        prev_short_syms = curr_short_syms
-
-    return pd.DataFrame(results)
-
-
-def construct_srp_portfolio(predictions, top_n=None):
-    """
-    Deep Momentum (SRP) strategy — Sharpe ratio reclassification.
-
-    Same as RET but sorts by predicted Sharpe ratio instead of expected return.
-
-    Args:
-        top_n: if None, decile selection (paper). If int, pick top_n/bottom_n
-               stocks by srp_score instead.
-    """
-    df = predictions.copy()
-    df = df.dropna(subset=["srp_score", "fwd_return"])
-
-    if df.empty:
-        return pd.DataFrame()
-
-    results = []
-    prev_long_syms = []
-    prev_short_syms = []
-
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if top_n is None:
-            if len(group) < N_CLASSES:
-                continue
-
-            group = group.copy()
-            group["srp_decile"] = pd.qcut(
-                group["srp_score"], q=N_CLASSES, labels=False, duplicates="drop"
-            ) + 1
-
-            long_stocks = group[group["srp_decile"] == N_CLASSES]
-            short_stocks = group[group["srp_decile"] == 1]
-        else:
-            long_stocks, short_stocks = _pick_top_bottom(group, "srp_score", top_n)
-            if long_stocks is None:
-                continue
-
-        if long_stocks.empty or short_stocks.empty:
-            continue
-
-        curr_long_syms = long_stocks["symbol"].tolist()
-        curr_short_syms = short_stocks["symbol"].tolist()
-
-        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
-                                   curr_long_syms, curr_short_syms)
-
-        long_ret = long_stocks["fwd_return"].mean()
-        short_ret = short_stocks["fwd_return"].mean()
-        ls_ret = long_ret - short_ret
-        ls_ret_net = ls_ret - tc
-
-        results.append({
-            "date": group["date"].iloc[0],
-            "long_ret": long_ret,
-            "short_ret": short_ret,
-            "ls_ret": ls_ret_net,
-            "ls_ret_gross": ls_ret,
-            "tc": tc,
-            "n_long": len(long_stocks),
-            "n_short": len(short_stocks),
-            "strategy": "SRP",
-        })
-
-        prev_long_syms = curr_long_syms
-        prev_short_syms = curr_short_syms
-
-    return pd.DataFrame(results)
-
-
-def construct_cvr_portfolio(predictions, top_n=None):
-    """
-    CVR strategy (extension, not in paper) — return-over-CVaR reclassification.
-
-    Same decile / fixed-N logic as RET and SRP, but sorts by cvr_score
-    (predicted E[r] divided by predicted |CVaR_alpha|).
-
-    Args:
-        top_n: if None, decile selection. If int, pick top_n/bottom_n by cvr_score.
-    """
-    df = predictions.copy()
-    df = df.dropna(subset=["cvr_score", "fwd_return"])
-
-    if df.empty:
-        return pd.DataFrame()
-
-    results = []
-    prev_long_syms = []
-    prev_short_syms = []
-
-    for date, group in df.groupby(df["date"].dt.to_period("M")):
-        if top_n is None:
-            if len(group) < N_CLASSES:
-                continue
-
-            group = group.copy()
-            group["cvr_decile"] = pd.qcut(
-                group["cvr_score"], q=N_CLASSES, labels=False, duplicates="drop"
-            ) + 1
-
-            long_stocks = group[group["cvr_decile"] == N_CLASSES]
-            short_stocks = group[group["cvr_decile"] == 1]
-        else:
-            long_stocks, short_stocks = _pick_top_bottom(group, "cvr_score", top_n)
-            if long_stocks is None:
-                continue
-
-        if long_stocks.empty or short_stocks.empty:
-            continue
-
-        curr_long_syms = long_stocks["symbol"].tolist()
-        curr_short_syms = short_stocks["symbol"].tolist()
-
-        tc = compute_turnover_cost(prev_long_syms, prev_short_syms,
-                                   curr_long_syms, curr_short_syms)
-
-        long_ret = long_stocks["fwd_return"].mean()
-        short_ret = short_stocks["fwd_return"].mean()
-        ls_ret = long_ret - short_ret
-        ls_ret_net = ls_ret - tc
-
-        results.append({
-            "date": group["date"].iloc[0],
-            "long_ret": long_ret,
-            "short_ret": short_ret,
-            "ls_ret": ls_ret_net,
-            "ls_ret_gross": ls_ret,
-            "tc": tc,
-            "n_long": len(long_stocks),
-            "n_short": len(short_stocks),
-            "strategy": "CVR",
-        })
-
-        prev_long_syms = curr_long_syms
-        prev_short_syms = curr_short_syms
-
-    return pd.DataFrame(results)
-
-
-def filter_oos(portfolio_df, oos_start=OOS_START):
-    """
-    Paper: "All empirical results in this section are from the out-of-sample
-    period of January 2010 to December 2023"
-
-    Filter portfolio returns to OOS period only.
-    """
-    if portfolio_df.empty:
-        return portfolio_df
-    return portfolio_df[portfolio_df["date"] >= pd.Timestamp(oos_start)].copy()
-
-
-def compute_performance(portfolio_df, strategy_name=""):
-    """
-    Compute standard performance metrics for a long-short portfolio.
-
-    Returns dict with:
-    - mean_return (annualized)
-    - std (annualized)
-    - sharpe (annualized)
-    - cumulative_return
-    - max_drawdown
-    - t_stat
-    - n_months
-    """
-    if portfolio_df.empty:
+    return pd.DataFrame(rows)
+
+
+# ─── Per-strategy public constructors ────────────────────────────────────────
+
+def construct_mom(features: pd.DataFrame, top_n: int = 15,
+                   tc_bps: float = 20.0,
+                   carry_long_annual: float = 0.05,
+                   carry_short_annual: float = 0.02,
+                   days: int = 30,
+                   long_only: bool = False) -> pd.DataFrame:
+    """MOM: rank by MOM_12_mt (Jegadeesh-Titman 11-month momentum, skip-1)."""
+    sels = _build_selections(features, score_col="MOM_12_mt", top_n=top_n,
+                              date_col="date_mt", return_col="fwd_return_mt")
+    return _run_strategy(sels, "MOM", tc_bps, carry_long_annual,
+                          carry_short_annual, days, long_only=long_only)
+
+
+def construct_xgb(predictions: pd.DataFrame, top_n: int = 15,
+                   tc_bps: float = 20.0,
+                   carry_long_annual: float = 0.05,
+                   carry_short_annual: float = 0.02,
+                   days: int = 30,
+                   n_classes: int = 10,
+                   long_only: bool = False) -> pd.DataFrame:
+    """XGB: rank by (prob_{N} - prob_1) — symmetric class-edge score."""
+    sels = _build_selections(predictions, score_col="", top_n=top_n,
+                              date_col="date_mt", return_col="fwd_return_mt",
+                              use_xgb_class=True, n_classes=n_classes)
+    return _run_strategy(sels, "XGB", tc_bps, carry_long_annual,
+                          carry_short_annual, days, long_only=long_only)
+
+
+def construct_ret(predictions: pd.DataFrame, top_n: int = 15,
+                   tc_bps: float = 20.0,
+                   carry_long_annual: float = 0.05,
+                   carry_short_annual: float = 0.02,
+                   days: int = 30,
+                   long_only: bool = False) -> pd.DataFrame:
+    """RET: rank by ret_score (predicted expected return)."""
+    sels = _build_selections(predictions, score_col="ret_score", top_n=top_n,
+                              date_col="date_mt", return_col="fwd_return_mt")
+    return _run_strategy(sels, "RET", tc_bps, carry_long_annual,
+                          carry_short_annual, days, long_only=long_only)
+
+
+def construct_srp(predictions: pd.DataFrame, top_n: int = 15,
+                   tc_bps: float = 20.0,
+                   carry_long_annual: float = 0.05,
+                   carry_short_annual: float = 0.02,
+                   days: int = 30,
+                   long_only: bool = False) -> pd.DataFrame:
+    """SRP: rank by srp_score (predicted Sharpe)."""
+    sels = _build_selections(predictions, score_col="srp_score", top_n=top_n,
+                              date_col="date_mt", return_col="fwd_return_mt")
+    return _run_strategy(sels, "SRP", tc_bps, carry_long_annual,
+                          carry_short_annual, days, long_only=long_only)
+
+
+def construct_cvr(predictions: pd.DataFrame, top_n: int = 15,
+                   tc_bps: float = 20.0,
+                   carry_long_annual: float = 0.05,
+                   carry_short_annual: float = 0.02,
+                   days: int = 30,
+                   long_only: bool = False) -> pd.DataFrame:
+    """CVR: rank by cvr_score (predicted return-over-CVaR; extension)."""
+    sels = _build_selections(predictions, score_col="cvr_score", top_n=top_n,
+                              date_col="date_mt", return_col="fwd_return_mt")
+    return _run_strategy(sels, "CVR", tc_bps, carry_long_annual,
+                          carry_short_annual, days, long_only=long_only)
+
+
+# ─── Performance + driver ────────────────────────────────────────────────────
+
+def compute_performance(port: pd.DataFrame, name: str = "") -> dict:
+    """Standard L/S metrics. Operates on `ls_ret` (net of costs)."""
+    if port.empty:
         return {}
-
-    ret = portfolio_df["ls_ret"]
-    n = len(ret)
-
-    mean_monthly = ret.mean()
-    std_monthly = ret.std()
-
-    # Annualize
-    mean_annual = mean_monthly * 12
-    std_annual = std_monthly * np.sqrt(12)
-    sharpe = mean_annual / std_annual if std_annual > 0 else 0
-
-    # Cumulative
-    cum = (1 + ret).cumprod()
-    cum_return = cum.iloc[-1] - 1
-
-    # Max drawdown
+    r = port["ls_ret"]
+    n = len(r)
+    mean_m, std_m = r.mean(), r.std()
+    cum = (1 + r).cumprod()
     peak = cum.cummax()
-    dd = (cum - peak) / peak
-    max_dd = dd.min()
-
-    # T-stat
-    t_stat = mean_monthly / (std_monthly / np.sqrt(n)) if std_monthly > 0 else 0
-
     return {
-        "strategy": strategy_name,
-        "n_months": n,
-        "mean_annual": mean_annual,
-        "std_annual": std_annual,
-        "sharpe": sharpe,
-        "cum_return": cum_return,
-        "max_drawdown": max_dd,
-        "t_stat": t_stat,
-        "mean_monthly": mean_monthly,
+        "strategy":     name,
+        "n_months":     n,
+        "mean_annual":  mean_m * 12,
+        "std_annual":   std_m * np.sqrt(12),
+        "sharpe":       (mean_m * 12) / (std_m * np.sqrt(12)) if std_m > 0 else 0,
+        "cum_return":   cum.iloc[-1] - 1,
+        "max_drawdown": ((cum - peak) / peak).min(),
+        "t_stat":       mean_m / (std_m / np.sqrt(n)) if std_m > 0 else 0,
+        "mean_monthly": mean_m,
+        "avg_comm_bps": port["commission"].mean() * 10000,
+        "avg_fin_bps":  port["financing" ].mean() * 10000,
     }
 
 
-def run_all_strategies(features_df, predictions_df, oos_start=OOS_START, top_n=None):
+def run_all_strategies(features: pd.DataFrame, predictions: pd.DataFrame,
+                        top_n: int = 15,
+                        tc_bps: float = 20.0,
+                        carry_long_annual: float = 0.05,
+                        carry_short_annual: float = 0.02,
+                        days: int = 30,
+                        long_only: bool = False,
+                        verbose: bool = True) -> dict:
     """
-    Construct portfolios for all strategies and compute performance.
+    Run all five strategies. Returns:
+        {strategy: {'portfolio': DataFrame, 'metrics': dict}}
 
-    Args:
-        features_df: DataFrame with features (needs MOM_12, fwd_return)
-        predictions_df: DataFrame with model predictions (xgb_class, ret_score, srp_score)
-        oos_start: start of out-of-sample period
-        top_n: if None, paper-faithful decile selection. If int (e.g. 10),
-               fixed top-N / bottom-N per country-month for all strategies.
-
-    Returns:
-        dict with portfolio DataFrames and performance metrics
+    long_only=True drops the short leg from every strategy — useful for a
+    diagnostic comparison vs the L/S book (the short leg is the source of
+    monthly compounding blow-ups when a single name surges 5×+).
     """
-    results = {}
-
-    # MOM
-    mom_port = construct_mom_portfolio(features_df, top_n=top_n)
-    mom_oos = filter_oos(mom_port, oos_start)
-    results["MOM"] = {
-        "portfolio": mom_oos,
-        "metrics": compute_performance(mom_oos, "MOM"),
+    common = dict(top_n=top_n, tc_bps=tc_bps,
+                  carry_long_annual=carry_long_annual,
+                  carry_short_annual=carry_short_annual,
+                  days=days, long_only=long_only)
+    constructors = {
+        "MOM": (construct_mom, features),
+        "XGB": (construct_xgb, predictions),
+        "RET": (construct_ret, predictions),
+        "SRP": (construct_srp, predictions),
+        "CVR": (construct_cvr, predictions),
     }
-
-    # XGB
-    xgb_port = construct_xgb_portfolio(predictions_df, top_n=top_n)
-    xgb_oos = filter_oos(xgb_port, oos_start)
-    results["XGB"] = {
-        "portfolio": xgb_oos,
-        "metrics": compute_performance(xgb_oos, "XGB"),
-    }
-
-    # RET
-    ret_port = construct_ret_portfolio(predictions_df, top_n=top_n)
-    ret_oos = filter_oos(ret_port, oos_start)
-    results["RET"] = {
-        "portfolio": ret_oos,
-        "metrics": compute_performance(ret_oos, "RET"),
-    }
-
-    # SRP
-    srp_port = construct_srp_portfolio(predictions_df, top_n=top_n)
-    srp_oos = filter_oos(srp_port, oos_start)
-    results["SRP"] = {
-        "portfolio": srp_oos,
-        "metrics": compute_performance(srp_oos, "SRP"),
-    }
-
-    # CVR (extension — return-over-CVaR)
-    cvr_port = construct_cvr_portfolio(predictions_df, top_n=top_n)
-    cvr_oos = filter_oos(cvr_port, oos_start)
-    results["CVR"] = {
-        "portfolio": cvr_oos,
-        "metrics": compute_performance(cvr_oos, "CVR"),
-    }
-
-    return results
+    out = {}
+    for name, (fn, src) in constructors.items():
+        port = fn(src, **common)
+        out[name] = {"portfolio": port,
+                     "metrics":   compute_performance(port, name)}
+        if verbose and not port.empty:
+            m = out[name]["metrics"]
+            print(f"  {name}: ann.ret {m['mean_annual']:>7.1%}  "
+                  f"sharpe {m['sharpe']:>5.2f}  "
+                  f"comm {m['avg_comm_bps']:>5.1f}bp/mo  "
+                  f"fin {m['avg_fin_bps']:>5.1f}bp/mo  "
+                  f"months {m['n_months']}")
+    return out
 
 
-def print_performance_table(results):
-    """Print a formatted comparison table of all strategies."""
-    print(f"\n{'Strategy':<10s} {'Ann.Ret':>10s} {'Ann.Vol':>10s} {'Sharpe':>8s} "
-          f"{'Cum.Ret':>10s} {'MaxDD':>8s} {'t-stat':>8s} {'Months':>7s} {'Avg TC':>8s}")
-    print("-" * 83)
-
+def print_performance_table(results: dict):
+    """Formatted table — same shape as legacy."""
+    print(f"\n{'Strategy':<8s} {'Ann.Ret':>9s} {'Ann.Vol':>9s} {'Sharpe':>8s} "
+          f"{'Cum.Ret':>10s} {'MaxDD':>8s} {'t-stat':>8s} {'Months':>7s} "
+          f"{'Comm':>7s} {'Fin':>7s}")
+    print("-" * 90)
     for name in ["MOM", "XGB", "RET", "SRP", "CVR"]:
         if name not in results or not results[name]["metrics"]:
-            print(f"{name:<10s} {'N/A':>10s}")
+            print(f"{name:<8s} N/A")
             continue
         m = results[name]["metrics"]
-        port = results[name]["portfolio"]
-        avg_tc = port["tc"].mean() * 10000 if "tc" in port.columns else 0
-        print(f"{name:<10s} {m['mean_annual']:>9.1%} {m['std_annual']:>9.1%} "
+        print(f"{name:<8s} {m['mean_annual']:>8.1%} {m['std_annual']:>8.1%} "
               f"{m['sharpe']:>8.3f} {m['cum_return']:>9.1%} "
               f"{m['max_drawdown']:>7.1%} {m['t_stat']:>8.2f} {m['n_months']:>7d} "
-              f"{avg_tc:>6.1f}bp")
+              f"{m['avg_comm_bps']:>5.1f}bp {m['avg_fin_bps']:>5.1f}bp")
 
 
-# ═══════════════════════════════════════════════════════
+# ─── Main ────────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
-    from pathlib import Path
-    from config import CACHE_DIR, COUNTRIES
-    from features import build_features
+    print("=" * 70)
+    print("Building portfolios (top-15 per leg, default cost params)")
+    print("=" * 70)
 
-    cache_dir = Path(CACHE_DIR)
-    suffix = "TO"
-    _, country_name, _, _ = COUNTRIES[suffix]
-
-    # Load filtered data and build features
-    filtered_path = cache_dir / f"filtered_{suffix}.parquet"
-    predictions_path = cache_dir / f"predictions_{suffix}.parquet"
-
-    if not filtered_path.exists() or not predictions_path.exists():
-        print("Need filtered data and predictions. Run data_filter.py and model.py first.")
-    else:
-        df = pd.read_parquet(filtered_path)
-        df, feature_cols = build_features(df, country_name)
-        predictions = pd.read_parquet(predictions_path)
-
-        # Merge fwd_return into predictions (from features df)
-        if "fwd_return" not in predictions.columns or predictions["fwd_return"].isna().all():
-            fwd = df[["symbol", "date", "fwd_return"]].dropna()
-            predictions = predictions.drop(columns=["fwd_return"], errors="ignore")
-            predictions = predictions.merge(fwd, on=["symbol", "date"], how="left")
-
-        print(f"\n  Running portfolio construction for {country_name}...")
-        results = run_all_strategies(
-            df, predictions,
-            oos_start="2016-01-01",  # adjusted for our short test sample
+    if not FEATURES_PATH.exists() or not PREDICTIONS_PATH.exists():
+        raise FileNotFoundError(
+            f"Need both {FEATURES_PATH.name} and {PREDICTIONS_PATH.name}. "
+            "Run features.py and model.py first."
         )
 
-        print_performance_table(results)
+    t0 = time.time()
+    features    = pd.read_parquet(FEATURES_PATH)
+    predictions = pd.read_parquet(PREDICTIONS_PATH)
+
+    # Predictions need fwd_return_mt for realised P&L; merge from features panel
+    if "fwd_return_mt" not in predictions.columns or predictions["fwd_return_mt"].isna().all():
+        merge_keys = ["assetid", "date_mt"]
+        fwd = features[merge_keys + ["fwd_return_mt"]].dropna()
+        predictions = predictions.drop(columns=["fwd_return_mt"], errors="ignore")
+        predictions = predictions.merge(fwd, on=merge_keys, how="left")
+
+    results = run_all_strategies(features, predictions,
+                                  top_n=15, tc_bps=20.0,
+                                  carry_long_annual=0.05,
+                                  carry_short_annual=0.02)
+
+    print_performance_table(results)
+
+    # Stack all five portfolios into one parquet with `strategy` column
+    all_ports = pd.concat([r["portfolio"] for r in results.values() if not r["portfolio"].empty],
+                           ignore_index=True)
+    all_ports.to_parquet(PORTFOLIOS_PATH, index=False, compression="snappy")
+    print(f"\nWrote {PORTFOLIOS_PATH} ({all_ports.shape[0]:,} rows)")
+    print(f"Total runtime: {time.time()-t0:.0f}s")
