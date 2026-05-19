@@ -71,25 +71,44 @@ def _period_cost(curr: list, prev: list, nxt: list,
 
 # ─── Strategy selection ──────────────────────────────────────────────────────
 
-def _select_top_bottom(group: pd.DataFrame, score_col: str, top_n: int):
-    """Sort group desc by score; return (top_n, bottom_n) DataFrames or (None,None)."""
-    if len(group) < 2 * top_n:
+def _resolve_n(top_n, n_total: int) -> int:
+    """
+    Convert top_n into an absolute count of names per leg.
+      - top_n > 1 (int)        → fixed N            (e.g. top_n=15 → 15 names)
+      - 0 < top_n <= 1 (float) → percentile of cross-section
+                                  (e.g. top_n=0.10 on 250 names → 25 per leg)
+    """
+    if top_n is None:
+        return 0
+    if top_n > 1:
+        return int(top_n)
+    return max(1, int(round(top_n * n_total)))
+
+
+def _select_top_bottom(group: pd.DataFrame, score_col: str, top_n):
+    """Sort group desc by score; return (top, bottom) DataFrames or (None, None).
+    top_n is either fixed int or percentile float (see _resolve_n)."""
+    n_total = len(group)
+    n = _resolve_n(top_n, n_total)
+    if n_total < 2 * n or n < 1:
         return None, None
     g = group.sort_values(score_col, ascending=False)
-    return g.head(top_n), g.tail(top_n)
+    return g.head(n), g.tail(n)
 
 
-def _select_xgb_class(group: pd.DataFrame, top_n: int, n_classes: int = 10):
+def _select_xgb_class(group: pd.DataFrame, top_n, n_classes: int = 10):
     """
     XGB-specific: rank by (prob_{N} - prob_1) — symmetric class-membership score.
-    Allows top-N selection consistent with the other strategies.
+    Allows top-N or percentile selection consistent with other strategies.
     """
-    if len(group) < 2 * top_n:
+    n_total = len(group)
+    n = _resolve_n(top_n, n_total)
+    if n_total < 2 * n or n < 1:
         return None, None
     g = group.copy()
     g["_xgb_score"] = g[f"prob_{n_classes}"] - g["prob_1"]
     g = g.sort_values("_xgb_score", ascending=False)
-    return g.head(top_n), g.tail(top_n)
+    return g.head(n), g.tail(n)
 
 
 # ─── Two-pass strategy runner ────────────────────────────────────────────────
@@ -194,7 +213,7 @@ def _run_strategy(selections, strategy_name: str,
 
 # ─── Per-strategy public constructors ────────────────────────────────────────
 
-def construct_mom(features: pd.DataFrame, top_n: int = 15,
+def construct_mom(features: pd.DataFrame, top_n = 15,
                    tc_bps: float = 20.0,
                    carry_long_annual: float = 0.05,
                    carry_short_annual: float = 0.02,
@@ -207,7 +226,7 @@ def construct_mom(features: pd.DataFrame, top_n: int = 15,
                           carry_short_annual, days, long_only=long_only)
 
 
-def construct_xgb(predictions: pd.DataFrame, top_n: int = 15,
+def construct_xgb(predictions: pd.DataFrame, top_n = 15,
                    tc_bps: float = 20.0,
                    carry_long_annual: float = 0.05,
                    carry_short_annual: float = 0.02,
@@ -222,7 +241,7 @@ def construct_xgb(predictions: pd.DataFrame, top_n: int = 15,
                           carry_short_annual, days, long_only=long_only)
 
 
-def construct_ret(predictions: pd.DataFrame, top_n: int = 15,
+def construct_ret(predictions: pd.DataFrame, top_n = 15,
                    tc_bps: float = 20.0,
                    carry_long_annual: float = 0.05,
                    carry_short_annual: float = 0.02,
@@ -235,7 +254,7 @@ def construct_ret(predictions: pd.DataFrame, top_n: int = 15,
                           carry_short_annual, days, long_only=long_only)
 
 
-def construct_srp(predictions: pd.DataFrame, top_n: int = 15,
+def construct_srp(predictions: pd.DataFrame, top_n = 15,
                    tc_bps: float = 20.0,
                    carry_long_annual: float = 0.05,
                    carry_short_annual: float = 0.02,
@@ -248,7 +267,7 @@ def construct_srp(predictions: pd.DataFrame, top_n: int = 15,
                           carry_short_annual, days, long_only=long_only)
 
 
-def construct_cvr(predictions: pd.DataFrame, top_n: int = 15,
+def construct_cvr(predictions: pd.DataFrame, top_n = 15,
                    tc_bps: float = 20.0,
                    carry_long_annual: float = 0.05,
                    carry_short_annual: float = 0.02,
@@ -288,7 +307,7 @@ def compute_performance(port: pd.DataFrame, name: str = "") -> dict:
 
 
 def run_all_strategies(features: pd.DataFrame, predictions: pd.DataFrame,
-                        top_n: int = 15,
+                        top_n = 15,
                         tc_bps: float = 20.0,
                         carry_long_annual: float = 0.05,
                         carry_short_annual: float = 0.02,

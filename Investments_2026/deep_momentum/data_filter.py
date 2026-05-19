@@ -27,6 +27,8 @@ The pipeline never clips per-stock returns; portfolio-level compounding is
 the only place this can interact, and that's handled in portfolio.py.
 """
 
+from __future__ import annotations
+
 import time
 from pathlib import Path
 
@@ -143,22 +145,35 @@ def filter_exchanges(df: pd.DataFrame, exchanges: list[str] | None = None,
 # ─── Master ──────────────────────────────────────────────────────────────────
 
 def filter_monthly(monthly: pd.DataFrame,
+                    use_legacy_liq_filter: bool = False,
                     liq_pct: float = 0.05,
                     liq_lookback: int = 12,
                     liq_min_periods: int = 6,
                     operating_only: bool = True,
                     exchanges: list[str] | None = None,
+                    pit_index: str | None = None,
                     verbose: bool = True) -> pd.DataFrame:
     """
     Apply the full filter sequence to the monthly panel.
 
     Args:
+        use_legacy_liq_filter:
+                         apply the old turnover-ratio liquidity filter.
+                         Default False because tradability.py now owns the
+                         upstream liquidity universe.
         liq_pct:         bottom-X cross-sectional liquidity cut (default 5%).
+                         Ignored when `pit_index` is set (index membership
+                         already implies liquidity).
         liq_lookback:    trailing months for avg turnover (default 12).
         liq_min_periods: minimum months of history to be evaluated (default 6).
-        operating_only:  keep only is_operating_company == True.
+        operating_only:  keep only is_operating_company == True. Ignored
+                         when `pit_index` is set (index members are operating
+                         companies by definition).
         exchanges:       optional whitelist (e.g. ['TSX', 'TSX Venture']);
                          None keeps all.
+        pit_index:       if set (e.g. 'sptsx_composite'), restrict universe
+                         each month to that index's point-in-time members.
+                         Subsumes liquidity + operating-only filters.
 
     Returns:
         Filtered DataFrame ready for features.py.
@@ -173,12 +188,25 @@ def filter_monthly(monthly: pd.DataFrame,
         print(f"  Drop NaN return_mt:  dropped {n_dropped:,} obs (first month per assetid)")
 
     df = filter_zero_volume(df, verbose=verbose)
-    df = filter_liquidity_bottom(df, pct=liq_pct,
-                                  lookback=liq_lookback,
-                                  min_periods=liq_min_periods,
-                                  verbose=verbose)
-    if operating_only:
-        df = filter_operating_companies(df, verbose=verbose)
+
+    if pit_index:
+        # Pit-list universe: subsumes both liquidity and operating-only filters.
+        # Index constituents are operating companies (Composite excludes ETFs/CEFs/
+        # SPACs by definition) and have inherent liquidity (mid+large cap).
+        from pitlist import filter_to_index
+        df = filter_to_index(df, index_name=pit_index, verbose=verbose)
+    else:
+        # Wide-universe path: optional legacy liquidity + operating-only filters.
+        if use_legacy_liq_filter:
+            df = filter_liquidity_bottom(df, pct=liq_pct,
+                                          lookback=liq_lookback,
+                                          min_periods=liq_min_periods,
+                                          verbose=verbose)
+        elif verbose:
+            print("  Legacy turnover-ratio liquidity filter: skipped")
+        if operating_only:
+            df = filter_operating_companies(df, verbose=verbose)
+
     df = filter_exchanges(df, exchanges=exchanges, verbose=verbose)
 
     if verbose:

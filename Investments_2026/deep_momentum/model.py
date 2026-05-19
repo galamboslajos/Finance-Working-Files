@@ -194,7 +194,7 @@ def run_walk_forward(df: pd.DataFrame, feature_cols: list[str] | None = None,
     (xgb_class, ret_score, srp_score, cvr_score) plus per-class probs.
     """
     if feature_cols is None:
-        feature_cols = get_feature_columns()
+        feature_cols = get_feature_columns(df)
 
     schedule, all_months = get_training_schedule(df)
     if not schedule:
@@ -224,7 +224,7 @@ def run_walk_forward(df: pd.DataFrame, feature_cols: list[str] | None = None,
                 print(f"      skip: only {len(sub)} complete training rows")
             continue
 
-        X_train = sub[feature_cols].values
+        X_train = sub[feature_cols].astype(float).values
         y_train = sub["LABEL_mt"].astype(int).values - 1  # 0-indexed for XGBoost
 
         models = train_ensemble(X_train, y_train, n_ensemble=n_ensemble)
@@ -245,7 +245,7 @@ def run_walk_forward(df: pd.DataFrame, feature_cols: list[str] | None = None,
                 continue
             pred_idx = valid.index
 
-            X_pred = month.loc[pred_idx, feature_cols].values
+            X_pred = month.loc[pred_idx, feature_cols].astype(float).values
             probs = predict_ensemble(models, X_pred)
 
             xgb_class = naive_classify(probs)

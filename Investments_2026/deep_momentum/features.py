@@ -12,11 +12,17 @@ single substitution that SIZE_mt is the per-month decile of `turnover_mt`
 (dollar-turnover proxy for market cap, since shares-outstanding is not in
 the Norgate export).
 
-Features (all month-end values, suffix `_mt`):
+Baseline features (all month-end values, suffix `_mt`):
   zMOM_1_mt   zMOM_3_mt   zMOM_6_mt   zMOM_9_mt   zMOM_12_mt   (cross-sectional z-score)
   MMOM_1_mt   MMOM_3_mt   MMOM_6_mt   MMOM_9_mt   MMOM_12_mt   (cross-sectional mean)
   SMOM_1_mt   SMOM_3_mt   SMOM_6_mt   SMOM_9_mt   SMOM_12_mt   (cross-sectional std)
   SIZE_mt                                                       (1..10, integer)
+
+Additional tradability/state features are included when present:
+  PRICE_DECILE_mt, TURNOVER_DECILE_mt, RANGE_HL_mt, CLOSE_POS_RANGE_mt,
+  DIST_HIGH_mt, DIST_LOW_mt, DAILY_VOL_mt, DOWNSIDE_DAILY_VOL_mt,
+  MAX_DAILY_RET_mt, MIN_DAILY_RET_mt, TURNOVER_RATIO_3_mt,
+  TURNOVER_RATIO_12_mt, ZERO_VOLUME_SHARE_mt, TRADED_DAYS_mt
 
 Raw momentum (kept for portfolio.py to use directly):
   MOM_1_mt    = r_t                                  (current-month return, reversal signal)
@@ -34,6 +40,8 @@ months. We NaN-out those rows so they don't enter training or portfolio
 construction.
 """
 
+from __future__ import annotations
+
 import time
 from pathlib import Path
 
@@ -48,6 +56,23 @@ FEATURES_PATH = CACHE_DIR / "ca_features_monthly.parquet"
 
 MOMENTUM_HORIZONS = [1, 3, 6, 9, 12]
 N_CLASSES = 10  # paper uses 10
+
+OPTIONAL_STATE_FEATURES = [
+    "PRICE_DECILE_mt",
+    "TURNOVER_DECILE_mt",
+    "RANGE_HL_mt",
+    "CLOSE_POS_RANGE_mt",
+    "DIST_HIGH_mt",
+    "DIST_LOW_mt",
+    "DAILY_VOL_mt",
+    "DOWNSIDE_DAILY_VOL_mt",
+    "MAX_DAILY_RET_mt",
+    "MIN_DAILY_RET_mt",
+    "TURNOVER_RATIO_3_mt",
+    "TURNOVER_RATIO_12_mt",
+    "ZERO_VOLUME_SHARE_mt",
+    "TRADED_DAYS_mt",
+]
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -138,16 +163,41 @@ def build_features(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     df["SIZE_mt"] = (df.groupby("date_mt", group_keys=False)["turnover_mt"]
                        .apply(_xs_decile)).astype("Int64")
 
-    # ── 4. Forward return + label ──
+    # ── 4. Daily-derived tradability/risk/liquidity state features ──
+    if "last_price_mt" in df.columns:
+        df["PRICE_DECILE_mt"] = (df.groupby("date_mt", group_keys=False)["last_price_mt"]
+                                   .apply(_xs_decile)).astype("Int64")
+    if "median_daily_turnover_mt" in df.columns:
+        df["TURNOVER_DECILE_mt"] = (
+            df.groupby("date_mt", group_keys=False)["median_daily_turnover_mt"]
+              .apply(_xs_decile)
+        ).astype("Int64")
+
+    rename_map = {
+        "range_hl_mt": "RANGE_HL_mt",
+        "close_pos_range_mt": "CLOSE_POS_RANGE_mt",
+        "dist_high_mt": "DIST_HIGH_mt",
+        "dist_low_mt": "DIST_LOW_mt",
+        "daily_vol_mt": "DAILY_VOL_mt",
+        "downside_daily_vol_mt": "DOWNSIDE_DAILY_VOL_mt",
+        "max_daily_ret_mt": "MAX_DAILY_RET_mt",
+        "min_daily_ret_mt": "MIN_DAILY_RET_mt",
+        "turnover_ratio_3_mt": "TURNOVER_RATIO_3_mt",
+        "turnover_ratio_12_mt": "TURNOVER_RATIO_12_mt",
+        "zero_volume_share_mt": "ZERO_VOLUME_SHARE_mt",
+        "traded_days_mt": "TRADED_DAYS_mt",
+    }
+    for src_col, dst_col in rename_map.items():
+        if src_col in df.columns:
+            df[dst_col] = df[src_col]
+
+    # ── 5. Forward return + label ──
     df["fwd_return_mt"] = _gap_aware_fwd_return(df)
     df["LABEL_mt"] = (df.groupby("date_mt", group_keys=False)["fwd_return_mt"]
                         .apply(_xs_decile)).astype("Int64")
 
     if verbose:
-        feature_cols = [f"zMOM_{m}_mt" for m in MOMENTUM_HORIZONS] + \
-                       [f"MMOM_{m}_mt" for m in MOMENTUM_HORIZONS] + \
-                       [f"SMOM_{m}_mt" for m in MOMENTUM_HORIZONS] + \
-                       ["SIZE_mt"]
+        feature_cols = get_feature_columns(df)
         n_complete = df[feature_cols + ["LABEL_mt"]].dropna().shape[0]
         print(f"  Features built in {time.time()-t0:.0f}s")
         print(f"  Rows with full features + label: {n_complete:,} "
@@ -157,12 +207,18 @@ def build_features(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     return df
 
 
-def get_feature_columns() -> list[str]:
-    """Canonical list of the 16 model input features (in paper order)."""
+def get_feature_columns(df: pd.DataFrame | None = None,
+                        include_state_features: bool = True) -> list[str]:
+    """Canonical model input features, plus optional state features if present."""
     cols = []
     for m in MOMENTUM_HORIZONS:
         cols.extend([f"zMOM_{m}_mt", f"MMOM_{m}_mt", f"SMOM_{m}_mt"])
     cols.append("SIZE_mt")
+    if include_state_features:
+        if df is None:
+            cols.extend(OPTIONAL_STATE_FEATURES)
+        else:
+            cols.extend([c for c in OPTIONAL_STATE_FEATURES if c in df.columns])
     return cols
 
 
