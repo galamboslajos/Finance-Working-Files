@@ -8,6 +8,7 @@ __pycache__/
 # Norgate raw exports — single-user license, do NOT commit
 norgate_exports/
 norgate_exports.zip
+norgate_ca_pit_export*.zip
 
 # Legacy FMP-era stash kept locally for reference; don't push
 _legacy/
