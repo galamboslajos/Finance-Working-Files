@@ -25,3 +25,10 @@ artifacts/*
 .env.*
 !.env.example
 configs/local.toml
+credentials*.json
+service-account*.json
+service_account*.json
+application_default_credentials.json
+*.pem
+*.key
+*.p12

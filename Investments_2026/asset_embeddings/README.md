@@ -41,13 +41,18 @@ Implementation files will be added only when the first data pipeline is built.
 
 ## Cloud access
 
+The cloud project, bucket URI, and authorized account are private operational configuration. Set
+the curated URI locally from a value shared through an approved private channel:
+
 ~~~bash
+export ASSET_EMBEDDINGS_CURATED_URI='gs://<private-bucket>/<private-prefix>/'
 ./scripts/gcloud auth list
 ./scripts/gcloud storage ls \
-  gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/
+  "$ASSET_EMBEDDINGS_CURATED_URI"
 ~~~
 
-Credentials, source data, generated artifacts, and the local Cloud SDK are ignored by Git.
+Credentials, account identifiers, cloud resource identifiers, source data, generated artifacts,
+and the local Cloud SDK must remain outside Git.
 
 ## Transparency standard
 
@@ -55,7 +60,8 @@ Credentials, source data, generated artifacts, and the local Cloud SDK are ignor
 - Inputs and results identify their Git commit and data manifest.
 - Availability timestamps are mandatory.
 - Negative results and limitations stay visible.
-- No raw or licensed data, credentials, or generated artifacts are committed.
+- No raw or licensed data, credentials, cloud resource identifiers, or generated artifacts are
+  committed.
 
 ## Git and collaboration policy
 

@@ -5,7 +5,7 @@ Read README.md, docs/PROJECT.md, and docs/DATA.md before changing research logic
 ## Repository boundary
 
 - This directory belongs to the existing Finance-Working-Files monorepo.
-- The required Git top level is /Users/lajosgalambos/Desktop/Finance-Working-Files.
+- The Git top-level directory must be named Finance-Working-Files.
 - The required origin is https://github.com/galamboslajos/Finance-Working-Files.git.
 - Never run git init inside Investments_2026/asset_embeddings.
 - Never create or connect a standalone asset_embeddings repository.
@@ -33,6 +33,18 @@ git status --short --branch
 - If authentication, push, or PR creation fails, state the blocker clearly; never imply that local
   work is already visible on GitHub.
 - Do not leave substantive completed work uncommitted or unpushed without an explicit reason.
+
+## Public repository safety
+
+- Treat every tracked file, commit, branch, pull request, issue, and log excerpt as public.
+- Never commit credentials, tokens, cookies, service-account files, private keys, account emails,
+  cloud project IDs, bucket names or URIs, internal object paths, non-public inventory statistics,
+  or licensed data.
+- Use placeholders and environment-variable names in documentation. Exchange real access details
+  only through an approved private channel.
+- Keep local values in ignored `.env`, `.gcloud`, or `.tools` paths.
+- Review the complete staged diff before every commit. If a secret is exposed, stop, revoke or
+  rotate it, and assess Git history; deleting it only from the latest version is insufficient.
 
 ## Research integrity
 
