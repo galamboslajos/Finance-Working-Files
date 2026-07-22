@@ -14,10 +14,10 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: inspect schemas and build the point-in-time data spine.
+- Current phase: bounded 13F/N-PORT schema exploration before building the point-in-time data spine.
 - Models and backtests: not started.
 
-## The seven repository files
+## Repository map
 
 | File | Purpose |
 | --- | --- |
@@ -27,9 +27,16 @@ separately.
 | docs/PAPER_NOTES.md | Exact source paper and implementation lessons |
 | AGENTS.md | Rules for AI-assisted work in this repository |
 | scripts/gcloud | Safe wrapper using ignored project-local credentials |
+| notebooks/01_explore_13f_nport.ipynb | Bounded, point-in-time holdings exploration |
+| src/holdings_exploration.py | Tested diagnostics used by the notebook |
+| tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
+| data/README.md | Safe local-data workflow |
+| .env.example | Placeholder-only private input configuration |
+| requirements.txt | Minimal Python dependencies |
 | .gitignore | Prevents credentials, data, tools, and artifacts entering Git |
 
-Implementation files will be added only when the first data pipeline is built.
+The notebook is an inspection tool, not a production pipeline. Its outputs remain local and
+uncommitted.
 
 ## Research order
 
@@ -53,6 +60,23 @@ export ASSET_EMBEDDINGS_CURATED_URI='gs://<private-bucket>/<private-prefix>/'
 
 Credentials, account identifiers, cloud resource identifiers, source data, generated artifacts,
 and the local Cloud SDK must remain outside Git.
+
+## First exploration
+
+Install the small Python environment, configure exact private sample objects in an ignored `.env`,
+and launch the notebook from this directory:
+
+~~~bash
+python -m pip install -r requirements.txt
+set -a
+source .env
+set +a
+jupyter lab notebooks/01_explore_13f_nport.ipynb
+~~~
+
+The notebook keeps economic, filing, and availability timestamps separate; profiles identifier
+coverage and duplicates; preserves zero, negative, missing, and excluded states; and reports every
+filter used to form a provisional investor-asset matrix.
 
 ## Transparency standard
 

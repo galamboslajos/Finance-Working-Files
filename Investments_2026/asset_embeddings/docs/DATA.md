@@ -78,6 +78,24 @@ dictionary. Establish:
 
 Raw data, credentials, local tools, and generated artifacts must never enter Git.
 
+## Bounded exploration workflow
+
+The first inspection is implemented in `notebooks/01_explore_13f_nport.ipynb` with tested helpers
+in `src/holdings_exploration.py`.
+
+- Private inputs are supplied as exact object URIs through environment variables.
+- Bucket-wide listing is not required.
+- Samples and variable dictionaries are downloaded into ignored `data/exploration/` paths.
+- The committed notebook contains no executed outputs or raw rows.
+- Schema completeness, timestamp ordering, identifiers, duplicates, signed values, categorical
+  states, portfolio shape, and matrix density are reviewed separately.
+- The paper-aligned 20-assets/20-investors conditions are applied iteratively and logged at every
+  iteration.
+
+The exploration does not yet choose an amendment rule, investor aggregation, security-to-company
+mapping, or final equity filter. Those decisions require multiple-period evidence and a written
+data-spine decision record.
+
 ## Verified commands
 
 ~~~bash
