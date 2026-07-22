@@ -2,40 +2,29 @@
 
 ## Connected platform
 
-Bucket:
-
-gs://quant-research-trusty-agility-492109-v0
-
-Curated prefix:
-
-gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/
-
-Access was verified with info@galamboscapital.com on 2026-07-16. Authentication, object reads, and
-recursive listing succeeded. The namespace contained 20,630 objects across 79 dataset versions.
-Credentials and the local Cloud SDK live in ignored .gcloud and .tools directories.
+The exact cloud project, bucket URI, object paths, authorized accounts, and inventory statistics are
+private operational metadata. They must be supplied locally through an approved private channel and
+must not be committed. Credentials and the local Cloud SDK live in ignored `.gcloud` and `.tools`
+directories.
 
 ## Candidate products
 
-| Curated root | Intended role | Status |
+| Product category | Intended role | Public status |
 | --- | --- | --- |
-| provider/sec_api/13f_holdings/v1 | Institutional holdings baseline | Passed |
-| provider/sec_api/nport_fund_holdings/v1 | Disaggregated fund holdings | Passed |
-| provider/sec_api/company_mapping/v1 | Issuer and security mapping | Passed |
-| provider/sec_api/xbrl_financial_statements/v1 | Fundamental characteristics | Historical backfill incomplete |
-| provider/sec_api/outstanding_shares_public_float/v1 | Shares and public float | Review pending |
-| equity_us/equity_us_market_daily_unified/v1 | Prices, returns, and liquidity | Passed |
-| equity_us/equity_us_index_membership_daily_unified/v1 | Point-in-time universe | Passed |
-| factor_benchmarks/v1 | Factor and return baselines | Passed with legacy-metadata warnings |
+| 13F holdings | Institutional holdings baseline | Validate locally |
+| N-PORT fund holdings | Disaggregated fund holdings | Validate locally |
+| Company mapping | Issuer and security mapping | Validate locally |
+| XBRL financial statements | Fundamental characteristics | Validate locally |
+| Shares and public float | Market-cap construction | Validate locally |
+| U.S. equity daily market data | Prices, returns, and liquidity | Validate locally |
+| Point-in-time index membership | Investable universe | Validate locally |
+| Factor benchmarks | Factor and return baselines | Validate locally |
 
 No payload is stored in Git.
 
-## 13F product snapshot
+## 13F product requirements
 
-- Coverage: January 2013 through June 2026.
-- Grain: manager, filing, holding.
-- Holdings rows: 120,270,881.
-- Filings: 388,292.
-- Managers: 16,154.
+- Required grain: manager, filing, holding.
 - Key point-in-time fields: period_of_report, filed_at, availability_timestamp_utc.
 - Holding fields include manager, issuer, CUSIP, ticker, value, shares, put/call, voting authority,
   and identity confidence.
@@ -97,5 +86,5 @@ Raw data, credentials, local tools, and generated artifacts must never enter Git
   --format='value(account)'
 
 ./scripts/gcloud storage ls \
-  'gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/**'
+  "$ASSET_EMBEDDINGS_CURATED_URI"
 ~~~
