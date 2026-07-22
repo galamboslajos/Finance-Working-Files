@@ -1,0 +1,27 @@
+.DS_Store
+.idea/
+.vscode/
+
+.venv/
+.tools/
+.gcloud/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Research data and generated outputs are local by default.
+data/*
+!data/README.md
+artifacts/*
+!artifacts/README.md
+
+# Local secrets and machine-specific configuration.
+.env
+.env.*
+!.env.example
+configs/local.toml

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+local_gcloud="$repository_root/.tools/google-cloud-sdk/bin/gcloud"
+export CLOUDSDK_CONFIG="$repository_root/.gcloud"
+
+if [ -x "$local_gcloud" ]; then
+    exec "$local_gcloud" "$@"
+fi
+
+if command -v gcloud >/dev/null 2>&1; then
+    exec gcloud "$@"
+fi
+
+echo "Google Cloud CLI is not installed." >&2
+echo "Install it from https://cloud.google.com/sdk/docs/install and retry." >&2
+exit 127
