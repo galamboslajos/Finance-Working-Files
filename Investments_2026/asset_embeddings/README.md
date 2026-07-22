@@ -56,3 +56,24 @@ Credentials, source data, generated artifacts, and the local Cloud SDK are ignor
 - Availability timestamps are mandatory.
 - Negative results and limitations stay visible.
 - No raw or licensed data, credentials, or generated artifacts are committed.
+
+## Git and collaboration policy
+
+This project is not a standalone repository. Its permanent location is:
+
+- Repository: https://github.com/galamboslajos/Finance-Working-Files
+- Directory: Investments_2026/asset_embeddings
+- Default branch: main
+
+For substantive work:
+
+1. Verify that the Git top level is Finance-Working-Files and origin points to the repository above.
+2. Update main and create an agent/ feature branch.
+3. Stage only explicit files under Investments_2026/asset_embeddings.
+4. Review the staged diff and run relevant validation.
+5. Commit and push each coherent milestone.
+6. Open or update a draft pull request against main.
+7. Report the branch, commit hash, checks, and PR URL at handoff.
+
+Never initialize Git inside this directory, use repository-wide bulk staging, or claim that local
+work is shared before the remote commit has been verified.
