@@ -22,3 +22,23 @@ To fetch them safely:
 The notebook deliberately avoids bucket-wide listing and downloads only explicitly configured
 objects. Clear notebook outputs before committing so sample rows and private inventory statistics
 do not enter Git.
+
+## Full-history mirror
+
+The complete products can be mirrored into the ignored `data/full_history/` directory without
+bucket-listing permission. Configure the two private manifest URIs shown in `.env.example`, then
+validate the download plan:
+
+~~~bash
+python3 scripts/sync_full_history.py --dry-run
+~~~
+
+Start or resume the mirror with:
+
+~~~bash
+python3 scripts/sync_full_history.py
+~~~
+
+The downloader validates manifest paths, reserves local disk headroom, skips exact-size files,
+resumes partial objects, refreshes short-lived Google access tokens, and verifies every downloaded
+file by its manifest byte size. The data and downloaded private manifests remain ignored by Git.
