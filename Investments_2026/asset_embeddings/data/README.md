@@ -49,3 +49,7 @@ file by its manifest byte size. The data and downloaded private manifests remain
 the full holdings payload into memory. If an executed copy is needed for local review, store it
 below `data/exploration/`; that directory is ignored because the outputs contain non-public
 inventory statistics.
+
+`notebooks/03_audit_13f_data_spine.ipynb` streams all holdings rows in bounded batches and writes
+only aggregate, fingerprinted cache files below `data/audits/13f_data_spine/`. Those caches and any
+executed notebook remain ignored and must not be committed.
