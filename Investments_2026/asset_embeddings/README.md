@@ -14,7 +14,8 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: bounded 13F/N-PORT schema exploration before building the point-in-time data spine.
+- Current phase: full-history 13F orientation and point-in-time data-spine decisions; N-PORT is
+  deferred as a possible later extension.
 - Models and backtests: not started.
 
 ## Repository map
@@ -28,8 +29,11 @@ separately.
 | AGENTS.md | Rules for AI-assisted work in this repository |
 | scripts/gcloud | Safe wrapper using ignored project-local credentials |
 | notebooks/01_explore_13f_nport.ipynb | Bounded, point-in-time holdings exploration |
+| notebooks/02_explore_13f_full_history.ipynb | Memory-safe orientation to the complete local 13F product |
 | src/holdings_exploration.py | Tested diagnostics used by the notebook |
+| src/full_history_13f.py | Tested full-history Parquet and 13F timing diagnostics |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
+| tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
@@ -77,6 +81,21 @@ jupyter lab notebooks/01_explore_13f_nport.ipynb
 The notebook keeps economic, filing, and availability timestamps separate; profiles identifier
 coverage and duplicates; preserves zero, negative, missing, and excluded states; and reports every
 filter used to form a provisional investor-asset matrix.
+
+## Full-history 13F orientation
+
+After mirroring the complete 13F product, open:
+
+~~~bash
+jupyter lab notebooks/02_explore_13f_full_history.ipynb
+~~~
+
+The notebook uses Parquet footers for complete table shapes, loads the smaller filing index for
+full-history timing analysis, and reads only a bounded cross-partition holdings sample. It explains
+the difference between the portfolio date, filing time, and permitted availability time without
+defining production amendment, asset-mapping, or equity-universe rules.
+
+Executed outputs contain private inventory statistics and remain local and uncommitted.
 
 ## Transparency standard
 

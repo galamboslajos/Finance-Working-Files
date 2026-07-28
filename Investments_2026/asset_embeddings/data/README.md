@@ -42,3 +42,10 @@ python3 scripts/sync_full_history.py
 The downloader validates manifest paths, reserves local disk headroom, skips exact-size files,
 resumes partial objects, refreshes short-lived Google access tokens, and verifies every downloaded
 file by its manifest byte size. The data and downloaded private manifests remain ignored by Git.
+
+## Full-history 13F notebook
+
+`notebooks/02_explore_13f_full_history.ipynb` reads the complete local 13F mirror without loading
+the full holdings payload into memory. If an executed copy is needed for local review, store it
+below `data/exploration/`; that directory is ignored because the outputs contain non-public
+inventory statistics.

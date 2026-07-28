@@ -18,7 +18,8 @@ tradable alpha.
 ## Initial scope
 
 - U.S. equities.
-- Quarterly 13F and N-PORT holdings.
+- Quarterly 13F holdings as the first implementation.
+- N-PORT deferred as a possible fund-level replication or extension.
 - Company or security aggregation chosen only after identifier review.
 - Simple factor or recommender-system baseline first.
 - Relative value among embedding peers as the first possible strategy family.
@@ -72,7 +73,7 @@ reduced to a transparent core.
 
 Current phase:
 
-- inspect product schemas, manifests, and variable dictionaries;
+- inspect the complete 13F product schema, filing index, and bounded holdings states;
 - choose issuer-versus-security grain;
 - define amendment and duplicate rules;
 - establish joins across holdings, mappings, market data, and fundamentals;
