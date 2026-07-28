@@ -12,7 +12,7 @@ directories.
 | Product category | Intended role | Public status |
 | --- | --- | --- |
 | 13F holdings | Institutional holdings baseline | Validate locally |
-| N-PORT fund holdings | Disaggregated fund holdings | Validate locally |
+| N-PORT fund holdings | Deferred disaggregated extension | Validate locally |
 | Company mapping | Issuer and security mapping | Validate locally |
 | XBRL financial statements | Fundamental characteristics | Validate locally |
 | Shares and public float | Market-cap construction | Validate locally |
@@ -95,6 +95,25 @@ in `src/holdings_exploration.py`.
 The exploration does not yet choose an amendment rule, investor aggregation, security-to-company
 mapping, or final equity filter. Those decisions require multiple-period evidence and a written
 data-spine decision record.
+
+## Full-history 13F orientation
+
+The 13F-first workflow is implemented in `notebooks/02_explore_13f_full_history.ipynb` with tested
+helpers in `src/full_history_13f.py`.
+
+- Complete table shapes and schema stability are read from Parquet footers.
+- The smaller filing index is loaded across all partitions for timing, cadence, form, and amendment
+  diagnostics.
+- Economic report dates, publication times, and permitted availability times remain separate.
+- Older backdated records are separated from the inferred continuous product window.
+- Holdings content is inspected through a deterministic bounded sample across filing-month
+  partitions.
+- Raw manager, issuer, CUSIP, ticker, and holding rows are not displayed.
+- Detailed inventory statistics and executed outputs remain in ignored local paths.
+
+This notebook is an orientation and audit tool. It does not resolve amendments, define the
+long-equity universe, choose company-versus-security grain, or build the production holdings
+matrix.
 
 ## Verified commands
 
