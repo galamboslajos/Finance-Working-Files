@@ -14,8 +14,8 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: full-history 13F orientation and point-in-time data-spine decisions; N-PORT is
-  deferred as a possible later extension.
+- Current phase: full-history 13F point-in-time data-spine audits; N-PORT is deferred as a possible
+  later extension.
 - Models and backtests: not started.
 
 ## Repository map
@@ -25,15 +25,19 @@ separately.
 | README.md | Fast orientation and current status |
 | docs/PROJECT.md | Hypotheses, safeguards, benchmarks, and roadmap |
 | docs/DATA.md | Cloud access, dataset inventory, and data rules |
+| docs/13F_DATA_SPINE.md | Provisional point-in-time 13F decisions and audit gates |
 | docs/PAPER_NOTES.md | Exact source paper and implementation lessons |
 | AGENTS.md | Rules for AI-assisted work in this repository |
 | scripts/gcloud | Safe wrapper using ignored project-local credentials |
 | notebooks/01_explore_13f_nport.ipynb | Bounded, point-in-time holdings exploration |
 | notebooks/02_explore_13f_full_history.ipynb | Memory-safe orientation to the complete local 13F product |
+| notebooks/03_audit_13f_data_spine.ipynb | Full-history audit of the provisional 13F data-spine rules |
 | src/holdings_exploration.py | Tested diagnostics used by the notebook |
 | src/full_history_13f.py | Tested full-history Parquet and 13F timing diagnostics |
+| src/data_spine_13f.py | Tested amendment, coverage, identity, and instrument audits |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
+| tests/test_data_spine_13f.py | Unit tests for point-in-time data-spine audit rules |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
@@ -96,6 +100,19 @@ the difference between the portfolio date, filing time, and permitted availabili
 defining production amendment, asset-mapping, or equity-universe rules.
 
 Executed outputs contain private inventory statistics and remain local and uncommitted.
+
+## Full-history 13F data-spine audit
+
+The seven provisional point-in-time decisions are recorded in `docs/13F_DATA_SPINE.md`. To test
+them against the complete local history, open:
+
+~~~bash
+jupyter lab notebooks/03_audit_13f_data_spine.ipynb
+~~~
+
+The first run streams every holdings row in bounded Parquet batches. Only aggregate results are
+retained, and a fingerprinted ignored cache under `data/audits/` prevents unchanged inputs from
+being rescanned. The notebook remains output-free in Git and does not build a modeling matrix.
 
 ## Transparency standard
 

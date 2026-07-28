@@ -73,9 +73,10 @@ reduced to a transparent core.
 
 Current phase:
 
-- inspect the complete 13F product schema, filing index, and bounded holdings states;
-- choose issuer-versus-security grain;
-- define amendment and duplicate rules;
+- audit the provisional point-in-time amendment, notice, asset-grain, instrument, manager,
+  coverage, and decision-time policies against the complete 13F history;
+- validate accession joins, issuer identity snapshots, and manager identifier stability;
+- choose the permitted point-in-time issuer mappings and common-equity security master;
 - establish joins across holdings, mappings, market data, and fundamentals;
 - build coverage and leakage diagnostics.
 

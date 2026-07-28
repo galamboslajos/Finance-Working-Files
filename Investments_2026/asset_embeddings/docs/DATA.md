@@ -115,6 +115,29 @@ This notebook is an orientation and audit tool. It does not resolve amendments, 
 long-equity universe, choose company-versus-security grain, or build the production holdings
 matrix.
 
+## Point-in-time 13F data-spine audit
+
+The provisional policies agreed after the orientation are recorded in `docs/13F_DATA_SPINE.md`.
+They cover amendment state transitions, notices and combination reports, issuer-level modeling,
+typed instruments, manager CIK identity, the continuous coverage window, and the standardized
+filing-deadline cutoff.
+
+`notebooks/03_audit_13f_data_spine.ipynb` tests those policies against the complete local history
+with helpers in `src/data_spine_13f.py`.
+
+- Filings and cover pages are reconciled by accession before amendment metadata is joined.
+- Restatements and new-holdings amendments remain separate event types.
+- Boundary quarters are eligible only when the complete normal filing window was observable.
+- Manager identifier instability is reported without displaying raw managers.
+- Every holdings row is streamed through provisional instrument, issuer-identity, and timestamp
+  audits.
+- Mapping snapshot dates are audited separately from present-day identifier coverage.
+- Aggregate scans are cached below ignored `data/audits/` paths using complete-input fingerprints.
+
+The instrument classes are audit labels, not a final equity universe. A point-in-time security
+master is still required to distinguish operating-company common equity from funds and other cash
+share instruments reliably.
+
 ## Verified commands
 
 ~~~bash
