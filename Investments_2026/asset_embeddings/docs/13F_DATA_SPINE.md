@@ -1,6 +1,6 @@
 # 13F point-in-time data-spine decisions
 
-Status: **provisional, audit-gated**
+Status: **provisional, audit-gated; state transitions implemented**
 
 This record converts the first full-history 13F review into explicit implementation policies.
 Nothing in this document authorizes silent cleaning. A policy becomes final only after the
@@ -168,3 +168,26 @@ The first investor-issuer matrix is blocked until all of the following are revie
 
 The committed notebook is output-free. Full inventory statistics, aggregate audit outputs, cache
 files, raw identifiers, and executed notebooks remain under ignored local `data/` paths.
+
+## Implemented point-in-time state contract
+
+`src/point_in_time_13f.py` now turns the audited rules into a decision-specific state machine.
+`notebooks/04_validate_13f_point_in_time_panel.ipynb` validates it on the first locally derived
+decision-complete quarter.
+
+The implementation deliberately separates three layers:
+
+1. `event_ledger`: every filing is applied, future, excluded, or quarantined with an explicit
+   reason;
+2. `manager_periods`: every manager-quarter reports completeness, quarantine state, and model
+   eligibility; and
+3. `holdings_asof`: raw holding lines from the state knowable at the requested cutoff, with source
+   event and availability provenance.
+
+Unit tests require invariance to future amendments, replacement after restatement availability,
+supplementation after new-holdings availability, exclusion of notices, incomplete-state handling,
+holding-count reconciliation, and timezone-aware decision timestamps.
+
+This implementation does not clear the matrix-construction gate. The remaining blocker is a
+point-in-time security master that distinguishes common equity from other cash-share candidates
+and uses only identifier mappings knowable at each historical date.

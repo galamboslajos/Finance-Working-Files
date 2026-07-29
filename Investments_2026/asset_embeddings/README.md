@@ -14,8 +14,8 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: full-history 13F point-in-time data-spine audits; N-PORT is deferred as a possible
-  later extension.
+- Current phase: canonical point-in-time 13F panel implementation and validation; N-PORT is deferred
+  as a possible later extension.
 - Models and backtests: not started.
 
 ## Repository map
@@ -32,12 +32,15 @@ separately.
 | notebooks/01_explore_13f_nport.ipynb | Bounded, point-in-time holdings exploration |
 | notebooks/02_explore_13f_full_history.ipynb | Memory-safe orientation to the complete local 13F product |
 | notebooks/03_audit_13f_data_spine.ipynb | Full-history audit of the provisional 13F data-spine rules |
+| notebooks/04_validate_13f_point_in_time_panel.ipynb | First decision-time 13F state validation |
 | src/holdings_exploration.py | Tested diagnostics used by the notebook |
 | src/full_history_13f.py | Tested full-history Parquet and 13F timing diagnostics |
 | src/data_spine_13f.py | Tested amendment, coverage, identity, and instrument audits |
+| src/point_in_time_13f.py | Canonical availability-ordered 13F state transitions |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
 | tests/test_data_spine_13f.py | Unit tests for point-in-time data-spine audit rules |
+| tests/test_point_in_time_13f.py | Unit tests for amendment state and no-lookahead behavior |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
@@ -113,6 +116,27 @@ jupyter lab notebooks/03_audit_13f_data_spine.ipynb
 The first run streams every holdings row in bounded Parquet batches. Only aggregate results are
 retained, and a fingerprinted ignored cache under `data/audits/` prevents unchanged inputs from
 being rescanned. The notebook remains output-free in Git and does not build a modeling matrix.
+
+## Canonical point-in-time 13F panel
+
+`src/point_in_time_13f.py` implements the first decision-time state builder. It:
+
+- orders filing events by permitted availability, filed time, and accession;
+- supplements with `NEW_HOLDINGS` amendments and replaces with `RESTATEMENT` amendments;
+- retains notices, combination reports, future filings, and quarantines in an event ledger;
+- marks incomplete or ambiguous manager-period states as ineligible rather than silently fixing
+  them; and
+- preserves filing-line identifiers without applying a present-day issuer mapping.
+
+Run the local validation with:
+
+~~~bash
+jupyter lab notebooks/04_validate_13f_point_in_time_panel.ipynb
+~~~
+
+The notebook derives the first decision-complete quarter from the local product, streams only the
+required filed-month holdings partitions, and exposes `raw_holdings_asof_local` for private Data
+Wrangler inspection. Executed outputs remain local and uncommitted.
 
 ## Transparency standard
 
