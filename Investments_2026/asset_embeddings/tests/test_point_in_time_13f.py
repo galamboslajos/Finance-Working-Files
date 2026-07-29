@@ -486,6 +486,13 @@ class PointInTime13FTests(unittest.TestCase):
         notebook_text = notebook_path.read_text(encoding="utf-8")
         self.assertNotIn("gs://", notebook_text)
         self.assertNotIn("@", notebook_text)
+        self.assertIn(
+            "Economic reference periods and announcement availability",
+            notebook_text,
+        )
+        self.assertIn("availability_timestamp_utc", notebook_text)
+        self.assertIn("announcement_date", notebook_text)
+        self.assertIn("45-day reference", notebook_text)
 
 
 if __name__ == "__main__":
