@@ -75,6 +75,8 @@ Current phase:
 
 - audit the provisional point-in-time amendment, notice, asset-grain, instrument, manager,
   coverage, and decision-time policies against the complete 13F history;
+- construct filing-event ledgers and canonical manager-period states at historical decision
+  cutoffs;
 - validate accession joins, issuer identity snapshots, and manager identifier stability;
 - choose the permitted point-in-time issuer mappings and common-equity security master;
 - establish joins across holdings, mappings, market data, and fundamentals;

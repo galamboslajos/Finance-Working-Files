@@ -138,6 +138,24 @@ The instrument classes are audit labels, not a final equity universe. A point-in
 master is still required to distinguish operating-company common equity from funds and other cash
 share instruments reliably.
 
+## Canonical point-in-time 13F state
+
+`src/point_in_time_13f.py` and `notebooks/04_validate_13f_point_in_time_panel.ipynb` implement and
+check the first canonical decision-time state:
+
+- the filing table defines the event inventory and expected holding-line count;
+- cover-page amendment and report metadata are joined one-to-one by accession;
+- events are ordered by availability, filed time, and accession;
+- originals initialize, new-holdings amendments supplement, and restatements replace;
+- notices and combination reports stay explicit but do not enter the complete-portfolio baseline;
+- missing joins, conflicting signals, count mismatches, and incomplete states are quarantined;
+- every output row retains its source accession and source-event availability; and
+- downstream modeling must use the explicit state-eligibility flag.
+
+The local quarter builder streams only holdings partitions needed by visible candidate events. It
+does not apply the current issuer mapping or define a final common-equity universe. Those remain
+blocking point-in-time security-master decisions.
+
 ## Verified commands
 
 ~~~bash

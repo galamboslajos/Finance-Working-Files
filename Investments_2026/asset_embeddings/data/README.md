@@ -53,3 +53,8 @@ inventory statistics.
 `notebooks/03_audit_13f_data_spine.ipynb` streams all holdings rows in bounded batches and writes
 only aggregate, fingerprinted cache files below `data/audits/13f_data_spine/`. Those caches and any
 executed notebook remain ignored and must not be committed.
+
+`notebooks/04_validate_13f_point_in_time_panel.ipynb` builds one decision-complete quarter from
+local Parquet partitions. Store its executed copy below `data/exploration/`. The in-memory
+`raw_holdings_asof_local` DataFrame is suitable for private Data Wrangler inspection but must never
+be exported into a tracked path.
