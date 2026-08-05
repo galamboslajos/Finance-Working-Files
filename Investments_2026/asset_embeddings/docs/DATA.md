@@ -153,8 +153,34 @@ check the first canonical decision-time state:
 - downstream modeling must use the explicit state-eligibility flag.
 
 The local quarter builder streams only holdings partitions needed by visible candidate events. It
-does not apply the current issuer mapping or define a final common-equity universe. Those remain
-blocking point-in-time security-master decisions.
+does not apply the current issuer mapping or define a final common-equity universe. The next
+section resolves the first security-level representation key while leaving the market
+common-equity gate explicit.
+
+## Point-in-time 13F security identity
+
+`src/security_master_13f.py` and `notebooks/05_audit_13f_security_master.ipynb` separate the first
+model-ready security identity from the later common-equity and issuer-mapping questions.
+
+- The first representation key is the normalized CUSIP reported with the filing, namespaced by
+  instrument channel. It is knowable at the filing availability timestamp.
+- A typed key is mandatory because the same reported CUSIP can appear in cash-share and option
+  channels. Those economic exposures are never added together.
+- The first matrix uses only positive-value `cash_share_candidate` rows from complete,
+  unquarantined point-in-time manager states.
+- `cash_share_candidate` is not a claim of verified common stock. Current mappings, names, and
+  tickers are not silent substitutes for a historical market security master.
+- Reported issuer CIK remains audit metadata and a later aggregation grain. A resolved issuer
+  mapping is usable only when its mapping snapshot predates the historical decision; a date-only
+  same-day snapshot is conservatively unavailable.
+- CUSIP changes remain separate security identities until effective-dated corporate-action links
+  exist.
+
+The full-history identity scan reads every holdings partition in bounded batches and caches only
+aggregate diagnostics under ignored `data/audits/` paths. The first local matrix candidate applies
+the 75 percent concentration rule, then the iterative 20-security/20-manager rules, and recomputes
+weights after the final universe is fixed. It remains a sparse pair table rather than a dense
+matrix.
 
 ## Verified commands
 

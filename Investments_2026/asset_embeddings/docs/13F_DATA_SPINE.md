@@ -1,6 +1,6 @@
 # 13F point-in-time data-spine decisions
 
-Status: **provisional, audit-gated; state transitions implemented**
+Status: **provisional, audit-gated; state transitions and security baseline implemented**
 
 This record converts the first full-history 13F review into explicit implementation policies.
 Nothing in this document authorizes silent cleaning. A policy becomes final only after the
@@ -62,11 +62,13 @@ audit tables and may enter later event-dated consolidation work.
 
 ## 3. Asset grain
 
-The raw holding line is never discarded. The first modeled asset is a point-in-time issuer, not an
-ultimate parent company.
+The raw holding line is never discarded. Full-history and decision-time evidence changes the first
+modeled asset from the provisional issuer proposal to a filing-reported security:
 
-- Eligible security lines are aggregated to a verified issuer identity.
-- Security-level embeddings remain a required robustness comparison.
+- The baseline key is normalized reported CUSIP, namespaced by instrument channel.
+- The key is knowable with the filing and does not require a later issuer-mapping snapshot.
+- Issuer-level embeddings remain a required robustness comparison once point-in-time mappings are
+  available.
 - Ultimate-parent or company consolidation is deferred until effective-dated corporate-action
   mappings exist.
 - Present-day issuer or parent mappings must not rewrite historical identity.
@@ -77,8 +79,9 @@ The mapping audit must review `reported_issuer_cik`, `resolved_issuer_cik`,
 
 ## 4. Instrument scope
 
-Every reported 13F instrument is preserved. The first model is a common-equity benchmark, followed
-by typed instrument extensions.
+Every reported 13F instrument is preserved. The first holdings-representation model uses the
+cash-share candidate channel; a verified common-equity benchmark follows the point-in-time market
+security-master join, and other instruments remain typed extensions.
 
 Provisional instrument channels are:
 
@@ -154,7 +157,7 @@ retroactively modify the frozen quarterly snapshot.
 
 ## Audit gates before matrix construction
 
-The first investor-issuer matrix is blocked until all of the following are reviewed:
+The first manager-security matrix is blocked until all of the following are reviewed:
 
 1. accession joins reconcile filings, cover pages, and holdings;
 2. amendment signals, types, numbers, sequences, and availability ordering are quantified;
@@ -188,6 +191,28 @@ Unit tests require invariance to future amendments, replacement after restatemen
 supplementation after new-holdings availability, exclusion of notices, incomplete-state handling,
 holding-count reconciliation, and timezone-aware decision timestamps.
 
-This implementation does not clear the matrix-construction gate. The remaining blocker is a
-point-in-time security master that distinguishes common equity from other cash-share candidates
-and uses only identifier mappings knowable at each historical date.
+The state-machine milestone alone does not clear the matrix-construction gate. It requires the
+security-identity evidence and rules recorded next.
+
+## Implemented security-identity contract
+
+`src/security_master_13f.py` and `notebooks/05_audit_13f_security_master.ipynb` implement the first
+security-level gate and a one-quarter sparse matrix candidate.
+
+The implementation:
+
+1. audits reported CUSIP format, issuer-CIK coverage, typed-channel reuse, and identifier conflicts
+   across the complete holdings history;
+2. uses only the reported, typed CUSIP for the baseline representation asset;
+3. excludes every mapping snapshot unavailable before the decision date, treating a date-only
+   same-day snapshot as unavailable;
+4. keeps non-cash instruments in separate channels and labels the baseline
+   `cash_share_candidate`, not verified common equity;
+5. forms one manager-security position per period, applies the concentration and iterative degree
+   rules, and recomputes weights only after the retained universe is fixed; and
+6. asserts no future source events, duplicate matrix cells, channel leakage, or weight
+   reconciliation failures.
+
+This clears the security-level representation gate once the local audit assertions pass. It does
+not clear the market-data gate: a historically valid market security master is still required
+before calling the universe common equity, joining returns, or testing a trading strategy.
