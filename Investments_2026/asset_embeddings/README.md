@@ -134,7 +134,8 @@ Run the local validation with:
 jupyter lab notebooks/04_validate_13f_point_in_time_panel.ipynb
 ~~~
 
-The notebook derives the first decision-complete quarter from the local product, streams only the
+The notebook visualizes the full-history relationship between economic report dates and filing
+availability, derives the first decision-complete quarter from the local product, streams only the
 required filed-month holdings partitions, and exposes `raw_holdings_asof_local` for private Data
 Wrangler inspection. Executed outputs remain local and uncommitted.
 
