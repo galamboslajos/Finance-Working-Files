@@ -20,7 +20,8 @@ tradable alpha.
 - U.S. equities.
 - Quarterly 13F holdings as the first implementation.
 - N-PORT deferred as a possible fund-level replication or extension.
-- Company or security aggregation chosen only after identifier review.
+- Filing-reported, typed CUSIP security grain for the first representation model; issuer and
+  company aggregation remain robustness extensions requiring effective-dated mappings.
 - Simple factor or recommender-system baseline first.
 - Relative value among embedding peers as the first possible strategy family.
 
@@ -78,7 +79,8 @@ Current phase:
 - construct filing-event ledgers and canonical manager-period states at historical decision
   cutoffs;
 - validate accession joins, issuer identity snapshots, and manager identifier stability;
-- choose the permitted point-in-time issuer mappings and common-equity security master;
+- validate the filing-reported CUSIP security key and quarantine identifier conflicts;
+- choose the permitted point-in-time issuer mappings and market common-equity security master;
 - establish joins across holdings, mappings, market data, and fundamentals;
 - build coverage and leakage diagnostics.
 

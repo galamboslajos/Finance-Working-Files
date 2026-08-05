@@ -14,8 +14,8 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: canonical point-in-time 13F panel implementation and validation; N-PORT is deferred
-  as a possible later extension.
+- Current phase: point-in-time 13F security identity and sparse matrix validation; N-PORT is
+  deferred as a possible later extension.
 - Models and backtests: not started.
 
 ## Repository map
@@ -33,14 +33,17 @@ separately.
 | notebooks/02_explore_13f_full_history.ipynb | Memory-safe orientation to the complete local 13F product |
 | notebooks/03_audit_13f_data_spine.ipynb | Full-history audit of the provisional 13F data-spine rules |
 | notebooks/04_validate_13f_point_in_time_panel.ipynb | First decision-time 13F state validation |
+| notebooks/05_audit_13f_security_master.ipynb | Full-history security identity and first sparse matrix audit |
 | src/holdings_exploration.py | Tested diagnostics used by the notebook |
 | src/full_history_13f.py | Tested full-history Parquet and 13F timing diagnostics |
 | src/data_spine_13f.py | Tested amendment, coverage, identity, and instrument audits |
 | src/point_in_time_13f.py | Canonical availability-ordered 13F state transitions |
+| src/security_master_13f.py | Point-in-time security identity and audited matrix-candidate rules |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
 | tests/test_data_spine_13f.py | Unit tests for point-in-time data-spine audit rules |
 | tests/test_point_in_time_13f.py | Unit tests for amendment state and no-lookahead behavior |
+| tests/test_security_master_13f.py | Unit tests for security identity, mapping cutoffs, and matrix gates |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
@@ -138,6 +141,27 @@ The notebook visualizes the full-history relationship between economic report da
 availability, derives the first decision-complete quarter from the local product, streams only the
 required filed-month holdings partitions, and exposes `raw_holdings_asof_local` for private Data
 Wrangler inspection. Executed outputs remain local and uncommitted.
+
+## Point-in-time security identity
+
+`src/security_master_13f.py` and `notebooks/05_audit_13f_security_master.ipynb` establish the first
+model-ready asset grain without applying a future issuer mapping. They:
+
+- use the normalized CUSIP reported with each filing, namespaced by instrument channel;
+- preserve options, debt-like instruments, preferred shares, units, warrants, and explicit funds
+  as separate channels;
+- use `cash_share_candidate` as the first holdings-representation baseline without calling it
+  verified common equity;
+- audit identifier coverage and collisions across the complete holdings history with an ignored,
+  fingerprinted aggregate cache;
+- exclude mapping snapshots that were not knowable before the historical decision time; and
+- build a sparse first-quarter matrix candidate with the 75 percent concentration rule and
+  iterative 20-manager/20-security coverage rules.
+
+The notebook exposes `security_rows_local` and `matrix_pairs_local` for private Data Wrangler use.
+Those frames contain raw identifiers and must remain local. A point-in-time market security master
+is still required before describing the universe as common equity or joining returns for a trading
+test.
 
 ## Transparency standard
 
