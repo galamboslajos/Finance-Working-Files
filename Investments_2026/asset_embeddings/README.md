@@ -14,7 +14,7 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: point-in-time 13F security identity and sparse matrix validation; N-PORT is
+- Current phase: full-history point-in-time 13F matrix materialization and validation; N-PORT is
   deferred as a possible later extension.
 - Models and backtests: not started.
 
@@ -34,16 +34,19 @@ separately.
 | notebooks/03_audit_13f_data_spine.ipynb | Full-history audit of the provisional 13F data-spine rules |
 | notebooks/04_validate_13f_point_in_time_panel.ipynb | First decision-time 13F state validation |
 | notebooks/05_audit_13f_security_master.ipynb | Full-history security identity and first sparse matrix audit |
+| notebooks/06_build_13f_pit_matrices.ipynb | Resumable full-history point-in-time matrix build and validation |
 | src/holdings_exploration.py | Tested diagnostics used by the notebook |
 | src/full_history_13f.py | Tested full-history Parquet and 13F timing diagnostics |
 | src/data_spine_13f.py | Tested amendment, coverage, identity, and instrument audits |
 | src/point_in_time_13f.py | Canonical availability-ordered 13F state transitions |
 | src/security_master_13f.py | Point-in-time security identity and audited matrix-candidate rules |
+| src/matrix_13f.py | Fingerprinted quarterly matrix materialization and full-history gates |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
 | tests/test_data_spine_13f.py | Unit tests for point-in-time data-spine audit rules |
 | tests/test_point_in_time_13f.py | Unit tests for amendment state and no-lookahead behavior |
 | tests/test_security_master_13f.py | Unit tests for security identity, mapping cutoffs, and matrix gates |
+| tests/test_matrix_13f.py | Unit tests for full-history matrix construction and safe resume |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
@@ -155,13 +158,32 @@ model-ready asset grain without applying a future issuer mapping. They:
 - audit identifier coverage and collisions across the complete holdings history with an ignored,
   fingerprinted aggregate cache;
 - exclude mapping snapshots that were not knowable before the historical decision time; and
-- build a sparse first-quarter matrix candidate with the 75 percent concentration rule and
-  iterative 20-manager/20-security coverage rules.
+- build a sparse first-quarter matrix candidate whose 75 percent concentration and iterative
+  20-manager/20-security coverage rules hold jointly at convergence.
 
 The notebook exposes `security_rows_local` and `matrix_pairs_local` for private Data Wrangler use.
 Those frames contain raw identifiers and must remain local. A point-in-time market security master
 is still required before describing the universe as common equity or joining returns for a trading
 test.
+
+## Full-history point-in-time matrices
+
+`src/matrix_13f.py` and `notebooks/06_build_13f_pit_matrices.ipynb` materialize the representation
+input for every locally derived decision-complete quarter. The baseline:
+
+- accepts only a normalized, source-reported nine-character CUSIP and never guesses a repair for a
+  shorter identifier;
+- builds each manager state from events available by that quarter's standardized cutoff;
+- keeps one sparse typed cash-share pair per manager and security;
+- jointly reapplies the 75 percent concentration and iterative 20-by-20 degree rules until both
+  hold at convergence;
+- records data, source-code, policy, parameter, and output-file fingerprints; and
+- blocks handoff when a quarter is missing, stale, modified, duplicated, or fails a no-lookahead,
+  channel, degree, concentration, uniqueness, or weight-reconciliation check.
+
+Generated partitions live below ignored `data/model_inputs/`. The notebook exposes one selected
+quarter as `matrix_pairs_local` for private Data Wrangler inspection and a partitioned Arrow
+dataset as `matrix_dataset_local` for memory-bounded full-history work.
 
 ## Transparency standard
 

@@ -149,6 +149,32 @@ class SecurityMaster13FTests(unittest.TestCase):
         self.assertEqual(candidate.filtered_positions["typed_security_id"].nunique(), 2)
         self.assertTrue(candidate.checks["violations"].eq(0).all())
 
+    def test_matrix_candidate_reapplies_concentration_after_degree_filter(self) -> None:
+        rows = [
+            self._row(manager="m1", cusip="000000001", value=70),
+            self._row(manager="m1", cusip="000000002", value=30),
+            self._row(manager="m2", cusip="000000001", value=50),
+            self._row(manager="m2", cusip="000000003", value=50),
+        ]
+        classified = classify_security_rows(pd.DataFrame.from_records(rows))
+        candidate = build_cash_share_matrix_candidate(
+            classified,
+            minimum_assets_per_manager=1,
+            minimum_managers_per_asset=2,
+        )
+        self.assertEqual(len(candidate.positions), 4)
+        self.assertTrue(candidate.filtered_positions.empty)
+        concentration_steps = candidate.iterative_log.loc[
+            candidate.iterative_log["step"].eq(
+                "retained_weight_concentration_filter"
+            )
+        ]
+        self.assertEqual(
+            int(concentration_steps["managers_removed_by_concentration"].sum()),
+            2,
+        )
+        self.assertTrue(candidate.checks["violations"].eq(0).all())
+
     def test_full_history_identity_audit_scans_all_rows_and_reuses_cache(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

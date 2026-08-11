@@ -80,6 +80,8 @@ Current phase:
   cutoffs;
 - validate accession joins, issuer identity snapshots, and manager identifier stability;
 - validate the filing-reported CUSIP security key and quarantine identifier conflicts;
+- materialize and fingerprint the sparse manager-security matrix for every decision-complete
+  quarter;
 - choose the permitted point-in-time issuer mappings and market common-equity security master;
 - establish joins across holdings, mappings, market data, and fundamentals;
 - build coverage and leakage diagnostics.

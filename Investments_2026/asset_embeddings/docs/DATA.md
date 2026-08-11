@@ -164,6 +164,10 @@ model-ready security identity from the later common-equity and issuer-mapping qu
 
 - The first representation key is the normalized CUSIP reported with the filing, namespaced by
   instrument channel. It is knowable at the filing availability timestamp.
+- The SEC filing contract and official 13(f) list specify a nine-character CUSIP. The baseline
+  therefore admits only normalized, source-reported nine-character values. Shorter or otherwise
+  nonstandard values remain in exclusion audits and are never padded, checksum-completed, or
+  silently joined to another security.
 - A typed key is mandatory because the same reported CUSIP can appear in cash-share and option
   channels. Those economic exposures are never added together.
 - The first matrix uses only positive-value `cash_share_candidate` rows from complete,
@@ -177,10 +181,17 @@ model-ready security identity from the later common-equity and issuer-mapping qu
   exist.
 
 The full-history identity scan reads every holdings partition in bounded batches and caches only
-aggregate diagnostics under ignored `data/audits/` paths. The first local matrix candidate applies
-the 75 percent concentration rule, then the iterative 20-security/20-manager rules, and recomputes
-weights after the final universe is fixed. It remains a sparse pair table rather than a dense
-matrix.
+aggregate diagnostics under ignored `data/audits/` paths. The first local matrix candidate jointly
+reapplies the 75 percent concentration rule and the iterative 20-security/20-manager rules until
+both hold, then recomputes weights after the final universe is fixed. It remains a sparse pair
+table rather than a dense matrix.
+
+`src/matrix_13f.py` materializes one ignored Parquet pair table per decision-complete quarter below
+`data/model_inputs/13f_cash_share_pit/v1/`. Each partition includes local aggregate audits and a
+manifest binding it to the data fingerprint, matrix-source fingerprint, identity policy, filter
+parameters, and pair-file hash. Full-history validation checks expected-quarter coverage, stale
+manifests, file integrity, Parquet row reconciliation, and every saved point-in-time matrix gate
+without loading the entire pair history into memory.
 
 ## Verified commands
 

@@ -208,11 +208,39 @@ The implementation:
    same-day snapshot as unavailable;
 4. keeps non-cash instruments in separate channels and labels the baseline
    `cash_share_candidate`, not verified common equity;
-5. forms one manager-security position per period, applies the concentration and iterative degree
-   rules, and recomputes weights only after the retained universe is fixed; and
+5. forms one manager-security position per period, jointly reapplies the concentration and
+   iterative degree rules until both hold, and recomputes weights only after the retained universe
+   is fixed; and
 6. asserts no future source events, duplicate matrix cells, channel leakage, or weight
    reconciliation failures.
 
 This clears the security-level representation gate once the local audit assertions pass. It does
 not clear the market-data gate: a historically valid market security master is still required
 before calling the universe common equity, joining returns, or testing a trading strategy.
+
+## Implemented full-history matrix contract
+
+`src/matrix_13f.py` and `notebooks/06_build_13f_pit_matrices.ipynb` extend the validated first
+quarter to every decision-complete reporting period.
+
+The identifier exception policy is deliberately conservative. Form 13F specifies a
+nine-character CUSIP, so the baseline accepts a normalized source-reported nine-character value
+only. A shorter value could reflect several upstream failures; it is quarantined rather than
+silently left-padded, right-completed, or merged. A later correction requires source-level
+evidence and a new versioned contract.
+
+For each quarter, the implementation:
+
+1. rebuilds canonical manager states at the standardized cutoff;
+2. classifies every state row and preserves explicit exclusion reasons;
+3. forms typed positive-value cash-share positions;
+4. jointly reapplies the concentration and iterative manager-security degree gates until both
+   hold;
+5. retains source-event availability and snapshot-cutoff provenance on every private pair row;
+6. writes a fingerprinted and hashed local Parquet partition; and
+7. saves public-safe aggregate audits for reproducible validation.
+
+The full-history validator requires every expected quarter, current data and source fingerprints,
+matching file hashes and row counts, and zero saved quarter-level violations. Raw pair tables and
+executed outputs remain ignored. Passing this contract clears the holdings-representation input
+gate, but not the later point-in-time market-security and returns-join gates.

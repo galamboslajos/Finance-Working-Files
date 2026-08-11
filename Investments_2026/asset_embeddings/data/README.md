@@ -58,3 +58,8 @@ executed notebook remain ignored and must not be committed.
 local Parquet partitions. Store its executed copy below `data/exploration/`. The in-memory
 `raw_holdings_asof_local` DataFrame is suitable for private Data Wrangler inspection but must never
 be exported into a tracked path.
+
+`notebooks/06_build_13f_pit_matrices.ipynb` writes resumable quarterly pair tables and their local
+manifests below `data/model_inputs/13f_cash_share_pit/v1/`. The pair tables contain raw manager
+CIKs and reported CUSIPs and must remain ignored. Store any executed copy of notebook 06 below
+`data/exploration/`, never under the tracked `notebooks/` directory.

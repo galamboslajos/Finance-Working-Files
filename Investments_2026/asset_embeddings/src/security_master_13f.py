@@ -568,16 +568,68 @@ def build_cash_share_matrix_candidate(
     filtered_parts: list[pd.DataFrame] = []
     logs: list[pd.DataFrame] = []
     for report_date, period in concentrated.groupby(report_column, dropna=False):
-        filtered, log = iterative_bipartite_filter(
-            period,
-            investor_column=manager_column,
-            asset_column="typed_security_id",
-            minimum_assets_per_investor=minimum_assets_per_manager,
-            minimum_investors_per_asset=minimum_managers_per_asset,
-        )
-        filtered_parts.append(filtered)
-        log.insert(0, report_column, report_date)
-        logs.append(log)
+        current = period.copy()
+        constraint_round = 0
+        while True:
+            constraint_round += 1
+            degree_filtered, degree_log = iterative_bipartite_filter(
+                current,
+                investor_column=manager_column,
+                asset_column="typed_security_id",
+                minimum_assets_per_investor=minimum_assets_per_manager,
+                minimum_investors_per_asset=minimum_managers_per_asset,
+            )
+            degree_log.insert(0, report_column, report_date)
+            degree_log.insert(1, "constraint_round", constraint_round)
+            degree_log.insert(2, "step", "iterative_degree_filter")
+            degree_log["managers_removed_by_concentration"] = 0
+            logs.append(degree_log)
+
+            if degree_filtered.empty:
+                current = degree_filtered
+                break
+            retained_value = degree_filtered.groupby(manager_column)[
+                "position_value_usd"
+            ].transform("sum")
+            retained_weight = degree_filtered["position_value_usd"] / retained_value
+            violating_managers = set(
+                degree_filtered.loc[
+                    retained_weight.gt(maximum_position_weight),
+                    manager_column,
+                ]
+            )
+            if not violating_managers:
+                current = degree_filtered
+                break
+
+            after_concentration = degree_filtered.loc[
+                ~degree_filtered[manager_column].isin(violating_managers)
+            ].copy()
+            logs.append(
+                pd.DataFrame.from_records(
+                    [
+                        {
+                            report_column: report_date,
+                            "constraint_round": constraint_round,
+                            "step": "retained_weight_concentration_filter",
+                            "iteration": pd.NA,
+                            "pairs_before": len(degree_filtered),
+                            "pairs_after": len(after_concentration),
+                            "investors_after": int(
+                                after_concentration[manager_column].nunique()
+                            ),
+                            "assets_after": int(
+                                after_concentration["typed_security_id"].nunique()
+                            ),
+                            "managers_removed_by_concentration": len(
+                                violating_managers
+                            ),
+                        }
+                    ]
+                )
+            )
+            current = after_concentration
+        filtered_parts.append(current)
     filtered_positions = (
         pd.concat(filtered_parts, ignore_index=True)
         if filtered_parts
@@ -610,7 +662,10 @@ def build_cash_share_matrix_candidate(
         [
             stage_record("aggregated eligible cash-share positions", positions),
             stage_record("after 75 percent concentration rule", concentrated),
-            stage_record("after iterative manager-asset degree rules", filtered_positions),
+            stage_record(
+                "after joint concentration and manager-asset degree rules",
+                filtered_positions,
+            ),
         ]
     )
 
@@ -642,17 +697,52 @@ def build_cash_share_matrix_candidate(
         maximum_weight_error = float((weight_sums - 1.0).abs().max())
     else:
         maximum_weight_error = 0.0
+    if len(filtered_positions):
+        final_manager_degrees = filtered_positions.groupby(manager_keys)[
+            "typed_security_id"
+        ].nunique()
+        final_asset_degrees = filtered_positions.groupby(
+            [report_column, "typed_security_id"]
+        )[manager_column].nunique()
+        final_concentration_violations = int(
+            filtered_positions.groupby(manager_keys)["matrix_weight"]
+            .max()
+            .gt(maximum_position_weight + 1e-12)
+            .sum()
+        )
+        final_manager_degree_violations = int(
+            final_manager_degrees.lt(minimum_assets_per_manager).sum()
+        )
+        final_asset_degree_violations = int(
+            final_asset_degrees.lt(minimum_managers_per_asset).sum()
+        )
+    else:
+        final_concentration_violations = 0
+        final_manager_degree_violations = 0
+        final_asset_degree_violations = 0
     checks = pd.DataFrame(
         {
             "check": [
                 "manager-security pairs are unique",
                 "retained manager weights reconcile to one",
+                "retained weights respect the concentration cap",
+                "retained managers satisfy minimum asset degree",
+                "retained assets satisfy minimum manager degree",
             ],
             "violations": [
                 duplicate_pairs,
                 int(maximum_weight_error > 1e-10),
+                final_concentration_violations,
+                final_manager_degree_violations,
+                final_asset_degree_violations,
             ],
-            "maximum_absolute_error": [0.0, maximum_weight_error],
+            "maximum_absolute_error": [
+                0.0,
+                maximum_weight_error,
+                0.0,
+                0.0,
+                0.0,
+            ],
         }
     )
     return MatrixCandidate(
