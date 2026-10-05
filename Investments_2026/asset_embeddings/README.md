@@ -14,9 +14,9 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: full-history point-in-time 13F matrix materialization and validation; N-PORT is
-  deferred as a possible later extension.
-- Models and backtests: not started.
+- Current phase: first holdings-representation smoke tests on saved point-in-time 13F matrices;
+  N-PORT is deferred as a possible later extension.
+- Trading backtests: not started.
 
 ## Repository map
 
@@ -41,12 +41,15 @@ separately.
 | src/point_in_time_13f.py | Canonical availability-ordered 13F state transitions |
 | src/security_master_13f.py | Point-in-time security identity and audited matrix-candidate rules |
 | src/matrix_13f.py | Fingerprinted quarterly matrix materialization and full-history gates |
+| src/representation_13f.py | Sparse centered-PCA and target-excluded masked-holding diagnostics |
+| scripts/run_13f_pca_smoke.py | One-quarter local RS-Binary/RS-Ranks smoke-test runner |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
 | tests/test_data_spine_13f.py | Unit tests for point-in-time data-spine audit rules |
 | tests/test_point_in_time_13f.py | Unit tests for amendment state and no-lookahead behavior |
 | tests/test_security_master_13f.py | Unit tests for security identity, mapping cutoffs, and matrix gates |
 | tests/test_matrix_13f.py | Unit tests for full-history matrix construction and safe resume |
+| tests/test_representation_13f.py | Unit tests for masking, rank ties, and sparse centered PCA |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
@@ -184,6 +187,25 @@ input for every locally derived decision-complete quarter. The baseline:
 Generated partitions live below ignored `data/model_inputs/`. The notebook exposes one selected
 quarter as `matrix_pairs_local` for private Data Wrangler inspection and a partitioned Arrow
 dataset as `matrix_dataset_local` for memory-bounded full-history work.
+
+## First representation smoke tests
+
+Run the paper's simpler RS-Binary and RS-Ranks PCA constructions on a saved quarterly matrix:
+
+~~~bash
+python -m scripts.run_13f_pca_smoke --quarter YYYYQX --save
+~~~
+
+Replace `YYYYQX` with a locally available report quarter.
+
+The runner masks each manager's second-largest retained holding **before** fitting, recomputes
+within-manager ranks on the remaining holdings, and compares 4- and 10-dimensional PCA scores
+with asset popularity. It reports top-100 recovery, mean reciprocal rank, and rank percentile.
+The seed, matrix-file hash, code hash, and limitations accompany each ignored local JSON run.
+The saved matrix universe was filtered before masking, so this is a smoke test, **not** a sealed
+paper benchmark or evidence of tradable alpha. A later benchmark must split before universe
+selection and use the paper's actual likelihood protocol. No raw manager or security identifiers,
+matrix rows, or run outputs are committed.
 
 ## Transparency standard
 
