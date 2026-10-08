@@ -5,6 +5,9 @@
 Determine whether holdings-derived asset embeddings provide economically useful information for
 equity investment decisions after realistic availability lags, constraints, and costs.
 
+The immediate objective is methodological replication of the paper's representation models and
+benchmarks on the available 13F panel. A trading strategy is a later, separate decision.
+
 ## Hypotheses
 
 1. Representation: holdings embeddings measure asset similarity beyond random embeddings and
@@ -60,8 +63,11 @@ accuracy, and improvement over random selection.
 2. Binary ownership factor model.
 3. Ranked-holdings factor model.
 4. Centered holdings-level model with explicit missing-state treatment.
-5. Word2Vec-style local portfolio context.
-6. AssetBERT only if it adds stable held-out value.
+5. Word2Vec-style local portfolio context on the same held-out portfolios.
+6. AssetBERT masked-token prediction on those same portfolios and candidate sets.
+
+Models five and six are required paper-method comparisons even if they fail locally. Their
+promotion to downstream prediction or investment use still requires stable held-out value.
 
 ## Roadmap
 
@@ -95,14 +101,22 @@ placebo comparisons.
 
 ### Phase 3 - Representation benchmarks
 
-Implement and freeze the three paper-aligned benchmarks.
+Implement and freeze the three paper-aligned benchmarks. The first ASMP pilot on the saved 13F
+matrices holds out 20 percent of managers within each quarter, fits all models and vocabulary on
+the remaining complete portfolios, and aligns test candidates and normalized log-likelihood
+across PCA, Word2Vec, and AssetBERT. It is not sealed: the stored universe was filtered using all
+managers before that split. Rebuild the final benchmark with eligibility and vocabulary fixed
+from training managers in the canonical point-in-time spine, then compare every model on the same
+untouched targets and report out-of-vocabulary coverage. Document differences from the paper's
+FactSet fund/company sample and from its RV/RC asset split.
 
 ### Phase 4 - Investment strategy
 
 Register, validate, and test an embedding-peer relative-value strategy after realistic costs and
 constraints.
 
-### Phase 5 - Advanced models
+### Phase 5 - Further models and extensions
 
-Consider Word2Vec, AssetBERT, investor embeddings, crowdedness, generative portfolios, stress
-testing, and text-assisted interpretation only after earlier gates pass.
+Consider investor embeddings, crowdedness, generative portfolios, stress testing, and text-assisted
+interpretation only after earlier gates pass. Word2Vec and AssetBERT are already part of the
+representation-replication comparison in Phase 3.
