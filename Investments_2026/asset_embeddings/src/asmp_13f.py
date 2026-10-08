@@ -63,6 +63,7 @@ class ASMPLabels:
     excluded_short_portfolios: int
     excluded_out_of_vocabulary: int
     excluded_too_few_candidates: int
+    dropped_out_of_vocabulary_visible_positions: int = 0
 
 
 @dataclass(frozen=True)
@@ -72,7 +73,9 @@ class ASMPManagerSplit:
     Training portfolios retain every asset, including rank two. The vocabulary
     is the union of training assets only. Test labels never enter training
     sequences or the vocabulary; test OOV exclusions remain explicit in
-    ``test_labels``. The saved input universe is still prefiltered.
+    ``test_labels``. The old pilot passes a prefiltered saved universe; the
+    manager-only benchmark passes fit-filtered training pairs and separate
+    prefilter evaluation pairs.
     """
 
     train_ranked_columns: tuple[tuple[int, ...], ...]
@@ -125,15 +128,24 @@ def _validated_pairs(pairs: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_asmp_queries(
-    pairs: pd.DataFrame, *, vocabulary: Sequence[str] | None = None
+    pairs: pd.DataFrame,
+    *,
+    vocabulary: Sequence[str] | None = None,
+    out_of_vocabulary_visible: str = "exclude_portfolio",
 ) -> tuple[ASMPQueries, ASMPLabels]:
     """Hide each manager's second-largest saved holding before model fitting.
 
     A supplied vocabulary may be frozen from earlier training data. Portfolios
-    with an out-of-vocabulary visible or target asset are excluded as a whole,
-    and the exclusion is reported. When omitted, the vocabulary comes from the
-    already-filtered saved pair table and is necessarily provisional.
+    with an out-of-vocabulary asset are excluded by default. For a universe
+    fitted on other managers, ``drop_after_rank_two`` retains the original
+    rank-two target, requires ranks one and two to be in vocabulary, and omits
+    later out-of-vocabulary visible positions. This is an explicit context
+    loss, not a re-ranking of the target. When vocabulary is omitted it comes
+    from the already-filtered saved pair table and is provisional.
     """
+
+    if out_of_vocabulary_visible not in ("exclude_portfolio", "drop_after_rank_two"):
+        raise ValueError("Unknown out-of-vocabulary visible-position policy")
 
     work = _validated_pairs(pairs)
 
@@ -148,7 +160,7 @@ def build_asmp_queries(
     targets: list[int] = []
     row_indexes: list[int] = []
     column_indexes: list[int] = []
-    excluded_short = excluded_oov = excluded_candidates = 0
+    excluded_short = excluded_oov = excluded_candidates = dropped_oov_visible = 0
     input_portfolios = 0
     for _, portfolio in ordered.groupby("manager_cik", sort=False):
         input_portfolios += 1
@@ -156,14 +168,27 @@ def build_asmp_queries(
         if len(assets) < 2:
             excluded_short += 1
             continue
-        if any(asset not in asset_columns for asset in assets):
-            excluded_oov += 1
-            continue
+        if out_of_vocabulary_visible == "exclude_portfolio":
+            if any(asset not in asset_columns for asset in assets):
+                excluded_oov += 1
+                continue
+        else:
+            if assets[0] not in asset_columns or assets[1] not in asset_columns:
+                excluded_oov += 1
+                continue
+            omitted_visible = sum(
+                asset not in asset_columns for asset in assets[2:]
+            )
+            assets = assets[:2] + [
+                asset for asset in assets[2:] if asset in asset_columns
+            ]
         # The target belongs to the complement, so at least two complement
         # choices are needed for a nondegenerate random-choice denominator.
         if len(frozen_vocabulary) - (len(assets) - 1) < 2:
             excluded_candidates += 1
             continue
+        if out_of_vocabulary_visible == "drop_after_rank_two":
+            dropped_oov_visible += omitted_visible
         columns = [asset_columns[asset] for asset in assets]
         targets.append(columns[1])
         columns[1] = MASKED_ASSET
@@ -195,22 +220,15 @@ def build_asmp_queries(
         excluded_short_portfolios=excluded_short,
         excluded_out_of_vocabulary=excluded_oov,
         excluded_too_few_candidates=excluded_candidates,
+        dropped_out_of_vocabulary_visible_positions=dropped_oov_visible,
     )
     return queries, labels
 
 
-def build_manager_holdout(
-    pairs: pd.DataFrame, *, seed: int = 17, test_fraction: float = 0.2
-) -> ASMPManagerSplit:
-    """Make a deterministic manager-level split before rank-two test masking.
-
-    Managers are ordered by a SHA-256 digest of the seed and manager ID, then
-    the nearest feasible test_fraction (at least one on each side) is held out.
-    This is invariant to pair-row order and uses no target values for the split.
-    A per-quarter split does not itself seal historical multi-quarter training:
-    that requires a frozen cross-quarter manager partition.
-    """
-
+def split_manager_ids(
+    managers: Sequence[str], *, seed: int = 17, test_fraction: float = 0.2
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Split manager IDs without consulting any holding or universe filter."""
     if isinstance(seed, bool) or not isinstance(seed, Integral):
         raise ValueError("The manager split seed must be an integer")
     if (
@@ -220,8 +238,11 @@ def build_manager_holdout(
         or not 0 < test_fraction < 1
     ):
         raise ValueError("test_fraction must be strictly between zero and one")
-    work = _validated_pairs(pairs)
-    managers = tuple(sorted(work["manager_cik"].unique()))
+    managers = tuple(sorted(managers))
+    if len(set(managers)) != len(managers) or any(
+        not isinstance(manager, str) or not manager for manager in managers
+    ):
+        raise ValueError("Manager IDs must be unique nonempty strings")
     if len(managers) < 2:
         raise ValueError("Manager holdout requires at least two portfolios")
 
@@ -235,8 +256,24 @@ def build_manager_holdout(
         max(1, int(np.floor(len(managers) * test_fraction + 0.5))),
     )
     held_out = set(shuffled[:test_count])
-    train = work.loc[~work["manager_cik"].isin(held_out)].copy()
-    test = work.loc[work["manager_cik"].isin(held_out)].copy()
+    return (
+        tuple(manager for manager in managers if manager not in held_out),
+        tuple(manager for manager in managers if manager in held_out),
+    )
+
+
+def build_partitioned_manager_holdout(
+    train_pairs: pd.DataFrame,
+    test_pairs: pd.DataFrame,
+    *,
+    out_of_vocabulary_visible: str = "exclude_portfolio",
+) -> ASMPManagerSplit:
+    """Build model inputs from an already split fit/evaluation pair of tables."""
+
+    train = _validated_pairs(train_pairs)
+    test = _validated_pairs(test_pairs)
+    if set(train["manager_cik"]) & set(test["manager_cik"]):
+        raise ValueError("Fit and evaluation manager IDs must be disjoint")
     vocabulary = _canonical_vocabulary(train["typed_security_id"], None)
     asset_columns = {asset: column for column, asset in enumerate(vocabulary)}
     ordered_train = train.sort_values(
@@ -264,7 +301,11 @@ def build_manager_holdout(
         shape=(len(train_ranked_columns), len(vocabulary)),
     ).tocsr()
     train_visible.sort_indices()
-    test_queries, test_labels = build_asmp_queries(test, vocabulary=vocabulary)
+    test_queries, test_labels = build_asmp_queries(
+        test,
+        vocabulary=vocabulary,
+        out_of_vocabulary_visible=out_of_vocabulary_visible,
+    )
     return ASMPManagerSplit(
         train_ranked_columns=train_ranked_columns,
         train_visible=train_visible,
@@ -272,7 +313,27 @@ def build_manager_holdout(
         test_labels=test_labels,
         vocabulary=vocabulary,
         train_manager_count=len(train_ranked_columns),
-        test_manager_count=test_count,
+        test_manager_count=int(test["manager_cik"].nunique()),
+    )
+
+
+def build_manager_holdout(
+    pairs: pd.DataFrame, *, seed: int = 17, test_fraction: float = 0.2
+) -> ASMPManagerSplit:
+    """Split saved, prefiltered pairs by manager for the provisional pilot.
+
+    A per-quarter split does not seal historical multi-quarter training: that
+    requires a frozen cross-quarter manager partition. The source universe was
+    also filtered before this split; use the manager-only builder to avoid it.
+    """
+
+    work = _validated_pairs(pairs)
+    train_ids, test_ids = split_manager_ids(
+        tuple(work["manager_cik"].unique()), seed=seed, test_fraction=test_fraction
+    )
+    return build_partitioned_manager_holdout(
+        work.loc[work["manager_cik"].isin(train_ids)],
+        work.loc[work["manager_cik"].isin(test_ids)],
     )
 
 
@@ -282,6 +343,7 @@ def evaluate_asmp(
     score_batch: Callable[[ASMPQueries], np.ndarray],
     *,
     batch_size: int = 128,
+    benchmark: str = "provisional_13f_asmp_prefiltered_universe_not_sealed",
 ) -> dict[str, object]:
     """Score identical unheld candidate sets with any model's vocabulary logits.
 
@@ -371,7 +433,7 @@ def evaluate_asmp(
     mean_log_choices = float(np.mean(random_log_choices))
     rank_array = np.asarray(ranks, dtype=np.int32)
     return {
-        "benchmark": "provisional_13f_asmp_prefiltered_universe_not_sealed",
+        "benchmark": benchmark,
         "masked_rank": 2,
         "candidate_policy": "frozen_vocabulary_minus_visible_holdings",
         "vocabulary_size": asset_count,
@@ -381,15 +443,25 @@ def evaluate_asmp(
         "excluded_short_portfolios": labels.excluded_short_portfolios,
         "excluded_out_of_vocabulary": labels.excluded_out_of_vocabulary,
         "excluded_too_few_candidates": labels.excluded_too_few_candidates,
+        "dropped_out_of_vocabulary_visible_positions": (
+            labels.dropped_out_of_vocabulary_visible_positions
+        ),
         "mean_log_target_probability": mean_log_probability,
         "mean_log_random_probability": -mean_log_choices,
         "asmp_normalized_log_likelihood": 1.0 + mean_log_probability / mean_log_choices,
         "hit_at_100": float(np.mean(rank_array <= 100)),
         "mean_reciprocal_rank": float(np.mean(1.0 / rank_array)),
         "random_expected_hit_at_100": float(np.mean(random_hit_at_100)),
-        "limitations": [
-            "The saved matrix universe was filtered before targets were hidden.",
-            "Coverage is measured only against portfolios in the saved matrix.",
-            "This is neither a sealed paper replication nor a trading backtest.",
-        ],
+        "limitations": (
+            [
+                "The saved matrix universe was filtered before targets were hidden.",
+                "Coverage is measured only against portfolios in the saved matrix.",
+                "This is neither a sealed paper replication nor a trading backtest.",
+            ]
+            if benchmark == "provisional_13f_asmp_prefiltered_universe_not_sealed"
+            else [
+                "The fit universe excludes test managers but test eligibility is conditional on vocabulary coverage.",
+                "This is neither the paper's original benchmark nor a future-quarter/trading test.",
+            ]
+        ),
     }

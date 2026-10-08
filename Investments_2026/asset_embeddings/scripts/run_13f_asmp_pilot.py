@@ -78,7 +78,11 @@ def ranked_training_matrix(
 
 
 def ranked_matrix(queries: ASMPQueries) -> sparse.csr_matrix:
-    """Preserve original holding-rank percentiles while omitting rank two."""
+    """Weight ranks within the model-visible portfolio while omitting rank two.
+
+    Pilot rows retain every visible asset and therefore keep original rank
+    gaps. Manager-only rows may omit later OOV assets and compress those gaps.
+    """
 
     rows: list[int] = []
     columns: list[int] = []
@@ -106,6 +110,7 @@ def run_pca_asmp(
     *,
     dimensions: tuple[int, ...] = (4, 10),
     seed: int = 17,
+    benchmark: str = "provisional_13f_asmp_prefiltered_universe_not_sealed",
 ) -> dict[str, object]:
     """Fit complete training portfolios and fold in masked test managers."""
 
@@ -121,6 +126,7 @@ def run_pca_asmp(
             lambda batch: np.zeros(
                 (len(batch), len(batch.vocabulary)), dtype=np.float64
             ),
+            benchmark=benchmark,
         )
     }
     popularity = np.log1p(np.asarray(binary.getnnz(axis=0), dtype=np.float64))
@@ -128,6 +134,7 @@ def run_pca_asmp(
         queries,
         labels,
         lambda batch: np.broadcast_to(popularity, (len(batch), len(popularity))),
+        benchmark=benchmark,
     )
     rank_train = ranked_training_matrix(
         training_ranked_columns, len(queries.vocabulary)
@@ -150,7 +157,7 @@ def run_pca_asmp(
                 row_indexes = np.asarray(batch.row_indices, dtype=np.int64)
                 return latent[row_indexes] @ loadings + means
 
-            metrics = evaluate_asmp(queries, labels, score_batch)
+            metrics = evaluate_asmp(queries, labels, score_batch, benchmark=benchmark)
             metrics["centered_variance_share"] = float(
                 np.square(singular[:dimension]).sum() / variance
             )
@@ -170,6 +177,7 @@ def run_word2vec_asmp(
     batch_size: int,
     learning_rate: float,
     seed: int,
+    benchmark: str = "provisional_13f_asmp_prefiltered_universe_not_sealed",
 ) -> dict[str, object]:
     """Fit tied-embedding CBOW on complete fit managers and score test rank two."""
 
@@ -193,7 +201,7 @@ def run_word2vec_asmp(
             [score_hidden(model, np.asarray(row)) for row in batch.ranked_columns]
         )
 
-    metrics = evaluate_asmp(queries, labels, score_batch)
+    metrics = evaluate_asmp(queries, labels, score_batch, benchmark=benchmark)
     metrics["fit"] = {
         "dimensions": dimensions,
         "rank_radius": radius,
@@ -221,6 +229,7 @@ def run_assetbert_asmp(
     learning_rate: float,
     seed: int,
     requested_device: str,
+    benchmark: str = "provisional_13f_asmp_prefiltered_universe_not_sealed",
 ) -> dict[str, object]:
     """Train random MLM on complete fit managers; infer on hidden test rank two."""
 
@@ -307,7 +316,9 @@ def run_assetbert_asmp(
         with torch.no_grad():
             return model(token_ids, attention_mask)[:, 1, :].cpu().numpy()
 
-    metrics = evaluate_asmp(queries, labels, score_batch, batch_size=batch_size)
+    metrics = evaluate_asmp(
+        queries, labels, score_batch, batch_size=batch_size, benchmark=benchmark
+    )
     metrics["fit"] = {
         "dimensions": dimensions,
         "epochs": epochs,

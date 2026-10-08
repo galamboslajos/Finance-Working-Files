@@ -14,9 +14,9 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: paper-aligned holdings-representation comparisons on saved point-in-time 13F
-  matrices. The masked-holding likelihood test is provisional because universe filtering preceded
-  masking; N-PORT remains a possible later fund-level extension.
+- Current phase: paper-aligned holdings-representation comparisons on point-in-time 13F.
+  Saved-matrix pilot results are provisional; a separate fit-manager-only universe benchmark
+  now rebuilds directly from the local PIT source. N-PORT remains a possible later extension.
 - Trading backtests: not started.
 
 ## Repository map
@@ -36,6 +36,7 @@ separately.
 | notebooks/04_validate_13f_point_in_time_panel.ipynb | First decision-time 13F state validation |
 | notebooks/05_audit_13f_security_master.ipynb | Full-history security identity and first sparse matrix audit |
 | notebooks/06_build_13f_pit_matrices.ipynb | Resumable full-history point-in-time matrix build and validation |
+| notebooks/07_explain_13f_model_results.ipynb | Local aggregate model-results guide, metrics, provenance, and plots |
 | src/holdings_exploration.py | Tested diagnostics used by the notebook |
 | src/full_history_13f.py | Tested full-history Parquet and 13F timing diagnostics |
 | src/data_spine_13f.py | Tested amendment, coverage, identity, and instrument audits |
@@ -48,7 +49,10 @@ separately.
 | src/word2vec_13f.py | Tied-embedding full-softmax Word2Vec on ranked portfolios |
 | src/assetbert_13f.py | Four-layer masked-token AssetBERT core with balanced portfolio chunks |
 | scripts/run_13f_asmp_pilot.py | Local, same-test PCA/Word2Vec/AssetBERT pilot runner |
+| src/manager_only_asmp_13f.py | Train-only universe and disjoint-manager test-input builder |
+| scripts/run_13f_manager_only_asmp.py | Rebuilt PIT-quarter manager-only ASMP runner |
 | tests/test_asmp_13f.py, tests/test_asmp_pilot.py | ASMP arithmetic and runner tests |
+| tests/test_manager_only_asmp_13f.py | Manager-isolation, OOV, and frozen-universe tests |
 | tests/test_word2vec_13f.py, tests/test_assetbert_13f.py | Neural model contract tests |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
@@ -236,9 +240,32 @@ The paper does not specify every neural hyperparameter; the runner records its e
 This cross-manager holdout is a local adaptation, not the paper's RV/RC 80/20 asset split or a
 future-quarter forecast. The saved 13F universe was filtered using all managers before the
 holdout, so this is an **unsealed 13F adaptation**, not the paper's published FactSet result.
-A final ASMP benchmark must freeze the universe and eligibility using fit managers only from the
-canonical point-in-time spine. Do not compare its likelihood percentages directly with the
-earlier Hit@100 percentages. Saved aggregate run files are ignored and never committed.
+A first manager-only benchmark now freezes the universe using fit managers only from the
+canonical point-in-time spine. It still needs validation-manager calibration and broader
+quarter/model runs before model ranking. Do not compare its score levels directly to the pilot:
+the candidate universe and test eligibility differ. Saved aggregate run files stay ignored.
+
+## Manager-only universe benchmark and results guide
+
+The newer runner rebuilds a single quarter at its recorded availability cutoff. It splits
+point-in-time-eligible manager IDs **before** the 75% concentration and iterative 20-by-20
+universe filters, applies those filters only to fit managers, and freezes the fit vocabulary.
+The test target remains each manager's original second-largest positive eligible cash-share
+position. Test managers with an out-of-vocabulary rank-one or rank-two position are excluded;
+later out-of-vocabulary visible positions are dropped from model context and counted. This is
+explicit conditioning: remaining ranks are compressed for RS-Ranks and the neural contexts.
+It is not a future-quarter prediction or the paper's FactSet replication.
+
+~~~bash
+python -m scripts.run_13f_manager_only_asmp --quarter YYYYQX --word2vec --save
+jupyter lab notebooks/07_explain_13f_model_results.ipynb
+~~~
+
+The notebook loads ignored aggregate JSON locally, distinguishes real model fits from pilot
+evaluation, and displays ASMP, Hit@100, reciprocal rank, coverage, and optional charts. Its
+tracked version has no outputs, raw identifiers, or holdings. Neither runner selects a best
+model: neural training budgets differ, PCA likelihood logits are not validation-calibrated,
+and no return forecast or trading test has been run.
 
 ## Transparency standard
 

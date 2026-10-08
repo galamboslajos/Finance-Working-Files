@@ -101,14 +101,14 @@ placebo comparisons.
 
 ### Phase 3 - Representation benchmarks
 
-Implement and freeze the three paper-aligned benchmarks. The first ASMP pilot on the saved 13F
-matrices holds out 20 percent of managers within each quarter, fits all models and vocabulary on
-the remaining complete portfolios, and aligns test candidates and normalized log-likelihood
-across PCA, Word2Vec, and AssetBERT. It is not sealed: the stored universe was filtered using all
-managers before that split. Rebuild the final benchmark with eligibility and vocabulary fixed
-from training managers in the canonical point-in-time spine, then compare every model on the same
-untouched targets and report out-of-vocabulary coverage. Document differences from the paper's
-FactSet fund/company sample and from its RV/RC asset split.
+Implement and freeze the three paper-aligned benchmarks. The first ASMP pilot on saved 13F
+matrices holds out 20 percent of managers within each quarter and aligns test candidates across
+PCA, Word2Vec, and AssetBERT. It is not sealed: all-manager filtering preceded the split. The
+separate manager-only runner rebuilds a canonical PIT quarter, splits managers first, and fixes
+the vocabulary and universe from fit managers only. It reports test coverage and visible-context
+OOV loss; this corrects one leakage channel but does not yet settle model ranking. Add a separate
+validation-manager split for calibration and hyperparameters, then expand across quarters and
+document differences from the paper's FactSet fund/company sample and RV/RC asset split.
 
 ### Phase 4 - Investment strategy
 
