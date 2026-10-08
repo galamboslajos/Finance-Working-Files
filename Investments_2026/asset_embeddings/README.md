@@ -265,7 +265,32 @@ The notebook loads ignored aggregate JSON locally, distinguishes real model fits
 evaluation, and displays ASMP, Hit@100, reciprocal rank, coverage, and optional charts. Its
 tracked version has no outputs, raw identifiers, or holdings. Neither runner selects a best
 model: neural training budgets differ, PCA likelihood logits are not validation-calibrated,
-and no return forecast or trading test has been run.
+and no return forecast or trading test has been run. The old prefiltered-pilot sections are
+optional when only corrected manager-only runs are available locally.
+
+The notebook also audits the local **32D fit-manager-only Word2Vec/AssetBERT** quarter-by-quarter
+comparison (seed 17; one Word2Vec epoch; five AssetBERT epochs). It derives the expected
+decision-complete quarters from the raw local 13F product, rejects mismatched selected-cohort
+provenance or test contracts, and reports unrelated invalid files as warnings. It visibly lists
+missing or ambiguous quarters while the batch is incomplete.
+
+Run the following once for **each decision-complete quarter**, replacing the placeholder with its
+YYYYQX label; seed 17 is the runner default:
+
+~~~bash
+python -m scripts.run_13f_manager_only_asmp \
+  --quarter YYYYQX --word2vec --assetbert --neural-dimensions 32 \
+  --w2v-epochs 1 --bert-epochs 5 --bert-device mps --save
+~~~
+
+MPS is the device used on this host, not a universal requirement. The runner exclusively creates
+an ignored aggregate JSON result: check for an existing completed result before repeating an
+identical quarter, since the same output filename will not be overwritten.
+
+Time-series plots use actual report-quarter dates and leave gaps for missing quarters. The
+aggregate score tables and plots are generated only in the local notebook session;
+executed outputs must not be committed. Matching held-out managers and candidate sets do not make
+the unequal model objectives or training budgets an equal-compute comparison.
 
 ## Transparency standard
 
