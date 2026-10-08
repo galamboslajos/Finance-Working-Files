@@ -14,9 +14,10 @@ separately.
 - Google Cloud data platform: connected and readable.
 - Candidate data: 13F, N-PORT, company mappings, XBRL fundamentals, U.S. market data, membership,
   and factor benchmarks.
-- Current phase: full-history point-in-time 13F matrix materialization and validation; N-PORT is
-  deferred as a possible later extension.
-- Models and backtests: not started.
+- Current phase: paper-aligned holdings-representation comparisons on saved point-in-time 13F
+  matrices. The masked-holding likelihood test is provisional because universe filtering preceded
+  masking; N-PORT remains a possible later fund-level extension.
+- Trading backtests: not started.
 
 ## Repository map
 
@@ -41,15 +42,25 @@ separately.
 | src/point_in_time_13f.py | Canonical availability-ordered 13F state transitions |
 | src/security_master_13f.py | Point-in-time security identity and audited matrix-candidate rules |
 | src/matrix_13f.py | Fingerprinted quarterly matrix materialization and full-history gates |
+| src/representation_13f.py | Sparse centered-PCA and target-excluded masked-holding diagnostics |
+| scripts/run_13f_pca_smoke.py | One-quarter local RS-Binary/RS-Ranks smoke-test runner |
+| src/asmp_13f.py | Deterministic manager holdout, masked-holding queries, and likelihood evaluator |
+| src/word2vec_13f.py | Tied-embedding full-softmax Word2Vec on ranked portfolios |
+| src/assetbert_13f.py | Four-layer masked-token AssetBERT core with balanced portfolio chunks |
+| scripts/run_13f_asmp_pilot.py | Local, same-test PCA/Word2Vec/AssetBERT pilot runner |
+| tests/test_asmp_13f.py, tests/test_asmp_pilot.py | ASMP arithmetic and runner tests |
+| tests/test_word2vec_13f.py, tests/test_assetbert_13f.py | Neural model contract tests |
 | tests/test_holdings_exploration.py | Unit tests for timing, missing-state, and matrix filters |
 | tests/test_full_history_13f.py | Unit tests for inventory, filing timing, and bounded sampling |
 | tests/test_data_spine_13f.py | Unit tests for point-in-time data-spine audit rules |
 | tests/test_point_in_time_13f.py | Unit tests for amendment state and no-lookahead behavior |
 | tests/test_security_master_13f.py | Unit tests for security identity, mapping cutoffs, and matrix gates |
 | tests/test_matrix_13f.py | Unit tests for full-history matrix construction and safe resume |
+| tests/test_representation_13f.py | Unit tests for masking, rank ties, and sparse centered PCA |
 | data/README.md | Safe local-data workflow |
 | .env.example | Placeholder-only private input configuration |
 | requirements.txt | Minimal Python dependencies |
+| requirements-neural.txt | Optional pinned PyTorch dependency for AssetBERT |
 | .gitignore | Prevents credentials, data, tools, and artifacts entering Git |
 
 The notebook is an inspection tool, not a production pipeline. Its outputs remain local and
@@ -60,8 +71,8 @@ uncommitted.
 1. Validate point-in-time holdings, identifiers, prices, and fundamentals.
 2. Build a simple holdings factor or recommender-system baseline.
 3. Test relative valuation, return comovement, and masked-holding prediction.
-4. Add Word2Vec or AssetBERT only if simpler models leave validated value.
-5. Test a frozen strategy after costs, turnover, exposures, liquidity, and capacity.
+4. Replicate Word2Vec and AssetBERT mechanics on the same held-out holdings as the simple models.
+5. Evaluate a frozen strategy only after the representation and prediction stages are validated.
 
 ## Cloud access
 
@@ -184,6 +195,50 @@ input for every locally derived decision-complete quarter. The baseline:
 Generated partitions live below ignored `data/model_inputs/`. The notebook exposes one selected
 quarter as `matrix_pairs_local` for private Data Wrangler inspection and a partitioned Arrow
 dataset as `matrix_dataset_local` for memory-bounded full-history work.
+
+## First representation smoke tests
+
+Run the paper's simpler RS-Binary and RS-Ranks PCA constructions on a saved quarterly matrix:
+
+~~~bash
+python -m scripts.run_13f_pca_smoke --quarter YYYYQX --save
+~~~
+
+Replace `YYYYQX` with a locally available report quarter.
+
+The runner masks each manager's second-largest retained holding **before** fitting, recomputes
+within-manager ranks on the remaining holdings, and compares 4- and 10-dimensional PCA scores
+with asset popularity. It reports top-100 recovery, mean reciprocal rank, and rank percentile.
+The seed, matrix-file hash, code hash, and limitations accompany each ignored local JSON run.
+The saved matrix universe was filtered before masking, so this is a smoke test, **not** a sealed
+paper benchmark or evidence of tradable alpha. A later benchmark must split before universe
+selection and use the paper's actual likelihood protocol. No raw manager or security identifiers,
+matrix rows, or run outputs are committed.
+
+## Provisional paper-aligned ASMP pilot
+
+The next runner splits managers 80/20 within each quarter. Only complete training-manager
+portfolios define the vocabulary and fit popularity, RS-Binary, RS-Ranks, Word2Vec, and
+AssetBERT. For each untouched test manager, it hides the second-largest holding, preserves that
+rank slot, and gives every model the same visible holdings and candidate set. PCA folds each
+test manager into frozen training loadings; AssetBERT trains by randomly masking positions in
+complete training portfolios, so its rank-two prediction receives direct supervision. The
+runner reports the paper's normalized mean log likelihood, top-100 recovery, reciprocal rank,
+and out-of-vocabulary test coverage. Training and output remain local:
+
+~~~bash
+python -m scripts.run_13f_asmp_pilot --quarter YYYYQX --save
+python -m pip install -r requirements-neural.txt  # only for AssetBERT
+python -m scripts.run_13f_asmp_pilot --quarter YYYYQX --word2vec --assetbert --bert-epochs 5 --save
+~~~
+
+The paper does not specify every neural hyperparameter; the runner records its explicit choices.
+This cross-manager holdout is a local adaptation, not the paper's RV/RC 80/20 asset split or a
+future-quarter forecast. The saved 13F universe was filtered using all managers before the
+holdout, so this is an **unsealed 13F adaptation**, not the paper's published FactSet result.
+A final ASMP benchmark must freeze the universe and eligibility using fit managers only from the
+canonical point-in-time spine. Do not compare its likelihood percentages directly with the
+earlier Hit@100 percentages. Saved aggregate run files are ignored and never committed.
 
 ## Transparency standard
 

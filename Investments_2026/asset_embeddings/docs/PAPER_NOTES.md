@@ -20,9 +20,11 @@ latent asset characteristics and investor styles that observed accounting variab
 ## Models
 
 - Recommender systems factor holdings into asset embeddings and investor loadings.
-- Word2Vec ranks assets within portfolios and predicts assets from nearby positions.
-- AssetBERT treats a ranked portfolio as a sequence and predicts masked holdings using the full
-  portfolio context.
+- Word2Vec uses a continuous-bag-of-words objective: within-portfolio holding ranks define the
+  neighboring context, whose mean embedding predicts a hidden stock by full-vocabulary softmax.
+- AssetBERT treats ranked stocks as tokens, learns position embeddings, and predicts masked
+  holdings with bidirectional attention within balanced chunks of at most 64 stocks. The paper
+  uses four encoder layers, two attention heads, and a 15 percent masked-token objective.
 - InvestorBERT transposes the task and predicts investors holding an asset.
 
 ## Paper benchmarks
@@ -34,6 +36,13 @@ latent asset characteristics and investor styles that observed accounting variab
 The paper reports that recommender systems are strong for valuation and comovement, while
 Word2Vec and especially AssetBERT are stronger for substitution or masked-holding prediction.
 Higher-dimensional models generally perform better.
+
+For managed-portfolio similarity (ASMP), the paper hides a large holding and evaluates its
+probability among assets not already visible in that portfolio. Its normalized score is
+`1 + mean(log hidden-asset probability) / mean(log candidate count)`; uniform guessing scores
+zero. This is not the same quantity as Hit@100. The paper reports Word2Vec at 26-29 percent
+and AssetBERT at 35 percent in four dimensions, rising beyond 60 percent at larger dimensions,
+on its own data. Those figures are not targets or directly comparable scores for our 13F panel.
 
 ## Paper sample
 
@@ -50,6 +59,13 @@ Our SEC-based sources differ, so this project is an adaptation, not a claimed re
   coverage.
 - Scale and rotation must be normalized before interpreting embedding distance.
 - A model trained on masked-holding prediction has an objective advantage on that benchmark.
+- The first saved 13F matrices were filtered using all managers before the 80/20 manager holdout.
+  Their cross-manager masked-holding results are provisional, not a sealed paper benchmark.
+- The manager holdout is our 13F generalization diagnostic; it is not the paper's RV/RC 80/20
+  asset split. All ASMP model fits use only complete training-manager portfolios, while the same
+  test managers supply rank-two masked queries and explicitly reported OOV coverage.
+- The paper leaves Word2Vec rank radius and several AssetBERT optimizer/architecture details
+  unspecified; every local choice must be recorded as an adaptation.
 - Contextual AssetBERT embeddings require a declared aggregation rule.
 - Security-level and issuer-level embeddings are different research objects.
 - Representation success does not establish investable alpha.
