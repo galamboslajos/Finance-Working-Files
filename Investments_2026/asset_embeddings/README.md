@@ -28,6 +28,7 @@ separately.
 | docs/DATA.md | Cloud access, dataset inventory, and data rules |
 | docs/13F_DATA_SPINE.md | Provisional point-in-time 13F decisions and audit gates |
 | docs/PAPER_NOTES.md | Exact source paper and implementation lessons |
+| docs/MODEL_RESULTS_EXPLAINER_DRAFT.md | Draft explanation of model definitions, local ASMP results, and paper comparison |
 | AGENTS.md | Rules for AI-assisted work in this repository |
 | scripts/gcloud | Safe wrapper using ignored project-local credentials |
 | notebooks/01_explore_13f_nport.ipynb | Bounded, point-in-time holdings exploration |
