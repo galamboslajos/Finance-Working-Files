@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.DS_Store
+.env
+.gcloud/
+configs/*.local.json
+data/raw/
+data/derived/*
+!data/derived/.gitkeep
+outputs/*
+!outputs/.gitkeep
+reference/sadig_us_recovery/
