@@ -1,0 +1,5 @@
+{
+  "sources": [
+    {"key": "intrinio", "label": "Intrinio daily prices", "manifest": "data/raw/<product>/<release>/MANIFEST.json", "sample_table": "intrinio_daily_prices", "manifest_sha256": "<canonical manifest hash>"}
+  ]
+}
