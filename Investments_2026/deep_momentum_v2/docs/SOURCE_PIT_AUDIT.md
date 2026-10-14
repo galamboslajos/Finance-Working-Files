@@ -159,10 +159,13 @@ price summaries are current metadata, useful for evidence but not predictors.
 Metadata retention of delisted names does not prove complete returns,
 delisting cash flows, terminal prices or economically survivorship-free coverage.
 
-Do not create returns yet. Total-return/adjustment semantics, stale/missing
-prices, terminal-event accounting and date-specific identity repair remain
-separate bounded audits. Missing future labels/quotes must not erase original
-signal-time names from eligibility/coverage or the later holding denominator.
+The initial audit deferred return construction. The subsequent user-authorized
+[monthly engineering stage](MONTHLY_RETURNS.md) implements explicitly named
+provider-adjusted endpoint ratios while preserving daily source data and the
+original cohort. Certified total returns, stale/missing-price resolution,
+terminal-event accounting and date-specific identity repair remain separate
+audits. Missing future labels/quotes must not erase original signal-time names
+from eligibility/coverage or the later holding denominator.
 
 ## Recommended foundation contract
 

@@ -36,6 +36,8 @@ coverage; the earlier 2010 loader check was not a research-start decision.
 - [Research workflow](docs/RESEARCH_PLAN.md) and [data status](docs/DATA_STATUS.md).
 - [Data foundations](docs/DATA_FOUNDATIONS.md): loader APIs, historical-universe
   reconstruction, coverage states, source limits and repeatable checks.
+- [Monthly returns and daily preservation](docs/MONTHLY_RETURNS.md): exact
+  endpoint ratios, prior-month cohorts, missing outcomes and event/PIT limits.
 
 The supplied 115-page PDF is identified by its SHA-256 in the reference and
 source manifest. Its ignored local copy is
@@ -77,6 +79,8 @@ unavailable from these inputs. The modelling packages are not installed.
 ## Layout
 
 - `src/dmv2/`: source catalog, bounded loaders, historical universe and quote audits.
+- `src/dmv2/monthly.py` and `monthly_loading.py`: monthly return/coverage worker
+  and bounded source adapter, retaining daily data for later backtesting.
 - `notebooks/00_research_master.ipynb`: the readable Run All entry point.
 - `configs/research_workflow.json`: selected study chronology and inspection controls.
 - `tests/`: adversarial source/PIT/coverage tests using structural fixtures only.
@@ -94,7 +98,7 @@ unavailable from these inputs. The modelling packages are not installed.
 
 ## Current state
 
-MASTER NOTEBOOK AND DATA FOUNDATIONS IMPLEMENTED; REMAINING DESIGN OPEN. Source-file integrity
+MASTER NOTEBOOK, DATA FOUNDATIONS AND MONTHLY RETURN ENGINEERING IMPLEMENTED; REMAINING DESIGN OPEN. Source-file integrity
 and table footer counts were verified. All 115 paper pages were reviewed.
 The 2010-01-29 combined universe audit retained all 902 constituents; only 130
 had a unique identity route without a review flag. Two exact-date quotes loaded
@@ -108,3 +112,9 @@ usable training coverage, pre-2000 feature warmup, return/execution rules,
 inner validation and experiment budget remain OPEN. Selected rolling chronology
 is recorded in configs/research_workflow.json, separate from paper facts.
 Protected 2024+ financial values remain uninspected.
+
+The master now constructs separate `daily_df` and `monthly_df` views for a
+bounded January–February 2000 sample. Monthly cohorts use the preceding month
+end, retaining every historical member and missing/unrequested outcome. Numeric
+provider-adjusted ratios are provisional research returns; knowledge-time,
+economic-event completeness and daily backtest readiness are not certified.

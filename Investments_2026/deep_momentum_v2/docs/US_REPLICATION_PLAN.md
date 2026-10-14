@@ -131,8 +131,10 @@ meaning of the ten shared state inputs. No universe has yet been selected.
    enter training. The paper expands classifier history, randomly splits
    historical rows 80:20 for early stopping and repeats 100 fits. Pin software,
    parameters and seeds; decide a separately labeled chronological-validation
-   adaptation. Do not silently move retraining to every month or truncate
-   classifier training to ten years.
+   adaptation. V2 explicitly selects rolling ten-year training while retaining
+   annual refits and monthly predictions; this departure from expanding paper
+   history is recorded in the chronology configuration. Do not silently change
+   the refit cadence or present V2 rolling history as the paper specification.
 6. **Estimate payoffs and predict.** Persist monthly realized class means;
    calculate class payoffs over the declared trailing ten-year window without
    future outcomes. Align and average classifier probabilities, then calculate
@@ -230,7 +232,10 @@ CVaR/CVR may be separate extensions; they are not needed to satisfy this paper.
 | Calibration/ensemble weighting and acceptance criteria | RET relies on probabilities and payoff estimation | OPEN |
 | Resources, full-build/backtest plan | Controls compute and reproducibility | OPEN; no compute launched |
 
-The next research step is a bounded pre-holdout identity/return coverage audit.
+The [monthly return engineering stage](MONTHLY_RETURNS.md) now constructs bounded
+provider-adjusted ratios, retains full signal cohorts and preserves daily data.
+These are not certified total returns or a complete model-ready panel. Next are
+dated identity adjudication and economic event/coverage accounting.
 Choosing the primary S&P cohort can proceed alongside that work. Capitalization
 source procurement is excluded from the work plan. These are design tasks,
 not permission to grant IAM, mutate GCS, launch compute or start an unbounded scan.

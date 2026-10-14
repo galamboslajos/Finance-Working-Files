@@ -6,6 +6,10 @@ loading, chronology, identity/coverage rules and future modelling functions.
 This keeps one Run All entry point while making the same rules usable from
 tests and the existing command line.
 
+The master now also calls the [monthly return stage](MONTHLY_RETURNS.md), keeping
+separate `daily_df` and `monthly_df` views. Daily data is preserved for later
+daily backtesting even though predictions and targets will be monthly.
+
 ## Start in VS Code
 
 Open the V2 folder and `notebooks/00_research_master.ipynb`. Select the project's
@@ -71,6 +75,9 @@ also remains open; `engineering_sample=combined` is a loader demonstration.
 4. Run one bounded historical membership/identity audit.
 5. Optionally sample a few exact-date quotes, disabled by default.
 6. Save complete audit evidence under ignored `outputs/notebook_audits/`.
+7. Construct the configured January–February 2000 monthly engineering sample
+   using preceding-month cohorts and two requested daily price IDs.
+8. Save independent daily/monthly Parquet tables and a private return audit.
 
 **VERIFIED LOCAL, 2026-10-14:** the installed master completed Run All in two
 fresh kernels, from both the V2 root and the notebook directory, using Python
@@ -78,7 +85,8 @@ fresh kernels, from both the V2 root and the notebook directory, using Python
 constituents on 2000-01-31: 302 uniquely mapped without review flags, 529 with
 review flags, 32 target collisions and 37 without Intrinio links. These are
 one-date identity audit counts, not certified historical training coverage.
-Price sampling remained disabled. Repeated runs produced identical private
+The optional one-date price sampling remained disabled. This smoke check
+preceded the separately controlled monthly stage. Repeated runs produced identical private
 audit evidence; the versioned master stayed without outputs. All 103 worker
 tests passed, using structural fixtures rather than financial outcomes.
 
@@ -109,7 +117,10 @@ raw market records in the public notebook.
 | [`src/dmv2/catalog.py`](../src/dmv2/catalog.py) | Manifest pins, source inventory, schema/integrity checks |
 | [`src/dmv2/loading.py`](../src/dmv2/loading.py) | Bounded date/ID price and metadata loading |
 | [`src/dmv2/universe.py`](../src/dmv2/universe.py) | Dated cohort, identity states and retained quote coverage |
-| [`src/dmv2/data.py`](../src/dmv2/data.py) | Source adapters and calendar helpers |
+| [`src/dmv2/data.py`](../src/dmv2/data.py) | Source adapters and source-calendar helpers |
+| [`src/dmv2/exchange_sessions.py`](../src/dmv2/exchange_sessions.py) | Independent XNYS sessions and vendor-calendar reconciliation |
+| [`src/dmv2/monthly.py`](../src/dmv2/monthly.py) | Full-cohort monthly ratios, endpoint/path and volume audits |
+| [`src/dmv2/monthly_loading.py`](../src/dmv2/monthly_loading.py) | Capped cumulative-budget sample with unchanged daily prices |
 | [`src/dmv2/chronology.py`](../src/dmv2/chronology.py) | Pure rolling outcome-window calendar |
 | [`src/dmv2/workflow.py`](../src/dmv2/workflow.py) | Notebook settings, orchestration and private audit persistence |
 | `tests/` | Adversarial worker tests; structural fixtures only |
@@ -126,7 +137,8 @@ a confirmed incorrect link or missing-price diagnosis. The prior 755 flagged
 2010 links all had resolved provider IDs, predominantly through ticker/company
 matching. All original constituents remain in the audit ledger.
 
-Next are monthly return/event accounting, a feature dictionary and labels,
+Provisional monthly endpoint arithmetic and daily preservation are implemented.
+Next are complete monthly event accounting, a feature dictionary and labels,
 class-payoff estimation, forest/XGBoost estimators and portfolio evaluation.
 Those modules will be added when implemented and verified; there are no
 placeholder model calls that pretend to execute the research. Source

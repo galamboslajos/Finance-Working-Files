@@ -70,3 +70,10 @@ These are retrieval-time mappings, not certified knowledge-time PIT identities.
 No feature build, model fit or backtest has been run. Reusing/rebuilding derived
 panels requires correct path, identity, calendar and accounting rules and the
 project's agreed execution plan.
+
+The user-authorized [monthly return engineering stage](MONTHLY_RETURNS.md)
+is now implemented. It preserves daily source tables separately, uses
+preceding-month historical cohorts and emits exact provider-adjusted endpoint
+ratios with missing/identity/coverage states. The local notebook example is
+January–February 2000 with two requested price IDs, not a complete universe
+panel or certified economic/PIT return history.

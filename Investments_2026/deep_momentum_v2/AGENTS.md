@@ -8,14 +8,22 @@ For loading or universe changes, also read docs/DATA_FOUNDATIONS.md.
 For notebook or chronology changes, also read docs/NOTEBOOK_WORKFLOW.md and
 configs/research_workflow.json. The master notebook orchestrates worker modules;
 keep reusable data/model rules in src/dmv2 and test them there.
+For monthly return changes, also read docs/MONTHLY_RETURNS.md. Keep the original
+daily data separate for future daily backtesting; monthly frequency applies to predictions.
 
 - This is a U.S. equity project. Keep new code and outputs in this directory.
 - User-selected chronology starts in 2000 with rolling ten-year training and
   one-year outcome tests. Keep the paper's expanding history as a source fact,
   separate from this V2 adaptation. Feature warmup and usable coverage remain open.
 - The notebook defaults to one bounded 2000 engineering audit and no price
-  sample. Keep its committed outputs empty and save private audit evidence
+  sample in the optional one-date check. Its separate monthly stage defaults
+  to January–February 2000 and two requested price IDs. Keep committed outputs empty and save private audit evidence
   under ignored outputs. Do not treat Run All as an implicit full-panel/model run.
+- Monthly outcomes use the preceding month-end historical cohort. Preserve
+  removals, missing/unrequested outcomes and original denominators. Exact
+  provider-adjusted endpoint ratios are provisional research returns; do not
+  double count dividends, substitute stale endpoints or certify cash-flow/PIT
+  completeness. Daily path completeness is distinct from backtest readiness.
 - Preserve ../deep_momentum/ as an observation and navigation reference.
 - Use the existing Finance-Working-Files Git repository; do not create nested Git repos.
 - Keep raw data, credentials, paper PDFs, source snapshots and generated outputs

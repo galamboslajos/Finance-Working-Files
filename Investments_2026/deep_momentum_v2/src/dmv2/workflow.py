@@ -3,19 +3,24 @@
 Run All performs explicit bounded foundation checks. This module does not
 silently turn a research date range into a full scan, feature build or model fit.
 """
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+import errno
 import json
 from pathlib import Path
 import hashlib
+from importlib.metadata import version
 import platform
+import re
 import tempfile
 
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 from .catalog import SourceCatalog, canonical_sha256
 from .chronology import build_annual_folds
 from .data import load_universe
 from .loading import PriceLoader, ReadBudget
+from .monthly_loading import load_monthly_sample
 from .universe import attach_quotes, iso_date
 
 
@@ -44,10 +49,10 @@ def load_workflow(root):
 
 def validate_workflow(settings):
     if (not isinstance(settings, dict) or type(settings.get("schema_version")) is not int
-            or settings.get("schema_version") != 1):
-        raise ValueError("Workflow requires schema_version 1")
+            or settings.get("schema_version") != 2):
+        raise ValueError("Workflow requires schema_version 2")
     required = {"schema_version", "research_start", "training", "warmup",
-                "universe", "inspection", "execution"}
+                "universe", "inspection", "monthly_returns", "execution"}
     if set(settings) != required:
         raise ValueError("Workflow settings have missing or unknown top-level fields")
     fields = {
@@ -56,6 +61,8 @@ def validate_workflow(settings):
         "universe": {"primary", "engineering_sample"},
         "inspection": {"as_of", "run_universe_audit", "run_price_sample",
                        "price_sample_size", "persist_audit", "read_budget"},
+        "monthly_returns": {"enabled", "start_month", "end_month", "sample_size",
+                            "return_basis", "calendar_basis", "persist", "read_budget"},
         "execution": {"scope", "full_panel_build_enabled", "model_execution_enabled"},
     }
     for name, expected in fields.items():
@@ -93,8 +100,35 @@ def validate_workflow(settings):
         ReadBudget(**budget)
     except TypeError as error:
         raise ValueError("Unknown read_budget setting") from error
+    monthly = settings["monthly_returns"]
+    for field in ("enabled", "persist"):
+        if type(monthly[field]) is not bool:
+            raise ValueError(f"monthly_returns.{field} requires an explicit boolean")
+    for field in ("start_month", "end_month"):
+        value = monthly[field]
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}", value):
+            raise ValueError(f"monthly_returns.{field} requires YYYY-MM")
+        iso_date(value + "-01", field)
+    first, last = monthly["start_month"], monthly["end_month"]
+    if first > last or first < settings["research_start"][:7] or last > f"{training['last_test_year']:04d}-12":
+        raise ValueError("Monthly outcomes must be within the selected pre-holdout research period")
+    length = 12 * (int(last[:4]) - int(first[:4])) + int(last[5:]) - int(first[5:]) + 1
+    if length > 3:
+        raise ValueError("The local monthly engineering stage is capped at three outcome months")
+    if type(monthly["sample_size"]) is not int or not 1 <= monthly["sample_size"] <= 10:
+        raise ValueError("Monthly engineering sample_size must be in 1..10")
+    if monthly["return_basis"] != "provider_adjusted_close_ratio":
+        raise ValueError("Only the documented provider-adjusted close research ratio is implemented")
+    if monthly["calendar_basis"] != "exchange_calendars_XNYS":
+        raise ValueError("Monthly dates require the independent XNYS calendar and source reconciliation")
+    if not isinstance(monthly["read_budget"], dict):
+        raise ValueError("Monthly read_budget must be an explicit object")
+    try:
+        ReadBudget(**monthly["read_budget"])
+    except TypeError as error:
+        raise ValueError("Unknown monthly read_budget setting") from error
     if settings["execution"] != {
-        "scope": "bounded_foundations_only", "full_panel_build_enabled": False,
+        "scope": "bounded_foundations_and_monthly_sample", "full_panel_build_enabled": False,
         "model_execution_enabled": False,
     }:
         raise ValueError("Full panels and models are not implemented in this foundation workflow")
@@ -112,11 +146,13 @@ def worker_code_provenance():
     """Fingerprint the workers actually imported, independent of an unrelated Git HEAD."""
     directory = Path(__file__).resolve().parent
     names = ("__init__.py", "catalog.py", "chronology.py", "data.py",
-             "loading.py", "universe.py", "workflow.py")
+             "exchange_sessions.py", "loading.py", "monthly.py", "monthly_loading.py", "universe.py", "workflow.py")
     return {
         "worker_sha256": {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
                           for name in names},
         "python_version": platform.python_version(), "pyarrow_version": pa.__version__,
+        "exchange_calendars_version": version("exchange-calendars"),
+        "pandas_version": version("pandas"),
     }
 
 
@@ -162,6 +198,104 @@ def run_inspection(catalog, settings):
                 ["source_security_id", "identity_status", "quote_status"]).to_pylist(),
         })
     return InspectionRun(snapshot, prices, coverage, report)
+
+
+@dataclass(frozen=True)
+class MonthlyRun:
+    sample: object
+    report: dict
+
+
+def run_monthly_sample(catalog, settings):
+    """Run a capped engineering sample; retain daily prices and the original cohort."""
+    validate_workflow(settings)
+    controls = settings["monthly_returns"]
+    if not controls["enabled"]:
+        return None
+    sample = load_monthly_sample(
+        catalog, start_month=controls["start_month"], end_month=controls["end_month"],
+        universe=settings["universe"]["engineering_sample"],
+        sample_size=controls["sample_size"], budget=ReadBudget(**controls["read_budget"]),
+        mode="historical_reconstruction",
+    )
+    report = {
+        "schema_version": 1, "workflow_sha256": canonical_sha256(settings),
+        "source_pins": catalog.provenance(), "code_provenance": worker_code_provenance(),
+        "research_start": settings["research_start"], "summary": sample.panel.summary,
+        "return_provenance": sample.panel.provenance,
+        "windows": [asdict(window) for window in sample.panel.windows],
+        "requested_ids": list(sample.requested_ids),
+        "loading_stats": sample.loading_stats, "loading_provenance": sample.loading_provenance,
+        "signal_cohorts": [
+            {"as_of": snapshot.as_of, "summary": snapshot.summary, "pit": snapshot.provenance,
+             "constituent_ledger": snapshot.table.to_pylist(),
+             "membership_exclusions": snapshot.excluded.to_pylist()}
+            for snapshot in sample.snapshots],
+        "artifact_roles": {
+            "daily.parquet": "Unchanged source daily OHLCV/action/quality observations for the declared sample",
+            "monthly.parquet": "Original-cohort monthly research returns and explicit coverage states",
+            "source_calendar.parquet": "Original pinned vendor calendar retained without repair",
+            "exchange_calendar.parquet": "Independent XNYS sessions used for the bounded monthly windows",
+        },
+    }
+    return MonthlyRun(sample, report)
+
+
+def save_monthly_sample(root, monthly):
+    """Atomically save independent daily/monthly sample tables and their audit.
+
+    Never overwrite evidence under unchanged settings/source/code/runtime pins.
+    Nonfinite source observations stay unchanged in Parquet, not nonstandard JSON.
+    """
+    root = Path(root).resolve()
+    report = monthly.report
+    pins = {field: report[field] for field in ("workflow_sha256", "source_pins", "code_provenance")}
+    identifier = canonical_sha256(pins).split(":")[1][:16]
+    first, last = monthly.sample.panel.windows[0], monthly.sample.panel.windows[-1]
+    parent = (root / "outputs/notebook_audits").resolve()
+    destination = parent / f"monthly-{first.outcome_month}-{last.outcome_month}-{identifier}"
+    if not parent.is_relative_to(root) or not destination.resolve().is_relative_to(root):
+        raise ValueError("Monthly output directory leaves the project")
+    parent.mkdir(parents=True, exist_ok=True)
+    buffers, artifacts = {}, {}
+    for name, table in (("daily.parquet", monthly.sample.daily_prices.table),
+                        ("monthly.parquet", monthly.sample.panel.table),
+                        ("source_calendar.parquet", monthly.sample.source_calendar),
+                        ("exchange_calendar.parquet", monthly.sample.calendar)):
+        sink = pa.BufferOutputStream()
+        pq.write_table(table, sink, compression="zstd")
+        buffers[name] = sink.getvalue().to_pybytes()
+        artifacts[name] = {"sha256": hashlib.sha256(buffers[name]).hexdigest(),
+                           "size_bytes": len(buffers[name]), "rows": table.num_rows,
+                           "columns": [{"name": f.name, "type": str(f.type)} for f in table.schema]}
+    text = json.dumps({**report, "artifacts": artifacts}, indent=2, sort_keys=True, allow_nan=False) + "\n"
+
+    def verify_existing():
+        if not destination.is_dir():
+            raise ValueError("Monthly artifact is not a directory; preserve and investigate")
+        audit = destination / "audit.json"
+        if not audit.resolve().is_relative_to(root) or not audit.is_file() or audit.read_text() != text:
+            raise ValueError("Monthly evidence changed under unchanged provenance; preserve and investigate")
+        for name, data in buffers.items():
+            path = destination / name
+            if not path.resolve().is_relative_to(root) or not path.is_file() or path.read_bytes() != data:
+                raise ValueError("Monthly table evidence changed; preserve and investigate")
+        return destination
+
+    if destination.exists():
+        return verify_existing()
+    with tempfile.TemporaryDirectory(dir=parent, prefix=".monthly-tmp-") as temporary:
+        directory = Path(temporary)
+        for name, data in buffers.items():
+            (directory / name).write_bytes(data)
+        (directory / "audit.json").write_text(text, encoding="utf-8")
+        try:
+            directory.rename(destination)
+        except OSError as error:
+            if error.errno not in (errno.EEXIST, errno.ENOTEMPTY):
+                raise
+            return verify_existing()
+    return destination
 
 
 def save_inspection(root, inspection):

@@ -1,6 +1,6 @@
 # Starting research workflow
 
-Status: DATA FOUNDATIONS IMPLEMENTED; EXPERIMENT DESIGN OPEN.
+Status: DATA FOUNDATIONS AND MONTHLY RETURN ENGINEERING IMPLEMENTED; EXPERIMENT DESIGN OPEN.
 New strategy research begins here; the previous attempt is a reference.
 
 **USER DIRECTION:** initialize research in 2000 and use rolling ten-year
@@ -14,6 +14,11 @@ The first source/date/identity/quote contracts and adversarial tests are in
 retains all 902 names, with 772 unresolved or review/collision identity states.
 Next, audit the dated evidence behind those mappings before treating a small
 uniquely mapped subset as an intended research universe.
+
+The [monthly worker and notebook stage](MONTHLY_RETURNS.md) now preserve daily
+data independently and construct bounded provider-adjusted ratios from full
+preceding-month cohorts. Missing/identity/unrequested states remain visible.
+Economic event accounting and knowledge-time certification remain unresolved.
 
 The locked paper is Han-Qin, *Bimodality Everywhere*, March 26, 2026. Read
 [its precise reference](PAPER_REFERENCE_HAN_QIN_2026.md) and

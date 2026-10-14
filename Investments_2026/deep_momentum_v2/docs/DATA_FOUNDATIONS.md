@@ -1,7 +1,9 @@
 # V2 data-loading and historical-universe foundations
 
-Implemented 2026-10-14. This stage provides audited loading and constituent
-reconstruction; it does not build returns, features, targets or backtests.
+Implemented 2026-10-14. The original foundation stage provides audited loading
+and constituent reconstruction. The subsequent [monthly stage](MONTHLY_RETURNS.md)
+builds bounded provider-adjusted ratios while preserving daily data. No features,
+targets, model fits or backtests are implemented.
 Market capitalization remains outside the project scope.
 
 The loader is coded in `src/dmv2/loading.py`, with catalog/source/universe
@@ -37,6 +39,12 @@ the 2010 audit below was a bounded test, not a source or study start date.
   duplicates/unknown states and obvious missing months, and apply bounds after
   identifying source month ends. They do not independently certify every
   calendar session or an execution-time convention.
+
+The later monthly audit found vendor calendar dates on real NYSE holidays.
+The [monthly adapter](MONTHLY_RETURNS.md) retains that source and reconciles
+it against an independent pinned XNYS calendar before selecting endpoints.
+The original source-calendar helpers are metadata utilities, not independent
+exchange-calendar certification.
 
 ## What PIT means here
 

@@ -368,6 +368,7 @@ PRICE_COLUMNS = (
     "intrinio_security_id", "trading_date", "open", "high", "low", "close", "volume",
     "adj_open", "adj_high", "adj_low", "adj_close", "adj_volume", "factor", "split_ratio",
     "dividend", "raw_ohlc_bounds_valid", "adjusted_ohlc_bounds_valid", "price_quality_status",
+    "frequency", "intraperiod",
 )
 
 
