@@ -17,11 +17,31 @@ complete historical coverage. Metadata inspection does not inspect protected
 2024+ financial values. See [the U.S. ledger](US_REPLICATION_PLAN.md) for verified
 table/schema availability and the return/identity audits still needed.
 
-**Paper-replication gap:** no historical market-capitalization or shares-outstanding
-field was found in the downloaded table schemas. The Han-Qin paper requires
-historical capitalization for size deciles, its bottom-5% screen and value
-weighting. An approved additional source is needed for a complete baseline.
-Price, volume and index membership are not equivalent size data.
+**Deliberate V2 adaptation (user decision, 2026-10-14):** no historical
+market-capitalization or shares-outstanding field was found in the downloaded
+schemas, and V2 will not use capitalization. The paper's size-decile feature,
+cap-based screens and cap-value weighting are omitted. V2 starts from the
+15 momentum/state inputs before extensions; obtaining capitalization is not
+a remaining task or blocker. Price, volume and index membership are not
+substitutes for the omitted size data.
+
+**Volume availability (verified 2026-10-14):** the local
+`intrinio_daily_prices` Parquet schema contains `volume: double` and
+`adj_volume: double`. Across all tables in the three downloaded releases, no
+turnover-ratio or shares-outstanding column was found. In a bounded check of
+the first 256 rows of one price shard, dated 2010-01-04 to 2011-01-05, both
+volume columns were non-null, finite and positive in all 256 rows. This does
+not establish complete volume coverage across securities or history.
+
+[Intrinio's stock-price documentation](https://docs.intrinio.com/documentation/web_api/GetSecurityStockPrices_v2)
+defines volume as shares exchanged during the period and describes adjusted
+volume as adjusted for splits and dividends; those provider semantics have
+not been independently validated here. Raw close times raw volume can give a
+daily dollar-volume approximation, not exact traded notional. Share turnover
+needs shares outstanding, and the paper's market-turnover ratio needs market
+capitalization, so neither ratio is available under the current inputs/scope.
+Portfolio turnover is a separate metric to calculate later from our trades
+and portfolio weights.
 
 Sadig's feature definitions and construction code are available under
 reference/sadig_us_recovery/. Its SOURCE_SNAPSHOT.json records repository,
@@ -39,6 +59,13 @@ The complete supplied paper was reviewed and copied locally to ignored
 reference/papers/ssrn-4452964-2026-03-26.pdf. Its SHA-256/version and original
 methodological notes are in [the paper reference](PAPER_REFERENCE_HAN_QIN_2026.md).
 The PDF, raw data and source snapshot are not published to Git.
+
+Data-loading and historical-universe foundations are implemented. The bounded
+2010-01-29 S&P 500/400 snapshot retained all 902 constituents: 130 unique routes
+without review flags, 755 needing review, 10 target collisions and 7 unlinked.
+Two explicitly requested exact-date price/volume records loaded; unqueried
+and unresolved names were retained. See [the foundation contract and evidence](DATA_FOUNDATIONS.md).
+These are retrieval-time mappings, not certified knowledge-time PIT identities.
 
 No feature build, model fit or backtest has been run. Reusing/rebuilding derived
 panels requires correct path, identity, calendar and accounting rules and the

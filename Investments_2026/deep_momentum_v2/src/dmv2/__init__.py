@@ -1,1 +1,1 @@
-__version__ = "0.1.0"
+"""Deep Momentum V2 data foundations."""

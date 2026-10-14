@@ -28,6 +28,7 @@ Evidence labels used below:
 - **PAPER:** stated in this specific PDF, with a page/section locator.
 - **INTERPRETATION:** a mathematical implication or an operational reading.
 - **VERIFIED LOCAL:** inspected in our source schemas or reference files.
+- **USER DIRECTION:** an explicit project choice, distinct from the paper.
 - **PROPOSED:** a V2 adaptation, not something the authors did or we have frozen.
 - **OPEN:** information missing from the paper or a project decision still needed.
 
@@ -68,7 +69,11 @@ is retained as a reference and is not automatically accepted as correct.
 **USER DIRECTION:** V2 will use U.S. stocks; candidate universes are historical
 S&P 500, S&P 400, or their union. Feature expansion and forest ensembles are
 intended extensions. They should preserve the probability-to-payoff mechanism
-if they are presented as extensions of this paper.
+if they are presented as extensions of this paper. On 2026-10-14, the user
+explicitly excluded market capitalization from V2: omit the size feature,
+cap-based screens and cap-value weighting. V2 starts from the 15 momentum/state
+inputs before extensions. Obtaining capitalization is not a task or blocker;
+portfolio weighting remains OPEN.
 
 ## 3. Data, frequency and sample construction
 
@@ -98,8 +103,8 @@ and Brazil exceed the comparison by more than 100 times. The data section says
 the discrepant countries are excluded from global portfolios, while the later
 portfolio section explicitly names only Argentina and Brazil; country-model
 results retain them. Preserve this exclusion-description inconsistency if
-extending the global analysis. It does not resolve our missing U.S. historical
-capitalization or validate every source record.
+extending the global analysis. It does not validate every source record;
+V2 deliberately excludes capitalization under the user direction above.
 
 ### 3.2 Cleaning rules as written
 
@@ -185,6 +190,10 @@ The introduction's "15 momentum-related features and a size feature" means
 16 total. The ten cross-sectional mean/std inputs are shared by stocks at the
 same signal month; they are time-varying market-state inputs, not extra
 stock-specific ranks. Dropping them changes the paper model.
+
+**USER DIRECTION, 2026-10-14:** V2 retains these 15 momentum/state inputs and
+omits the size decile before adding separately defined features. This is a
+declared adaptation, not a change to the paper's 16-input specification.
 
 **OPEN:** the standard-deviation divisor, exact cross-section after missingness,
 tie handling, size-decile direction, and numerical treatment of zero dispersion

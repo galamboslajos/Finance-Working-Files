@@ -23,7 +23,9 @@ identity. The original paper is local, ignored and not bundled with this skill.
   annual 100-fit probability ensemble; it does not prescribe an LSTM.
 - Follow the exact calendar indexing: `MOM1=r[t]`; longer `m=3,6,9,12`
   features compound `t-m+1` through `t-1`, with 2/5/8/11 returns. Include
-  five normalized momenta, five cross-sectional means, five SDs and size decile.
+  five normalized momenta, five cross-sectional means, five SDs and size
+  decile in the paper account. V2 deliberately omits the size decile and starts
+  from the other 15 inputs before extensions.
 - Expand classifier training history, but use trailing ten-year historical
   realized class payoffs for RET. Average monthly class means across time;
   do not pool stock rows or estimate payoffs from predicted-mode groups.
@@ -36,15 +38,18 @@ identity. The original paper is local, ignored and not bundled with this skill.
 
 ## Keep adaptations and evidence explicit
 
-- Label facts as PAPER, INTERPRETATION, VERIFIED LOCAL, PROPOSED or OPEN.
+- Label facts as PAPER, INTERPRETATION, VERIFIED LOCAL, USER DIRECTION,
+  PROPOSED or OPEN.
   Never invent author settings for software defaults, seeds, early stopping,
   ties, size orientation, SD/variance estimators, winsorization or execution.
 - Historical S&P membership plus Intrinio is a data/universe adaptation to
   broad CRSP. Do not use today's constituents or future quotes for eligibility.
   Keep missing/terminal outcomes in coverage and economic accounting.
-- Historical market capitalization is absent from the currently downloaded
-  source schemas. A price-only 15-input experiment is an ablation, not the
-  complete paper baseline. Never manufacture size from price or dollar volume.
+- By user direction on 2026-10-14, V2 excludes market capitalization, the
+  size input, cap-based screens and cap-value weighting. Obtaining capitalization
+  is not a task or blocker. Label the 15-input starting set as a declared
+  adaptation, not the complete 16-input paper baseline. Never manufacture size
+  from price or dollar volume. Portfolio weighting/execution remain OPEN.
 - Forests and added features are proposed extensions. Preserve the probability
   interface and RET layer when evaluating an estimator change. Separate
   feature changes from model changes; validate/calibrate/weight only on past

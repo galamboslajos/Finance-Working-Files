@@ -10,7 +10,10 @@ probabilities → historical class payoffs → RET portfolio rankings**. This PD
 uses XGBoost and probability averaging. We intend to study historical S&P 500,
 S&P 400 or their union, then added features and forest ensembles. These are
 explicit adaptations to its broader CRSP/international analysis, not a promise
-to reproduce its published returns.
+to reproduce its published returns. By user decision, V2 does not use market
+capitalization: its starting set is the 15 momentum/state inputs, omitting the
+size decile, cap-based screening and cap-value weighting. Additional features
+remain to be specified.
 
 ## Read before research
 
@@ -23,6 +26,8 @@ to reproduce its published returns.
 - [Draft decision configuration](configs/paper_replication_draft.json): fixed
   paper facts separated from unresolved project conventions; not runnable policy.
 - [Research workflow](docs/RESEARCH_PLAN.md) and [data status](docs/DATA_STATUS.md).
+- [Data foundations](docs/DATA_FOUNDATIONS.md): loader APIs, historical-universe
+  reconstruction, coverage states, source limits and repeatable checks.
 
 The supplied 115-page PDF is identified by its SHA-256 in the reference and
 source manifest. Its ignored local copy is
@@ -47,20 +52,24 @@ manifest hashes. A clone alone does not include data.
 From a configured workspace:
 
 ```sh
-.venv/bin/python -m dmv2 status
-.venv/bin/python -m dmv2 schema intrinio
-.venv/bin/python -m dmv2 verify-data --hashes
+PYTHONPATH=src .venv/bin/python -m dmv2 status
+PYTHONPATH=src .venv/bin/python -m dmv2 schema intrinio
+PYTHONPATH=src .venv/bin/python -m dmv2 verify-data --hashes
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+PYTHONPATH=src .venv/bin/python -m dmv2 universe --as-of 2010-01-29 --universe combined --mode historical_reconstruction --max-scanned-rows 9000000
 ```
 
 The first checks input files against manifests. The second shows schemas
 without reading financial values. The last verifies local file sizes and
-SHA-256 values. Local reads do not require Google login. The existing package
-is a data catalog/verification CLI; paper-model software is not installed by
-this documentation change.
+SHA-256 values. Local reads do not require Google login. The package now also
+provides bounded price readers and historical constituent reconstruction.
+The explicit mode records source limitations; knowledge-time certification is
+unavailable from these inputs. The modelling packages are not installed.
 
 ## Layout
 
-- `src/dmv2/`: active V2 code, currently the data catalog and verification CLI.
+- `src/dmv2/`: source catalog, bounded loaders, historical universe and quote audits.
+- `tests/`: adversarial source/PIT/coverage tests using structural fixtures only.
 - `configs/data_sources.local.json`: ignored private paths and source pins.
 - `configs/paper_replication_draft.json`: public paper facts/design placeholders.
 - `data/raw/`: ignored independent Intrinio, Siblis membership and unified
@@ -75,10 +84,16 @@ this documentation change.
 
 ## Current state
 
-SETUP AND PAPER REVIEW COMPLETE; EXPERIMENT DESIGN OPEN. Source-file integrity
+DATA FOUNDATIONS IMPLEMENTED; EXPERIMENT DESIGN OPEN. Source-file integrity
 and table footer counts were verified. All 115 paper pages were reviewed.
+The 2010-01-29 combined universe audit retained all 902 constituents; only 130
+had a unique identity route without a review flag. Two exact-date quotes loaded
+successfully. Unresolved identities remain in the ledger; do not model the
+mapped subset as if it represented the intended complete cohort.
 No new features, model fits or backtests have been run. Historical capitalization
-is absent from the downloaded schemas, so the paper's complete 16-feature
-baseline is not yet supported. The primary S&P universe, usable history,
+is absent from the downloaded schemas and deliberately excluded from V2; it
+is not a remaining data task or blocker. The 15-input starting set is a declared
+adaptation, not the paper's complete 16-input baseline. The primary S&P universe,
+usable history,
 return/execution rules, temporal validation and experiment budget remain OPEN.
 Protected 2024+ financial values remain uninspected.

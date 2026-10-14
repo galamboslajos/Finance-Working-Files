@@ -4,6 +4,7 @@ Read README.md, docs/RESEARCH_PLAN.md and docs/DATA_STATUS.md before work here.
 For features, labels, models or portfolios, also read
 docs/PAPER_REFERENCE_HAN_QIN_2026.md and docs/US_REPLICATION_PLAN.md. Apply the
 repository-local .agents/skills/han-qin-deep-momentum/SKILL.md when relevant.
+For loading or universe changes, also read docs/DATA_FOUNDATIONS.md.
 
 - This is a U.S. equity project. Keep new code and outputs in this directory.
 - Preserve ../deep_momentum/ as an observation and navigation reference.
@@ -15,16 +16,29 @@ repository-local .agents/skills/han-qin-deep-momentum/SKILL.md when relevant.
   XGBoost and RET reclassification. It does not require an LSTM or Sharpe-loss
   neural network. Added features and forest ensembles are intended extensions;
   distinguish them from the paper baseline and isolate their effects.
-- Use the paper reference's exact momentum indexing, 16-feature count,
+- Preserve the paper account: exact momentum indexing, 16 original inputs,
   expanding annual classifier history, 100-fit probability averaging and
   trailing ten-year class payoffs. Do not invent missing author parameters.
+  V2 deliberately starts from 15 momentum/state inputs before extensions;
+  omit the market-cap size feature, cap-based screens and cap-value weighting.
 - Distinguish source fields, engineered features and model-ready panels.
-  Historical capitalization is missing from the current local source schemas;
-  do not substitute price or dollar volume for the paper's size feature.
+  Historical capitalization is absent locally and excluded by user direction;
+  obtaining it is not a V2 task or blocker. Do not substitute price or dollar
+  volume for the omitted size feature.
 - Use stable security IDs and dated membership. Record identity, adjustment,
   missing-price and corporate-action limitations from the prior U.S. attempt.
   Future quote availability must not determine signal-time eligibility.
-- Keep PAPER, INTERPRETATION, VERIFIED LOCAL, PROPOSED and OPEN claims separate.
+- Build cohorts from dated source membership before price joins. Retain identity,
+  missing-price and unrequested-price states and original cohort denominators.
+  Current links/adjusted prices are retrieval-time evidence; distinguish
+  historical_reconstruction from unavailable knowledge_time certification.
+  Quarantined identities are review tasks, not silently removed constituents.
+- Use pinned manifest objects, explicit projections/date bounds and measured
+  read budgets. Never return a silently truncated request or read protected
+  financial values through metadata keys/filters. Read the documented holdout
+  output guard and Parquet block-decoding limits before changing loaders.
+- Keep PAPER, INTERPRETATION, VERIFIED LOCAL, USER DIRECTION, PROPOSED and
+  OPEN claims separate.
   Paper-reading completion is not empirical replication or a frozen protocol.
 - Freeze formulas, timing, eligibility, chronology, costs and trial bounds before
   results. Do not inspect protected 2024+ financial values unless a new research
