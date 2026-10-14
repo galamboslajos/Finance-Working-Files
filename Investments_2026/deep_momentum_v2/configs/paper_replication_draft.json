@@ -91,7 +91,9 @@
       "cross_section_momentum_standard_deviations": 5
     },
     "relation_to_paper": "declared_no_size_feature_or_cap_based_screening_adaptation_not_complete_16_input_baseline",
-    "portfolio_weighting_remains_open": true
+    "portfolio_weighting_remains_open": true,
+    "research_workflow_config": "configs/research_workflow.json",
+    "research_workflow_decision": "User selected initialization in 2000 and rolling 10 years train / 1 year test; canonical values are in research_workflow.json"
   },
   "v2_decisions_open": {
     "primary_universe": null,
@@ -101,7 +103,6 @@
     "return_total_return_and_terminal_event_rules": null,
     "portfolio_weighting": null,
     "source_and_learning_cleaning_rules": null,
-    "development_and_outer_test_periods": null,
     "holdout_protocol": null,
     "inner_validation_variant": null,
     "deterministic_conventions_for_paper_underspecification": null,
@@ -109,7 +110,8 @@
     "models_features_and_hyperparameter_bounds": null,
     "probability_calibration_and_ensemble_weights": null,
     "trial_budget_and_acceptance_criteria": null,
-    "compute_resource_and_cost_budget": null
+    "compute_resource_and_cost_budget": null,
+    "usable_training_coverage_and_feature_warmup": null
   },
   "extensions_proposed_not_frozen": {
     "estimators": ["random_forest_classifier", "extra_trees_classifier_optional"],

@@ -4,6 +4,11 @@ Implemented 2026-10-14. This stage provides audited loading and constituent
 reconstruction; it does not build returns, features, targets or backtests.
 Market capitalization remains outside the project scope.
 
+The loader is coded in `src/dmv2/loading.py`, with catalog/source/universe
+helpers. A [master notebook](NOTEBOOK_WORKFLOW.md) now exposes those stages.
+Research initialization is user-selected 2000 with rolling 10/1 chronology;
+the 2010 audit below was a bounded test, not a source or study start date.
+
 ## Contracts
 
 - `SourceCatalog` resolves only objects listed in pinned source manifests.

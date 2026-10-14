@@ -17,6 +17,14 @@ remain to be specified.
 
 ## Read before research
 
+Start with [`notebooks/00_research_master.ipynb`](notebooks/00_research_master.ipynb)
+in VS Code. Select **Deep Momentum V2 (.venv)** and use **Run All** to execute
+the implemented bounded foundation stages. It calls the tested source modules;
+it does not hide a full scan or model fit. See [the notebook guide](docs/NOTEBOOK_WORKFLOW.md).
+The selected study initialization is **2000**, with **rolling 10-year training /
+1-year testing**. The nominal first outcome test is 2010, subject to warmup and
+coverage; the earlier 2010 loader check was not a research-start decision.
+
 - [Precise paper reference](docs/PAPER_REFERENCE_HAN_QIN_2026.md): equations,
   timing, features, training, portfolio rules, reported evidence and ambiguities.
 - [U.S. adaptation and decision ledger](docs/US_REPLICATION_PLAN.md): data
@@ -69,6 +77,8 @@ unavailable from these inputs. The modelling packages are not installed.
 ## Layout
 
 - `src/dmv2/`: source catalog, bounded loaders, historical universe and quote audits.
+- `notebooks/00_research_master.ipynb`: the readable Run All entry point.
+- `configs/research_workflow.json`: selected study chronology and inspection controls.
 - `tests/`: adversarial source/PIT/coverage tests using structural fixtures only.
 - `configs/data_sources.local.json`: ignored private paths and source pins.
 - `configs/paper_replication_draft.json`: public paper facts/design placeholders.
@@ -84,7 +94,7 @@ unavailable from these inputs. The modelling packages are not installed.
 
 ## Current state
 
-DATA FOUNDATIONS IMPLEMENTED; EXPERIMENT DESIGN OPEN. Source-file integrity
+MASTER NOTEBOOK AND DATA FOUNDATIONS IMPLEMENTED; REMAINING DESIGN OPEN. Source-file integrity
 and table footer counts were verified. All 115 paper pages were reviewed.
 The 2010-01-29 combined universe audit retained all 902 constituents; only 130
 had a unique identity route without a review flag. Two exact-date quotes loaded
@@ -94,6 +104,7 @@ No new features, model fits or backtests have been run. Historical capitalizatio
 is absent from the downloaded schemas and deliberately excluded from V2; it
 is not a remaining data task or blocker. The 15-input starting set is a declared
 adaptation, not the paper's complete 16-input baseline. The primary S&P universe,
-usable history,
-return/execution rules, temporal validation and experiment budget remain OPEN.
+usable training coverage, pre-2000 feature warmup, return/execution rules,
+inner validation and experiment budget remain OPEN. Selected rolling chronology
+is recorded in configs/research_workflow.json, separate from paper facts.
 Protected 2024+ financial values remain uninspected.

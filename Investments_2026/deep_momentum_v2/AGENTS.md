@@ -5,8 +5,17 @@ For features, labels, models or portfolios, also read
 docs/PAPER_REFERENCE_HAN_QIN_2026.md and docs/US_REPLICATION_PLAN.md. Apply the
 repository-local .agents/skills/han-qin-deep-momentum/SKILL.md when relevant.
 For loading or universe changes, also read docs/DATA_FOUNDATIONS.md.
+For notebook or chronology changes, also read docs/NOTEBOOK_WORKFLOW.md and
+configs/research_workflow.json. The master notebook orchestrates worker modules;
+keep reusable data/model rules in src/dmv2 and test them there.
 
 - This is a U.S. equity project. Keep new code and outputs in this directory.
+- User-selected chronology starts in 2000 with rolling ten-year training and
+  one-year outcome tests. Keep the paper's expanding history as a source fact,
+  separate from this V2 adaptation. Feature warmup and usable coverage remain open.
+- The notebook defaults to one bounded 2000 engineering audit and no price
+  sample. Keep its committed outputs empty and save private audit evidence
+  under ignored outputs. Do not treat Run All as an implicit full-panel/model run.
 - Preserve ../deep_momentum/ as an observation and navigation reference.
 - Use the existing Finance-Working-Files Git repository; do not create nested Git repos.
 - Keep raw data, credentials, paper PDFs, source snapshots and generated outputs

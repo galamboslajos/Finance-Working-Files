@@ -3,6 +3,12 @@
 Status: DATA FOUNDATIONS IMPLEMENTED; EXPERIMENT DESIGN OPEN.
 New strategy research begins here; the previous attempt is a reference.
 
+**USER DIRECTION:** initialize research in 2000 and use rolling ten-year
+training / one-year outcome tests. The canonical settings and readable master
+notebook are described in [the notebook workflow](NOTEBOOK_WORKFLOW.md).
+Nominal tests run from 2010 through the existing pre-holdout boundary in 2023;
+actual usable coverage and pre-2000 feature warmup remain to be established.
+
 The first source/date/identity/quote contracts and adversarial tests are in
 [data foundations](DATA_FOUNDATIONS.md). One real 2010-01-29 combined snapshot
 retains all 902 names, with 772 unresolved or review/collision identity states.
@@ -24,7 +30,8 @@ forest ensembles are our intended adaptations.
    feature, cap-based screens and cap-value weighting. Keep this departure
    explicit; obtaining capitalization is not a task or blocker. Portfolio
    weighting remains a separate OPEN decision.
-3. Choose the primary historical S&P cohort and audit usable history. Freeze
+3. Choose the primary historical S&P cohort and audit usable history within the
+   selected 2000 initialization / rolling 10-1 chronology. Freeze
    feature/label conventions, cleaning, signal/entry timing, completed-outcome
    cutoffs, annual retraining, class-payoff windows, validation, costs and trials.
    Resolve paper underspecification in the ledger instead of inventing author settings.

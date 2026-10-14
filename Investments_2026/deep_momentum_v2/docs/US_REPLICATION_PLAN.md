@@ -157,6 +157,14 @@ No full dataset build is authorized by the paper alone.
 
 ## 5. Chronology and dates: do not inherit the previous attempt silently
 
+**USER DIRECTION:** research initialization is 2000, with rolling ten-year
+training / one-year outcome tests. Values live in
+[`research_workflow.json`](../configs/research_workflow.json); the
+[master notebook](../notebooks/00_research_master.ipynb) previews fourteen nominal
+2010–2023 tests. This explicitly adapts the paper's expanding classifier history.
+The 2010 engineering check is unrelated to the selected initialization date.
+Raw earlier history is retained; pre-2000 feature warmup is still OPEN.
+
 The paper requires at least ten years before initial model fitting and uses a
 rolling ten-year class-payoff estimate. A source product reaching back decades
 does not establish ten usable years for our chosen universe and return rules.
@@ -167,7 +175,8 @@ The prior recovery used 1998 warmup, 1999-2023 accepted signal-panel coverage,
 2009-2023 primary inputs and 2015-2023 test folds. These are different roles,
 not interchangeable sample dates. January 1998 data alone cannot justify a
 paper-style initial fit in 1999. The available releases may support a longer
-history, but that has not been audited. New start/end dates remain OPEN.
+history, but that has not been audited. Usable training coverage, feature warmup,
+inner validation and execution timing remain OPEN within the selected chronology.
 
 Protected 2024+ financial values remain uninspected. Define the development
 period, annual outer forecasts, inner validation, tuning budget, embargo/purge
