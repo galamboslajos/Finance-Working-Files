@@ -1,7 +1,24 @@
 # Starting research workflow
 
-Status: SETUP AND PAPER REVIEW COMPLETE; EXPERIMENT DESIGN OPEN.
+Status: DATA FOUNDATIONS AND MONTHLY RETURN ENGINEERING IMPLEMENTED; EXPERIMENT DESIGN OPEN.
 New strategy research begins here; the previous attempt is a reference.
+
+**USER DIRECTION:** initialize research in 2000 and use rolling ten-year
+training / one-year outcome tests. The canonical settings and readable master
+notebook are described in [the notebook workflow](NOTEBOOK_WORKFLOW.md).
+Nominal tests run from 2010 through the existing pre-holdout boundary in 2023;
+actual usable coverage and pre-2000 feature warmup remain to be established.
+
+The first source/date/identity/quote contracts and adversarial tests are in
+[data foundations](DATA_FOUNDATIONS.md). One real 2010-01-29 combined snapshot
+retains all 902 names, with 772 unresolved or review/collision identity states.
+Next, audit the dated evidence behind those mappings before treating a small
+uniquely mapped subset as an intended research universe.
+
+The [monthly worker and notebook stage](MONTHLY_RETURNS.md) now preserve daily
+data independently and construct bounded provider-adjusted ratios from full
+preceding-month cohorts. Missing/identity/unrequested states remain visible.
+Economic event accounting and knowledge-time certification remain unresolved.
 
 The locked paper is Han-Qin, *Bimodality Everywhere*, March 26, 2026. Read
 [its precise reference](PAPER_REFERENCE_HAN_QIN_2026.md) and
@@ -13,15 +30,18 @@ forest ensembles are our intended adaptations.
 1. Audit dated U.S. membership and identity joins, return adjustments,
    availability, delisted names and corporate actions on a bounded approved
    pre-holdout sample. Preserve exclusion denominators and prior failure evidence.
-2. Identify an approved historical market-capitalization source. Current
-   downloaded schemas lack capitalization and shares outstanding. This blocks
-   the full size-feature baseline and value weighting; a 15-feature experiment
-   must be explicitly labeled an ablation.
-3. Choose the primary historical S&P cohort and audit usable history. Freeze
+2. Apply the user's decision to exclude market capitalization. Start from
+   the 15 momentum/state inputs before extensions, omitting the paper's size
+   feature, cap-based screens and cap-value weighting. Keep this departure
+   explicit; obtaining capitalization is not a task or blocker. Portfolio
+   weighting remains a separate OPEN decision.
+3. Choose the primary historical S&P cohort and audit usable history within the
+   selected 2000 initialization / rolling 10-1 chronology. Freeze
    feature/label conventions, cleaning, signal/entry timing, completed-outcome
    cutoffs, annual retraining, class-payoff windows, validation, costs and trials.
    Resolve paper underspecification in the ledger instead of inventing author settings.
-4. Implement and verify the paper mechanism with monthly momentum, mode-XGB
+4. Implement and verify the paper mechanism under the declared 15-input
+   V2 adaptation, with monthly momentum, mode-XGB
    and RET under a common cohort and economic ledger. Keep prediction quality
    distinct from portfolio/valuation completeness. The paper's random historical
    inner split and any temporal variant must have different named protocols.
