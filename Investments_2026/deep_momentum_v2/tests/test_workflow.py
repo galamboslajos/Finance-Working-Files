@@ -68,6 +68,20 @@ class WorkflowValidationTests(unittest.TestCase):
         validate_workflow(legacy)
         self.assertEqual(workflow_identity_policy(legacy),STRICT_IDENTITY_POLICY)
 
+    def test_context_policy_is_named_and_does_not_change_paper_policy(self):
+        settings = configuration()
+        validate_workflow(settings)
+        self.assertEqual(settings['features']['context_policy'], 'available_cohort_80pct')
+        self.assertEqual(settings['features']['cohort_policy'], 'signal_qualified_common_momentum_v1')
+        legacy = deepcopy(settings)
+        legacy['features'].pop('context_policy')
+        validate_workflow(legacy)
+        for invalid in ('ignore_missing', .9, None):
+            bad = deepcopy(settings)
+            bad['features']['context_policy'] = invalid
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                validate_workflow(bad)
+
     def test_identity_policy_cannot_claim_verified_or_missing_waiver(self):
         for field,value in [('accept_identity_uncertainty',False),('accept_identity_uncertainty',1),
             ('research_status','VERIFIED'),('policy','ignore_all'),('policy_version',True)]:

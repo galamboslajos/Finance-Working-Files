@@ -62,7 +62,8 @@
       "max_scanned_rows": 12000000,
       "max_output_rows": 100000,
       "max_read_bytes": 134217728
-    }
+    },
+    "context_policy": "available_cohort_80pct"
   },
   "identity": {
     "policy": "provisional_unique_resolved_link",

@@ -115,7 +115,7 @@ def load_feature_sample(catalog, *, start_month, end_month, universe, sample_siz
         'identity_policy':identity_policy_provenance(identity_policy),
         "financial_cutoff": raw_end, "outcome_tables_consumed": False,
         "daily_context_loaded": False,
-        "context_policy": "Withhold cohort-derived statistics until every original required member/input is available; no sample ranks.",
+        "context_policy": "Bounded engineering samples do not qualify as exhaustive original cohorts; withhold cohort-derived statistics under either supported context policy.",
         "knowledge_time_verified": False,
         "holdout_policy": "Financial reads end before 2024; Arrow masks exclusions before values reach Python/analysis. Parquet chunks may transiently decode excluded values.",
     }

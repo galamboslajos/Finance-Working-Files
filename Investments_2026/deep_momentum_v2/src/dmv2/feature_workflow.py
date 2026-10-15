@@ -35,7 +35,8 @@ def run_feature_sample(catalog, settings):
         identity_policy=workflow_identity_policy(settings))
     panel = build_feature_panel(sample.daily_prices.table, sample.calendar, sample.snapshots,
         requested_security_ids=sample.requested_ids,identity_policy=workflow_identity_policy(settings),
-        normalization_policy=controls['cohort_policy'])
+        normalization_policy=controls['cohort_policy'],
+        context_policy=controls.get('context_policy', 'complete_cohort'))
     report = {'schema_version': 1, 'workflow_sha256': canonical_sha256(settings),
         'source_pins': catalog.provenance(), 'code_provenance': worker_code_provenance(),
         'summary': panel.summary, 'feature_provenance': panel.provenance,

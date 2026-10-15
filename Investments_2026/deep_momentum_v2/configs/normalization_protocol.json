@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "protocol_id": "dmv2-normalization-missingness-v2-2010",
-  "version": "2.0.0",
+  "protocol_id": "dmv2-normalization-missingness-v4-2010-context80-primary",
+  "version": "4.0.0",
   "status": "ACTIVE_ENGINEERING_IDENTITY_UNVERIFIED",
   "effective_date": "2026-10-15",
   "supersedes": "normalization_protocol.proposed.json remains historical inactive evidence",
-  "authority": "User requested normalization/missingness completion under provisional identity policy, then changed initialization to 2010 before model results.",
+  "authority": "User promoted the verified 80% context panel to primary and retained 90% as sensitivity on 2026-10-15; provisional identity and 2010 initialization remain unchanged.",
   "chronology": {
     "initial_outcome_year": 2010,
     "training": "rolling preceding 10 completed outcome years",
@@ -55,10 +55,17 @@
     "paper_attribution": "Momentum formulas follow paper equations6-8; common population, ddof and gates are declared V2 adaptations."
   },
   "context_policy": {
-    "active_worker_policy": "complete_cohort",
-    "status": "Full-cohort context remains withheld unless its exhaustive original and daily historical cohort requirements are met.",
-    "daily_benchmarks": "Use each daily historical cohort; never reuse month-end membership throughout past days.",
-    "all_715_full_history_predictors_ready": false
+    "active_worker_policy": "available_cohort_80pct",
+    "minimum_coverage_fraction": 0.8,
+    "exhaustive_request_required": true,
+    "coverage_denominator": "Every original historical member of the specific variable/date/universe or index sleeve, including identity-blocked members.",
+    "status": "Available-observation context; a fixed user-approved engineering threshold, not proof of representativeness.",
+    "daily_benchmarks": "Apply 80% and exhaustive admitted-ID requests separately on EVERY historical daily union/sleeve; retain 90% sensitivity and never project month-end membership backward.",
+    "individual_history": "Exact temporal windows and complete stock/benchmark pairs remain unchanged; no padding, skipping, fill or input imputation.",
+    "paper15_changed": false,
+    "all_715_full_history_predictors_ready": false,
+    "sensitivity_worker_policy": "available_cohort_90pct",
+    "sensitivity_coverage_fraction": 0.9
   },
   "missingness": {
     "preprocessing_policy": "train_partition_median_missing_indicator_v1",

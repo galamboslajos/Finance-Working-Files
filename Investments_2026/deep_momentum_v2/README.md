@@ -111,11 +111,11 @@ enter research with their flags retained; missing/ambiguous routes and collision
 remain blocked. Original cohort denominators remain intact.
 The separate [2010–2023 endpoint audit](docs/INITIALIZATION_2010.md) measured
 complete 15-input paper coverage on 140,777 of 152,307 original stock-months
-(92.43%). Full 715-predictor/context coverage, model fits and backtests remain outstanding. Historical capitalization
+(92.43%). Full-bank coverage is now measured in [the full-panel audit](docs/FULL_FEATURE_PANEL.md); model fits and backtests remain outstanding. Historical capitalization
 is absent from the downloaded schemas and deliberately excluded from V2; it
 is not a remaining data task or blocker. The 15-input starting set is a declared
 adaptation, not the paper's complete 16-input baseline. The primary S&P universe,
-full added-feature coverage, economic return/execution rules, inner validation
+economic return/execution rules, inner validation
 and experiment budget remain OPEN. Exact per-signal warmup is implemented; the
 15-input endpoint audit does not establish complete daily technical/context history. Selected rolling chronology
 is recorded in configs/research_workflow.json, separate from paper facts.
@@ -146,3 +146,39 @@ is active in the master configuration. Unique resolved review-flagged links may
 enter research calculations with their original flags and uncertainty intact;
 missing/ambiguous routes and same-date collisions remain blocked and visible.
 Historical identity/PIT certification no longer stops all provisional development.
+
+The explicitly authorized [full 2010–2023 feature build](docs/FULL_FEATURE_PANEL.md)
+uses annual checkpoints and separate raw daily data. The master verifies saved
+coverage/missingness reports and exposes lazy feature/daily datasets; Run All
+does not launch a full build or fit preprocessing/models.
+
+The active added-context policy is [80% original-cohort coverage](docs/CONTEXT_AVAILABILITY.md),
+with 90% retained as a separate sensitivity check,
+with exhaustive admitted-ID requests, per-variable/date/sleeve diagnostics and
+unchanged exact temporal windows. The paper15 keep their existing common-five
+population. The earlier complete-cohort build remains historical comparison evidence.
+
+The historical user-authorized 90% context rebuild is complete: all 402 previously empty
+context predictors have observations somewhere in 2010–2023; none are entirely
+missing over that full period. Paper15,298 technical features and every preserved
+daily artifact match the previous run exactly. Among paper-qualified rows,
+context-value coverage is 59.52% in 2010–2019 and 98.08% in 2020–2023. Early missingness
+remains material; these are descriptive counts, not full-history feature selection.
+See [the full-panel verification](docs/FULL_FEATURE_PANEL.md) and the active
+context contract for detailed annual/feature coverage.
+
+By subsequent user direction, **80% is primary and 90% is the sensitivity check**.
+The verified panels retain their original paths, identities and bytes; their
+roles are recorded in `configs/context_panel_roles.json`. Read both panels and
+saved comparison evidence with `dmv2.context_panel_roles.read_context_panel_roles`.
+Historical comparison tables retain their original **90% → 80%** orientation.
+Notebook Run All verifies saved evidence without starting a build or fitting a model.
+`configs/context_panel_roles.json` selects the active roles; original output
+pointers retain their historical build meanings.
+See [the comparison and promotion record](docs/CONTEXT_SENSITIVITY_80.md).
+
+The [verified 80% primary panel](docs/CONTEXT_SENSITIVITY_80.md) has 96.27% finite
+context values among paper-qualified rows over 2010–2023 and 92.09% in 2010–2015.
+The retained 90% sensitivity has 71.06% and 33.57%, respectively. All shared finite
+values, paper15, technical298 and daily artifacts are unchanged. Missingness may
+be systematic; promoting 80% does not establish representative or certified PIT data.

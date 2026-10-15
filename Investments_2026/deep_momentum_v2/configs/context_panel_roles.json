@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-context-panel-roles-2010-2023-v1",
+  "authorization": "User explicitly selected 80% primary and 90% sensitivity and requested merge on 2026-10-15. Role promotion reuses verified immutable artifacts; no numerical rebuild.",
+  "primary_policy": "available_cohort_80pct",
+  "sensitivity_policy": "available_cohort_90pct",
+  "historical_comparison_orientation": "90pct_reference_to_80pct_candidate",
+  "archived_recipe_directory": "outputs/reference_code/context80-c39631454bfea7da",
+  "primary": {
+    "context_policy": "available_cohort_80pct",
+    "directory": "outputs/context_sensitivity/80pct-2010-2023-c39631454bfea7da",
+    "audit_sha256": "c61958cdde8a923a33987fbe6986cfda0924a3505dba93597c05b774866499e4",
+    "build_identity_sha256": "sha256:c39631454bfea7daf65a314f1fe9b2533c8eda7ac672bbc5e1a3ae186338843c"
+  },
+  "sensitivity": {
+    "context_policy": "available_cohort_90pct",
+    "directory": "outputs/full_feature_panel/2010-2023-9992dcb5c83acdf2",
+    "audit_sha256": "89542dcd94d387878f93882e781eca4f424f814016985bfab57045da75f19620",
+    "build_identity_sha256": "sha256:9992dcb5c83acdf29f316a37c68cdb4e97f7855b3e46e3b04a3cb38edd9a0217",
+    "worker_snapshot_directory": "outputs/reference_code/context90-9992dcb5c83acdf2"
+  },
+  "comparison_manifest_sha256": "86aa62cda4c047510742ceb92cdbb1c756ecaddf30cfba031bd23481f1563ad7"
+}

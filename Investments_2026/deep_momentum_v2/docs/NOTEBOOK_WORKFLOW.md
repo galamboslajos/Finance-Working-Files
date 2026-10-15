@@ -197,3 +197,27 @@ separate admission display reports 831/860/878 eligible routes at the three
 anchor dates. No predictor contains admission metadata, no fit was performed,
 and no cross-sectional sample normalization or historical certification is
 inferred. See [the recorded provisional decision](PROVISIONAL_IDENTITY_POLICY.md).
+
+## Full feature panel verification, 2026-10-15
+
+The [full 2010–2023 feature panel](FULL_FEATURE_PANEL.md) is now built and audited under the provisional identity policy. It retains 152,307 original rows and 168 monthly signals. Daily observations feed technical/context calculations and are also preserved independently for later backtesting, including complete annual warmup and signal anchors. All 715 eligible names remain in the dictionary; missing context is reported rather than filled or silently excluded. The master verifies saved coverage and exposes separate lazy feature/daily datasets. Notebook Run All does not relaunch the full build, fit imputation/models or backtest.
+
+## Active 80% primary context policy; 90% sensitivity
+
+`features.context_policy=available_cohort_80pct` agrees with the active normalization
+and full-build configurations. The master verifies explicit immutable panel pins
+and exposes the 80% run as `full_feature_run`/`full_feature_dataset`, the 90% run as
+`context_sensitivity_run`/`context_sensitivity_dataset`, and raw daily data as the
+separate lazy `full_daily_dataset`. Historical comparison columns remain 90% →80%.
+It displays the active policy and saved full-panel context coverage. A two-ID request still cannot qualify a historical cross-section:
+all admitted IDs must be requested before 80% observed coverage is considered.
+The paper15 normalization and daily/outcome separation are unchanged. Read
+[the context contract](CONTEXT_AVAILABILITY.md).
+
+By subsequent user direction, **80% is primary and 90% is the sensitivity check**.
+The verified panels retain their original paths, identities and bytes; their
+roles are recorded in `configs/context_panel_roles.json`. Read both panels and
+saved comparison evidence with `dmv2.context_panel_roles.read_context_panel_roles`.
+Historical comparison tables retain their original **90% → 80%** orientation.
+Notebook Run All verifies saved evidence without starting a build or fitting a model.
+See [the comparison and promotion record](CONTEXT_SENSITIVITY_80.md).

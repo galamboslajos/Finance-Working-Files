@@ -34,7 +34,7 @@ daily data separate for future daily backtesting; monthly frequency applies to p
   Keep features_df signal-only and separate from monthly_df outcomes and coverage.
   Statistics must not be computed on an arbitrary requested subset. The active
   common-five paper population needs exhaustive admitted-original requests;
-  context retains its complete-cohort requirements.
+  context uses `available_cohort_80pct`: exhaustive admitted-ID requests plus at least 80% valid original members per variable/date/cohort. Exact individual lookbacks stay unchanged.
   Preserve 728 dictionary definitions; the predictor allowlist excludes three
   constants and ten exact rank aliases. No outcomes or audit flags enter X.
 - Monthly outcomes use the preceding month-end historical cohort. Preserve
@@ -95,4 +95,14 @@ daily data separate for future daily backtesting; monthly frequency applies to p
 - The 2010–2023 initialization audit is an explicit monthly-endpoint check,
   separate from the two-ID daily sample. The master verifies saved evidence;
   Run All does not launch the full audit. Complete paper inputs do not certify
-  all715 added predictor coverage or representative full-index performance.
+  all 715 added predictor coverage or representative full-index performance.
+
+- The user-authorized full 2010–2023 feature build is implemented in `full_loading.py`, `full_features.py`, `full_panel.py` and `panel_coverage.py`. Read docs/FULL_FEATURE_PANEL.md and configs/full_panel_build.json before changing it. The master reads verified saved reports; full building is an explicit CLI action. Preserve full annual raw warmup and past-only feature histories separately from disjoint outcome-year daily tables. Context uses the user-approved 80% primary original-cohort rule, with 90% retained as sensitivity; read docs/CONTEXT_AVAILABILITY.md. Missingness reports never authorize full-history predictor selection or fitting.
+
+By subsequent user direction, **80% is primary and 90% is the sensitivity check**.
+The verified panels retain their original paths, identities and bytes; their
+roles are recorded in `configs/context_panel_roles.json`. Read both panels and
+saved comparison evidence with `dmv2.context_panel_roles.read_context_panel_roles`.
+Historical comparison tables retain their original **90% → 80%** orientation.
+Notebook Run All verifies saved evidence without starting a build or fitting a model.
+See [the comparison and promotion record](docs/CONTEXT_SENSITIVITY_80.md).
