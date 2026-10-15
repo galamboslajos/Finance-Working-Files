@@ -1,6 +1,7 @@
 # Starting research workflow
 
-Status: DATA FOUNDATIONS, MONTHLY RETURNS AND BOUNDED FEATURE WORKERS IMPLEMENTED; EXPERIMENT DESIGN OPEN.
+Status: DATA FOUNDATIONS, FULL FEATURES AND SHARED TARGET/RET WORKERS IMPLEMENTED;
+FULL TARGET COVERAGE AUDITED; ESTIMATOR EXECUTION DESIGN OPEN.
 New strategy research begins here; the previous attempt is a reference.
 
 **USER DIRECTION, 2026-10-15:** initialize research in 2010 and use rolling ten-year
@@ -43,10 +44,11 @@ forest ensembles are our intended adaptations.
    feature, cap-based screens and cap-value weighting. Keep this departure
    explicit; obtaining capitalization is not a task or blocker. Portfolio
    weighting remains a separate OPEN decision.
-3. Choose the primary historical S&P cohort and audit usable history within the
-   selected 2010 initialization / rolling 10-1 chronology. Freeze
-   feature/label conventions, cleaning, signal/entry timing, completed-outcome
-   cutoffs, annual retraining, class-payoff windows, validation, costs and trials.
+3. Use the selected historical S&P 500/400 union and audit usable history within
+   the selected 2010 initialization / rolling 10-1 chronology. The feature and
+   shared target/class/RET conventions are implemented in their named contracts.
+   Freeze remaining estimator validation/settings, operational signal/entry
+   timing, costs and trial budgets before fitting or portfolio evaluation.
    Resolve paper underspecification in the ledger instead of inventing author settings.
 4. Implement and verify the paper mechanism under the declared 15-input
    V2 adaptation, with monthly momentum, mode-XGB
@@ -96,3 +98,50 @@ Context-value coverage among paper-qualified rows is 96.27% versus 71.06% over
 original denominators, paper15, technical298, PIT cutoffs and separate daily
 artifacts are unchanged. This is a user policy choice, not selection by model
 performance or proof that remaining omissions are random.
+
+## Next modelling design
+
+The primary model universe is now the user-selected historical S&P 500/400
+union. The [initial comparison sketch](MODEL_COMPARISON.md) separates XGBoost
+versus random forest and Paper15 versus expanded inputs in four arms. The master
+displays metadata-only plans from `dmv2.model_design`; no model fit is implied.
+The shared target/class/payoff contracts are implemented. The separately
+authorized [full historical target audit](FULL_TARGET_PANEL.md) is complete
+under the same PIT, missingness, chronology and protected-data rules. Estimator
+adapters and a measured pilot follow verified coverage and frozen execution settings.
+
+## Shared monthly class/RET engineering, 2026-10-15
+
+The [shared workers](TARGET_CLASSES_RET.md) now implement exact tie-aware monthly
+classes, original-cohort/missing-outcome ledgers, the label-aware training adapter
+and strict 120-calendar-month realized-class RET payoffs. Forward-outcome requests
+are distinguished from past feature requests. The master checks already loaded
+bounded samples and keeps daily/feature data separate. A separate explicit
+full-history build has measured label and strict RET payoff coverage. No
+estimator or backtest has run for this implementation,
+and economic accounting remains unresolved.
+
+## Full monthly target and RET coverage audit, 2026-10-15
+
+The user authorized the full 2010–2023 target panel and class/payoff coverage
+audit before fitting either model. The cache-only workflow reuses the primary
+panel's original cohorts, provisional identity admission, Paper15 eligibility
+and independent calendar evidence. It keeps forward-outcome requests separate
+from feature-history requests and preserves existing feature and daily artifacts.
+The [full target audit record](FULL_TARGET_PANEL.md) describes the explicit build
+and saved readers. The completed audit retains 152,307 original rows,
+149,950 identity-admitted rows and 140,777 signal-time prediction-eligible rows.
+It releases 140,485 labels (99.79% of prediction-eligible rows). The 292 eligible
+unlabelled rows comprise 276 missing end quotes and 16 source quality flags;
+they remain in prediction ledgers. All 168 months pass exhaustive-request and
+rank guards, and all ten classes appear in every month. Forty-three months
+contain exact-return ties; the largest tie has four members.
+
+All 48 nominal test signals have complete RET payoff vectors,
+cross-checked through the canonical shared payoff worker. The first available
+signal is 2019-12-31 for the January 2020 prediction. The preceding 120 signals
+withhold RET because they lack 120 completed outcome months; history is never
+shortened. The saved audit contains 201,600 month/class grid rows and 1,680
+class-payoff rows, and verifies 475 recorded input files unchanged. Rolling
+ten-year classifier windows and monthly 120-calendar-month payoff updates remain
+separate and unchanged.

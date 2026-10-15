@@ -106,3 +106,37 @@ saved comparison evidence with `dmv2.context_panel_roles.read_context_panel_role
 Historical comparison tables retain their original **90% → 80%** orientation.
 Notebook Run All verifies saved evidence without starting a build or fitting a model.
 See [the comparison and promotion record](docs/CONTEXT_SENSITIVITY_80.md).
+
+For model planning, read docs/MODEL_COMPARISON.md and the standalone
+configs/model_comparison.proposed.json. The primary modelling universe is the
+user-selected historical S&P 500/400 union. The four-arm design and temporal
+inner validation remain proposals, not execution authority. model_design.py
+reads draft metadata only. Keep the paper's original expanding/16-input/100-fit
+method distinct from V2's rolling/no-size baseline. Existing panel recipe
+configs are pinned historical contracts; model planning must not rewrite them.
+
+For classifier labels or RET scoring, read docs/TARGET_CLASSES_RET.md and
+configs/target_ret_protocol.json. Use targets.build_monthly_targets and
+classification.classification_training_slice for BOTH XGBoost and random forest;
+features.training_slice still returns continuous research returns. Preserve
+independent past-feature and forward-outcome request evidence, all original keys
+and outcome metadata before financial conversion. Targets use exact-equal
+descending midrank bins on valid observed Paper15-cohort outcomes. RET requires
+every ten-class cell in 120 completed calendar months and withholds the whole
+vector otherwise. The notebook check reuses existing <=3-month/3,000-row samples;
+it does not authorize a full label build or fit.
+
+
+The user-authorized full 2010–2023 target panel is implemented separately in
+`full_target_loading.py`, `target_coverage.py` and `full_target_panel.py`. Read
+`docs/FULL_TARGET_PANEL.md` and `configs/full_target_build.json` before changing it.
+Use verified annual raw-history caches (including prior December anchors), not
+raw-source fallback or future quote inventories. Preserve all original keys and
+the same Paper15 prediction cohorts for both estimators. The saved build has
+140,485 classes for 140,777 prediction-eligible rows, with 292 eligible missing
+outcomes retained; all 48 nominal 2020–2023 RET vectors have complete 120-month
+ten-class grids. Earlier RET states are withheld rather than shortened. Section 16
+of the master verifies saved reports and exposes lazy target/outcome views;
+Run All never rebuilds full targets, fits preprocessing/models or backtests.
+Original daily/feature files and the protected 2024+ financial guard remain unchanged.
+Do not treat observed-label coverage as certified delisting or survivorship accounting.

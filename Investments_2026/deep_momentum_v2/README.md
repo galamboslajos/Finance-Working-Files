@@ -114,8 +114,8 @@ complete 15-input paper coverage on 140,777 of 152,307 original stock-months
 (92.43%). Full-bank coverage is now measured in [the full-panel audit](docs/FULL_FEATURE_PANEL.md); model fits and backtests remain outstanding. Historical capitalization
 is absent from the downloaded schemas and deliberately excluded from V2; it
 is not a remaining data task or blocker. The 15-input starting set is a declared
-adaptation, not the paper's complete 16-input baseline. The primary S&P universe,
-economic return/execution rules, inner validation
+adaptation, not the paper's complete 16-input baseline. The selected primary modelling universe is the historical S&P 500/400 union.
+Economic return/execution rules, inner validation
 and experiment budget remain OPEN. Exact per-signal warmup is implemented; the
 15-input endpoint audit does not establish complete daily technical/context history. Selected rolling chronology
 is recorded in configs/research_workflow.json, separate from paper facts.
@@ -182,3 +182,30 @@ context values among paper-qualified rows over 2010–2023 and 92.09% in 2010–
 The retained 90% sensitivity has 71.06% and 33.57%, respectively. All shared finite
 values, paper15, technical298 and daily artifacts are unchanged. Missingness may
 be systematic; promoting 80% does not establish representative or certified PIT data.
+
+## Initial model-comparison sketch
+
+The user selected the historical S&P 500 + S&P 400 union. The master now displays
+a metadata-only [four-arm XGBoost/random-forest design](docs/MODEL_COMPARISON.md):
+both estimators on Paper15, then both on the expanded candidate bank. The draft
+keeps the shared ten-class probability-to-RET interface, rolling ten-year annual
+fits, monthly predictions and 80% primary/90% sensitivity context policy.
+`configs/model_comparison.proposed.json` records proposed settings and open
+label/validation/budget decisions; `src/dmv2/model_design.py` produces calendar
+plans without estimator dependencies or data reads. No model has been fitted.
+
+## Shared target and RET workers
+
+[The exact target/RET contract](docs/TARGET_CLASSES_RET.md) is implemented in
+`targets.py`, `classification.py` and `ret.py`. Both probability estimators use
+the same original cohorts, completed-outcome class labels and dated 120-month
+payoff vectors. Ties share exact midrank classes; missing returns remain
+unlabelled and never remove prediction rows. Past feature requests and forward
+outcome requests are checked separately. The master keeps its bounded
+check and separately verifies the completed [full 2010–2023 target audit](docs/FULL_TARGET_PANEL.md)
+in section 16. The full panel retains 152,307 original rows and 140,485 released
+classes (99.79% of the 140,777 prediction-eligible rows); 292 eligible missing
+outcomes remain visible. All ten classes occur in all 168 months, and all 48
+nominal 2020–2023 RET payoff vectors have complete 120-month histories. Daily
+and feature data are unchanged. Run All reads saved reports and lazy datasets;
+model/preprocessor fits remain separate work.

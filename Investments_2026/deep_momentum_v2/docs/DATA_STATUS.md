@@ -121,3 +121,51 @@ Context-value coverage among paper-qualified rows is 96.27% versus 71.06% over
 original denominators, paper15, technical298, PIT cutoffs and separate daily
 artifacts are unchanged. This is a user policy choice, not selection by model
 performance or proof that remaining omissions are random.
+
+## Shared monthly class/RET engineering, 2026-10-15
+
+The [shared workers](TARGET_CLASSES_RET.md) now implement exact tie-aware monthly
+classes, original-cohort/missing-outcome ledgers, the label-aware training adapter
+and strict 120-calendar-month realized-class RET payoffs. Forward-outcome requests
+are distinguished from past feature requests. The master checks already loaded
+bounded samples and keeps daily/feature data separate. Full historical label and
+payoff coverage is now measured by the separate explicit audit below.
+No estimator or backtest has run for this implementation; economic accounting
+remains unresolved.
+
+## Full monthly target and RET coverage audit, 2026-10-15
+
+The user-authorized [full target panel and coverage audit](FULL_TARGET_PANEL.md)
+is complete for 2010–2023. It uses verified saved daily caches and the same
+historical S&P 500/400-union cohorts and signal-time prediction eligibility as
+the existing primary feature panel. Labels retain missing outcomes and their
+original denominators. Class counts include all ten bins, including empty bins;
+RET requires every cell of the trailing 120-calendar-month × ten-class grid.
+
+The target portion retains **152,307 original rows**, including 2,357 identity
+exclusions and 9,173 additional identity-admitted rows without Paper15 prediction
+eligibility. Among the remaining **140,777 prediction-eligible rows**, **140,485**
+receive labels: **99.79% of the prediction cohort**, or **92.24% of all original
+rows**. The 292 eligible missing labels comprise 276 missing end quotes and
+16 source quality flags. No prediction rows are removed because their later
+outcomes are missing.
+
+All 168 monthly rank/request guards pass, every month populates all ten classes,
+and 43 months contain exact-return ties (maximum group size four). Every
+identity-admitted original member has explicit past-feature and forward-outcome
+request evidence; no unknown/unrequested cases or missing outcome records occur.
+These are conditional observed-return labels, not certification that excluded or
+missing outcomes are harmless.
+
+All **48 nominal 2020–2023 test signals** have complete strict RET payoff vectors,
+each checked against the canonical shared worker. The first available signal
+is **2019-12-31**, predicting January 2020. The earlier 120 signals retain withheld
+vectors because the 2010-start outcome history cannot yet supply 120 completed
+months. The saved evidence includes all 201,600 month/class grid rows and 1,680
+class-payoff rows, including explicit unavailable statuses.
+
+The completed audit verified **475 recorded input files unchanged**. Existing
+feature panels and their separate daily artifacts are preserved, and the audit
+does not fit preprocessing, either model or a backtest. Successful cache hashes,
+labels or payoff arithmetic would not certify identities, knowledge time,
+missing terminal-event cash flows or executable economic returns.
