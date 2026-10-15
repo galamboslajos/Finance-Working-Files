@@ -1,9 +1,34 @@
 # U.S. adaptation and replication decision ledger
 
-Status: DATA FOUNDATIONS AND BOUNDED FEATURE ENGINEERING IMPLEMENTED; EXPERIMENT DESIGN OPEN. Updated 2026-10-15.
+Status: FULL FEATURES AND TARGET COVERAGE AUDITED; FIRST FOUR-ARM CLASSIFIER
+PILOT COMPLETE AND VERIFIED. Updated 2026-10-15.
 No feature build, model fit, portfolio simulation or holdout inspection was
-performed during this paper review. This document is a design ledger, not an
-execution authorization or a frozen research protocol.
+performed during the original paper review. Subsequent stages have their own
+user authorization and contracts; this ledger alone is not execution authority.
+
+**ACTIVE USER DIRECTION:** fit RF and XGBoost once each on Paper15 and once each
+on expanded candidates, using completed 2010–2017 outcomes for fitting and
+2018–2019 validation. The [pilot record](CLASSIFIER_PILOT.md) and
+[`classifier_pilot.json`](../configs/classifier_pilot.json) freeze this limited
+execution. Primary 80% context, seed 1729, training-only preprocessing and a
+common prediction/evaluation cohort apply. No 90% sensitivity fits, parameter
+search, early stopping, outer refit, 2020–2023 outcome evaluation, RET or backtest
+is included. The one-fit pilot is a V2 adaptation, separate from the paper's
+100-fit ensemble. `model_comparison.proposed.json` remains the earlier design
+snapshot; the separately authorized pilot is now complete and verified.
+
+**VERIFIED LOCAL PILOT:** all four arms fit the same 77,690 training rows and
+predict all 20,755 eligible validation rows, retaining 46 missing labels and
+scoring the same 20,709 observed classes. Mean monthly log losses are RF/Paper15
+2.277891, XGBoost/Paper15 2.276638, RF/expanded 2.263056 and XGBoost/expanded
+2.264372; uniform is 2.302585. Expanded RF has the lowest observed loss and
+13.60% accuracy in this one development split. This descriptive comparison does
+not establish significance, certified PIT identities or investable performance.
+The run took 911.08 seconds at 5.01 GiB peak RSS, preserving 726 recorded source
+files. Independent metric/matrix/source verification and exact model-probability
+reloads passed, as did the 690-test suite, seven later focused verifier tests and
+all 24 master cells with implicit-fit/build guards. Detailed results and audit
+scope are in [CLASSIFIER_PILOT.md](CLASSIFIER_PILOT.md).
 
 Subsequent user-authorized loading/universe engineering is implemented in
 [data foundations](DATA_FOUNDATIONS.md). The 2010-01-29 combined audit retains
@@ -186,7 +211,8 @@ not interchangeable sample dates. January 1998 data alone cannot justify a
 paper-style initial fit in 1999. The available releases may support a longer
 history, but the new design does not adopt those dates. The measured paper-input
 coverage does not certify daily technical/context history or economic labels.
-Inner validation and execution timing remain OPEN within the selected chronology.
+The first inner pilot now fixes 2010–2017 training and 2018–2019 validation.
+Later outer-evaluation design and operational execution timing remain separate.
 
 Protected 2024+ financial values remain uninspected. Define the development
 period, annual outer forecasts, inner validation, tuning budget, embargo/purge
@@ -234,11 +260,11 @@ CVaR/CVR may be separate extensions; they are not needed to satisfy this paper.
 | Primary S&P universe and target-rank cohort | Defines the prediction distribution and eligible trades | USER SELECTED historical S&P 500/400 union; target ranks use valid observed outcomes inside the signal-time Paper15 prediction cohort; missing outcomes remain explicit |
 | Return/terminal-event accounting and identity rules | Determines whether labels and portfolio cash flows are credible | Provisional identity admission selected; knowledge-time identity and economic accounting remain unverified |
 | Coverage and experiment chronology | Ten-year startup, development/outer tests, holdout | 2010 initialization and rolling10/1 selected; 15-input endpoint coverage measured; full-bank coverage measured; 80% primary/90% sensitivity selected; 2024+ protected |
-| Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | Active normalization/missingness rules frozen separately; exact midrank target ties are fixed by the shared target contract; model mechanics remain OPEN; size encoding applies only to the paper account |
+| Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | Active normalization/missingness and exact midrank ties are fixed; the first pilot freezes versions, seed 1729 and fixed rounds without early stopping; later ensemble mechanics remain OPEN; size encoding applies only to the paper account |
 | Execution/cost/exposure/borrow rules | Separates predictive results from investable returns | OPEN |
-| Models, feature groups and trial bounds | Prevents results-driven expansion of the search | OPEN; forests/features proposed |
+| Models, feature groups and trial bounds | Prevents results-driven expansion of the search | First pilot fixed: RF/XGBoost × Paper15/expanded, one fit per arm; no tuning or outer evaluation; later experiments OPEN |
 | Calibration/ensemble weighting and acceptance criteria | RET relies on probabilities and payoff estimation | OPEN |
-| Resources, full-build/backtest plan | Controls compute and reproducibility | OPEN; no compute launched |
+| Resources, full-build/backtest plan | Controls compute and reproducibility | Explicit local pilot has measured read/memory budgets and fixed execution ceilings; backtest/cloud workflows remain separate and OPEN |
 
 The [monthly return engineering stage](MONTHLY_RETURNS.md) now constructs bounded
 provider-adjusted ratios, retains full signal cohorts and preserves daily data.
@@ -318,8 +344,8 @@ classes, original-cohort/missing-outcome ledgers, the label-aware training adapt
 and strict 120-calendar-month realized-class RET payoffs. Forward-outcome requests
 are distinguished from past feature requests. The master checks already loaded
 bounded samples and keeps daily/feature data separate. Full historical label and
-payoff coverage, estimator fitting and economic accounting remain unverified;
-no model or backtest has run for this implementation.
+payoff coverage, estimator fitting and economic accounting were unverified at
+that shared-worker stage; no model or backtest ran for that implementation.
 
 
 ## Full target/RET coverage, 2026-10-15
@@ -332,4 +358,5 @@ unlabelled. All 168 months contain all ten classes. All 48 nominal 2020–2023
 RET states have complete preceding 120-month grids; the first available signal
 is December 31, 2019 for January 2020. This resolves empirical structural
 class/payoff coverage under the provisional policy, while terminal cash flows
-and knowledge-time certification remain open. No model or preprocessor is fitted.
+and knowledge-time certification remain open. That target audit fitted no model
+or preprocessor.

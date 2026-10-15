@@ -1,8 +1,33 @@
 # Starting research workflow
 
 Status: DATA FOUNDATIONS, FULL FEATURES AND SHARED TARGET/RET WORKERS IMPLEMENTED;
-FULL TARGET COVERAGE AUDITED; ESTIMATOR EXECUTION DESIGN OPEN.
+FULL TARGET COVERAGE AUDITED; FIRST FOUR-ARM CLASSIFIER PILOT COMPLETE AND VERIFIED.
 New strategy research begins here; the previous attempt is a reference.
+
+The user has now authorized the [first classifier pilot](CLASSIFIER_PILOT.md):
+one RF and one XGBoost fit on each of Paper15 and the expanded candidate bank,
+using 2010–2017 completed outcomes for training and 2018–2019 for validation.
+[`configs/classifier_pilot.json`](../configs/classifier_pilot.json) freezes the
+settings before fitting. It uses primary 80% context, seed 1729 and the same
+cohorts and observed-label evaluation mask across four arms. Training-only
+preprocessing, 500-tree RF and 300-round XGBoost are separately recorded; no
+parameter search, early stopping, 90% model sensitivity, outer refit, RET or
+backtest is included. The completed run retained 77,690 supervised training rows
+and all 20,755 eligible validation predictions, including 46 missing labels;
+20,709 observed labels were scored identically across all arms.
+The earlier `model_comparison.proposed.json` remains a design snapshot.
+
+The verified mean monthly log losses are RF/Paper15 2.277891, XGBoost/Paper15
+2.276638, RF/expanded 2.263056 and XGBoost/expanded 2.264372, versus 2.302585 for
+the uniform reference. Expanded RF has the lowest observed loss and 13.60%
+monthly accuracy in this development split. This is a descriptive pilot result;
+later outer tests and economic evaluation remain separate work. Four fits took
+911.08 seconds with 5.01 GiB peak RSS and 726 recorded source files unchanged.
+Independent reconstruction, exact model-probability reload checks, the 690-test
+suite and seven later focused verifier tests passed. The fresh master ran all
+24 code cells while guards blocked implicit fits/builds and preserved its
+separate daily/monthly/feature frames. Full metrics and evidence are in the
+[pilot verification record](CLASSIFIER_PILOT.md).
 
 **USER DIRECTION, 2026-10-15:** initialize research in 2010 and use rolling ten-year
 training / one-year outcome tests. The canonical settings and readable master
@@ -99,7 +124,7 @@ original denominators, paper15, technical298, PIT cutoffs and separate daily
 artifacts are unchanged. This is a user policy choice, not selection by model
 performance or proof that remaining omissions are random.
 
-## Next modelling design
+## Initial modelling design and active pilot
 
 The primary model universe is now the user-selected historical S&P 500/400
 union. The [initial comparison sketch](MODEL_COMPARISON.md) separates XGBoost
@@ -108,7 +133,14 @@ displays metadata-only plans from `dmv2.model_design`; no model fit is implied.
 The shared target/class/payoff contracts are implemented. The separately
 authorized [full historical target audit](FULL_TARGET_PANEL.md) is complete
 under the same PIT, missingness, chronology and protected-data rules. Estimator
-adapters and a measured pilot follow verified coverage and frozen execution settings.
+adapters and fixed probability metrics are now implemented under the active
+pilot contract above. Its completed run retains 86,825 training originals,
+77,690 supervised fit rows, 21,827 validation originals and 20,755 predictions.
+All 46 eligible missing validation classes remain in prediction coverage;
+20,709 observed classes supply the common evaluation mask. Validation labels
+do not enter preprocessing, fitting or stopping. Run All continues to verify
+saved reports without fitting; the explicit local pilot is complete and its
+saved models are not loaded by notebook Run All.
 
 ## Shared monthly class/RET engineering, 2026-10-15
 
@@ -118,7 +150,7 @@ and strict 120-calendar-month realized-class RET payoffs. Forward-outcome reques
 are distinguished from past feature requests. The master checks already loaded
 bounded samples and keeps daily/feature data separate. A separate explicit
 full-history build has measured label and strict RET payoff coverage. No
-estimator or backtest has run for this implementation,
+estimator or backtest ran during this target/RET implementation stage,
 and economic accounting remains unresolved.
 
 ## Full monthly target and RET coverage audit, 2026-10-15
