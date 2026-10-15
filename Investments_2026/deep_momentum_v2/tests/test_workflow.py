@@ -37,10 +37,13 @@ def source_fixture():
         {"source_security_id": "member-c", "intrinio_security_id": "id-c",
          "identity_status": "needs_review"},
     ]
+    for row in rows:
+        row.update(as_of=configuration()['inspection']['as_of'],unified_security_id='u-'+row['source_security_id'],
+                   identity_review_required=row['identity_status']=='needs_review',resolution_status='resolved')
     snapshot = UniverseSnapshot(
         pa.Table.from_pylist(rows, schema=UNIVERSE_SCHEMA),
         pa.Table.from_pylist([], schema=EXCLUDED_SCHEMA),
-        "2000-01-31", "combined", {"knowledge_time_verified": False},
+        configuration()["inspection"]["as_of"], "combined", {"knowledge_time_verified": False},
         {"constituents": 3, "identity_status_counts": {"resolved": 2, "needs_review": 1}},
     )
     return LoadedUniverse(snapshot, {"fixture": "metadata only"}, {"fixture_rows": 3})
@@ -50,11 +53,26 @@ class WorkflowValidationTests(unittest.TestCase):
     def test_selected_configuration_is_valid_and_keeps_price_stage_opt_in(self):
         settings = configuration()
         validate_workflow(settings)
-        self.assertEqual(settings["research_start"], "2000-01-01")
+        self.assertEqual(settings["research_start"], "2010-01-01")
         self.assertEqual(settings["training"]["mode"], "rolling")
         self.assertEqual(settings["training"]["train_years"], 10)
         self.assertFalse(settings["inspection"]["run_price_sample"])
         self.assertIsNone(settings["universe"]["primary"])
+
+    def test_policy_is_explicit_and_legacy_configuration_remains_strict(self):
+        from dmv2.workflow import workflow_identity_policy
+        from dmv2.identity_policy import STRICT_IDENTITY_POLICY,PROVISIONAL_IDENTITY_POLICY
+        settings=configuration();validate_workflow(settings)
+        self.assertEqual(workflow_identity_policy(settings),PROVISIONAL_IDENTITY_POLICY)
+        legacy=deepcopy(settings);legacy['schema_version']=3;legacy.pop('identity')
+        validate_workflow(legacy)
+        self.assertEqual(workflow_identity_policy(legacy),STRICT_IDENTITY_POLICY)
+
+    def test_identity_policy_cannot_claim_verified_or_missing_waiver(self):
+        for field,value in [('accept_identity_uncertainty',False),('accept_identity_uncertainty',1),
+            ('research_status','VERIFIED'),('policy','ignore_all'),('policy_version',True)]:
+            settings=configuration();settings['identity'][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):validate_workflow(settings)
 
     def test_forbidden_execution_and_invalid_dates_fail_before_source_reads(self):
         cases = []
@@ -143,11 +161,12 @@ class InspectionOrchestrationTests(unittest.TestCase):
         self.assertFalse(result.report["pit"]["knowledge_time_verified"])
         self.assertIsNone(result.prices)
         price_loader.assert_not_called()
-        self.assertEqual(loader.call_args.kwargs["as_of"], "2000-01-31")
+        self.assertEqual(loader.call_args.kwargs["as_of"], configuration()["inspection"]["as_of"])
         self.assertEqual(loader.call_args.kwargs["mode"], "historical_reconstruction")
 
     def test_partial_price_request_keeps_missing_unrequested_and_review_states(self):
         settings = configuration()
+        settings['identity'].update(policy='strict_unique_unflagged',accept_identity_uncertainty=False)
         settings["inspection"].update(run_price_sample=True, price_sample_size=1)
         empty_quotes = pa.Table.from_pylist([], schema=pa.schema([
             ("intrinio_security_id", pa.string()), ("trading_date", pa.string()),
@@ -159,7 +178,7 @@ class InspectionOrchestrationTests(unittest.TestCase):
             price_loader.return_value.load.return_value = price_result
             result = run_inspection(self.catalog, settings)
         self.assertEqual(price_loader.return_value.load.call_args.args[:3],
-                         (["id-a"], "2000-01-31", "2000-01-31"))
+                         (["id-a"], settings["inspection"]["as_of"], settings["inspection"]["as_of"]))
         self.assertEqual(result.quote_coverage.table.num_rows, 3)
         self.assertEqual(result.quote_coverage.summary["quote_status_counts"],
                          {"missing_price": 1, "not_requested": 1, "identity_unresolved": 1})
@@ -173,6 +192,7 @@ class InspectionOrchestrationTests(unittest.TestCase):
         rows = loaded.snapshot.table.to_pylist()
         for row in rows:
             row["identity_status"] = "needs_review"
+            row['resolution_status']='not_resolved'
         snapshot = UniverseSnapshot(pa.Table.from_pylist(rows, schema=UNIVERSE_SCHEMA),
                                     loaded.snapshot.excluded, loaded.snapshot.as_of,
                                     loaded.snapshot.universe, {}, {"constituents": 3})

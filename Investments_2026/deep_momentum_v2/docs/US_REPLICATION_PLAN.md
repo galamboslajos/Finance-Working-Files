@@ -1,14 +1,17 @@
 # U.S. adaptation and replication decision ledger
 
-Status: DATA FOUNDATIONS IMPLEMENTED; EXPERIMENT DESIGN OPEN. Updated 2026-10-14.
+Status: DATA FOUNDATIONS AND BOUNDED FEATURE ENGINEERING IMPLEMENTED; EXPERIMENT DESIGN OPEN. Updated 2026-10-15.
 No feature build, model fit, portfolio simulation or holdout inspection was
 performed during this paper review. This document is a design ledger, not an
 execution authorization or a frozen research protocol.
 
 Subsequent user-authorized loading/universe engineering is implemented in
 [data foundations](DATA_FOUNDATIONS.md). The 2010-01-29 combined audit retains
-902 source constituents, including 772 unresolved/review/collision identities;
-two exact-date quote reads worked. Source knowledge-time evidence and economic
+902 source constituents. Its original strict-policy audit counted 130 clear
+routes, 755 review-flagged routes, ten collisions and seven unlinked names;
+two exact-date quote reads worked. The [active provisional policy](PROVISIONAL_IDENTITY_POLICY.md)
+admits unique resolved review-flagged routes with their flags retained. Missing/ambiguous
+routes and collisions remain blocked. Source knowledge-time evidence and economic
 completeness remain unverified. No model-ready complete panel is claimed.
 
 Read [the locked paper reference](PAPER_REFERENCE_HAN_QIN_2026.md) first. Its
@@ -159,13 +162,17 @@ No full dataset build is authorized by the paper alone.
 
 ## 5. Chronology and dates: do not inherit the previous attempt silently
 
-**USER DIRECTION:** research initialization is 2000, with rolling ten-year
-training / one-year outcome tests. Values live in
+**USER DIRECTION, 2026-10-15:** research initialization is 2010, with rolling ten-year
+training / one-year outcome tests, annual refits and monthly predictions. Values live in
 [`research_workflow.json`](../configs/research_workflow.json); the
-[master notebook](../notebooks/00_research_master.ipynb) previews fourteen nominal
-2010–2023 tests. This explicitly adapts the paper's expanding classifier history.
-The 2010 engineering check is unrelated to the selected initialization date.
-Raw earlier history is retained; pre-2000 feature warmup is still OPEN.
+[master notebook](../notebooks/00_research_master.ipynb) previews four nominal
+2020–2023 tests: 2010–2019 training precedes 2020 testing, advancing through
+2013–2022 training / 2023 testing. This explicitly adapts the paper's expanding
+classifier history. The one-date engineering check is a separate control.
+Raw pre-2010 history is retained for exact per-signal warmup (503 sessions for
+the complete registered bank). The [2010–2023 endpoint audit](INITIALIZATION_2010.md)
+measured the 15 paper inputs; full 715-predictor/context coverage remains OPEN.
+See [feature contracts](FEATURES.md).
 
 The paper requires at least ten years before initial model fitting and uses a
 rolling ten-year class-payoff estimate. A source product reaching back decades
@@ -177,8 +184,9 @@ The prior recovery used 1998 warmup, 1999-2023 accepted signal-panel coverage,
 2009-2023 primary inputs and 2015-2023 test folds. These are different roles,
 not interchangeable sample dates. January 1998 data alone cannot justify a
 paper-style initial fit in 1999. The available releases may support a longer
-history, but that has not been audited. Usable training coverage, feature warmup,
-inner validation and execution timing remain OPEN within the selected chronology.
+history, but the new design does not adopt those dates. The measured paper-input
+coverage does not certify daily technical/context history or economic labels.
+Inner validation and execution timing remain OPEN within the selected chronology.
 
 Protected 2024+ financial values remain uninspected. Define the development
 period, annual outer forecasts, inner validation, tuning budget, embargo/purge
@@ -223,10 +231,10 @@ CVaR/CVR may be separate extensions; they are not needed to satisfy this paper.
 
 | Decision | Why it matters | Current state |
 |---|---|---|
-| Primary S&P universe and normalization/rank cohort | Defines the prediction distribution and eligible trades | OPEN |
-| Return/terminal-event accounting and identity rules | Determines whether labels and portfolio cash flows are credible | OPEN; bounded audits needed |
-| Coverage and experiment chronology | Ten-year startup, development/outer tests, holdout | OPEN; 2024+ protected |
-| Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | OPEN; size encoding applies only to the paper account |
+| Primary S&P universe and target-rank cohort | Defines the prediction distribution and eligible trades | OPEN; engineering universe is the S&P500/400 union, with active common-five paper normalization |
+| Return/terminal-event accounting and identity rules | Determines whether labels and portfolio cash flows are credible | Provisional identity admission selected; knowledge-time identity and economic accounting remain unverified |
+| Coverage and experiment chronology | Ten-year startup, development/outer tests, holdout | 2010 initialization and rolling10/1 selected; 15-input endpoint coverage measured; full added-feature coverage open; 2024+ protected |
+| Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | Active normalization/missingness rules frozen separately; target ties and model mechanics remain OPEN; size encoding applies only to the paper account |
 | Execution/cost/exposure/borrow rules | Separates predictive results from investable returns | OPEN |
 | Models, feature groups and trial bounds | Prevents results-driven expansion of the search | OPEN; forests/features proposed |
 | Calibration/ensemble weighting and acceptance criteria | RET relies on probabilities and payoff estimation | OPEN |
@@ -235,8 +243,10 @@ CVaR/CVR may be separate extensions; they are not needed to satisfy this paper.
 The [monthly return engineering stage](MONTHLY_RETURNS.md) now constructs bounded
 provider-adjusted ratios, retains full signal cohorts and preserves daily data.
 These are not certified total returns or a complete model-ready panel. Next are
-dated identity adjudication and economic event/coverage accounting.
-Choosing the primary S&P cohort can proceed alongside that work. Capitalization
+economic event/coverage accounting and continued dated identity evidence review.
+The [accepted identity waiver](PROVISIONAL_IDENTITY_POLICY.md) permits provisional
+development while those source limits remain explicit. Choosing the primary S&P
+cohort can proceed alongside that work. Capitalization
 source procurement is excluded from the work plan. These are design tasks,
 not permission to grant IAM, mutate GCS, launch compute or start an unbounded scan.
 
@@ -255,3 +265,31 @@ validation folds, payoff windows, costs, exposure conventions and resource
 budget. Preserve unsuccessful and incomplete economics as evidence. A new
 paper version requires a separately identified review and diff; never silently
 overwrite the March 26 source lock.
+
+## Feature engineering decision, 2026-10-14
+
+**USER DIRECTION / IMPLEMENTED:** daily technical indicators then exact month-end
+snapshots, alongside the15 exact monthly paper momentum/state variables. The
+728-definition bank has715 eligible predictors after three constants and ten
+exact rank aliases. Complete required windows and sample SD(ddof=1) are explicit
+V2 engineering adaptations. The initial complete-original-cohort paper policy
+was superseded on 2026-10-15 by the active common-five policy below; context
+retains its complete-cohort requirements.
+Features and future targets have separate tables, loaders and allowlists;
+completed outcome cutoffs and canonical calendar windows guard later X/y
+alignment. No fit, preprocessing, trial selection or full panel is authorized
+by notebook Run All. Source knowledge-time and terminal-accounting limits remain
+unresolved; see [FEATURES.md](FEATURES.md).
+
+## Active engineering policy, 2026-10-15
+
+The [normalization/missingness protocol](NORMALIZATION_PROTOCOL.md) requires
+exhaustive admitted-original requests and one common population with all five
+finite exact momenta and positive finite sample dispersions. All 15 paper inputs
+use that population; shared mean/dispersion levels are retained. Arbitrary
+two-ID samples withhold those statistics. Context still requires its complete
+original cohorts and dated daily membership. Added-feature medians, missing
+indicators and all-missing/constant exclusions are fitted only on explicit
+completed training rows, including within inner splits; prediction consumes no
+labels. The 2010 endpoint audit is coverage evidence, not a fitted preprocessing
+manifest or authorization for a full model/backtest run.

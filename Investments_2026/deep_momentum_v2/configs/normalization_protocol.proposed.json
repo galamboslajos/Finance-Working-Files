@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-normalization-missingness-v1",
+  "protocol_version": "1.0.0-proposed",
+  "created_on": "2026-10-14",
+  "status": "PROPOSED_NOT_ACTIVE_BLOCKED_FOR_MODEL",
+  "evidence_conventions": [
+    "PAPER",
+    "USER_DIRECTION",
+    "VERIFIED_LOCAL",
+    "PROPOSED",
+    "OPEN"
+  ],
+  "purpose": "Separate historical membership, signal-time statistical qualification, normalization and estimator preprocessing without selecting stocks by future outcomes.",
+  "authorization_scope": {
+    "authorized_now": [
+      "bounded source-metadata coverage audit",
+      "versioned proposed protocol",
+      "review of previously authorized two-ID engineering diagnostics"
+    ],
+    "new_financial_source_reads_authorized_by_this_file": false,
+    "full_feature_panel_build_authorized": false,
+    "model_fit_authorized": false,
+    "backtest_authorized": false,
+    "protected_2024_plus_financial_access_authorized": false,
+    "notes": "This file is a research design artifact. It does not change active workers or expand execution authorization."
+  },
+  "active_engineering_policy_preserved": {
+    "config": "configs/research_workflow.json",
+    "paper_normalization": "complete_cohort",
+    "context_normalization": "complete_cohort",
+    "price_sample_size": 2,
+    "history_sessions": 503,
+    "full_panel_build_enabled": false,
+    "model_execution_enabled": false,
+    "unchanged_by_proposal": true,
+    "meaning": "Incomplete original cohorts withhold statistical features. Raw per-security momenta remain diagnostics. A two-ID sample cannot establish full-universe normalization or coverage."
+  },
+  "research_clock": {
+    "research_outcome_history_start": "2000-01-01",
+    "training": "rolling preceding ten completed outcome years",
+    "testing": "following one completed outcome year",
+    "forecast_frequency": "monthly",
+    "refit_frequency": "annual",
+    "last_development_outcome_year": 2023,
+    "feature_cutoff": "closed exact independent exchange month-end signal session t",
+    "target_interval": "strictly after signal close through the complete next calendar month end",
+    "calendar_metadata_after_signal_allowed": true,
+    "financial_inputs_after_signal_allowed": false,
+    "same_close_execution_assumed": false,
+    "shared_price_anchor": "A signal-close price can be the final historical feature endpoint and the next-month target denominator; the return intervals do not overlap."
+  },
+  "population_contract": {
+    "primary_universe": null,
+    "primary_universe_status": "OPEN_SP500_SP400_OR_UNION",
+    "engineering_universe": "combined_sp500_sp400",
+    "full_membership_cohort": "Every source-security ID admitted by dated historical membership at signal t, before price or future-outcome joins.",
+    "economic_and_coverage_ledger": "Preserve one source-security-ID/signal-date row for every original member, including unresolved identities, missing predictors, unrequested prices and missing or terminal outcomes.",
+    "candidate_paper_population": "One common signal-time qualified subset of the original cohort with all five raw momenta available, used for every paper momentum horizon at that signal.",
+    "same_population_across_five_horizons": true,
+    "same_population_required_across_all_history_months": false,
+    "balanced_panel_intersection_using_future_history_forbidden": true,
+    "candidate_population_qualifies_each_signal_independently": true,
+    "future_return_or_target_availability_in_qualification": false,
+    "future_membership_in_qualification": false,
+    "current_security_master_survivor_filters": false,
+    "coverage_denominator": "original signal-date historical membership count",
+    "normalization_denominator": "common paper-qualified member count for that signal, after predeclared past-input qualification",
+    "subset_statistics_claim_limit": "Qualified-subset means and SDs are not certified full-universe market statistics; original-cohort coverage must accompany them."
+  },
+  "exhaustive_request_contract": {
+    "declared_full_original_cohort_required": true,
+    "requested_provider_ids": "Every unique, nonquarantined provider ID reachable from the complete original signal cohort; unresolved IDs remain explicit in the original denominator.",
+    "request_based_on_future_prices_or_outcomes": false,
+    "request_mode_required": "EXHAUSTIVE_ORIGINAL_SIGNAL_COHORT",
+    "sample_request_mode": "ENGINEERING_SAMPLE_NOT_NORMALIZATION_ELIGIBLE",
+    "requested_and_unrequested_counts_recorded": true,
+    "unrequested_members_cannot_be_relabelled_as_observed_missing": true,
+    "request_manifest_required": [
+      "signal_date",
+      "original_source_security_ids",
+      "original_cohort_count",
+      "resolved_requested_provider_ids",
+      "quarantined_identity_counts",
+      "unrequested_resolved_ids",
+      "financial_date_bounds",
+      "source_pins",
+      "read_budget",
+      "request_hash"
+    ],
+    "partial_or_silently_truncated_request_allows_normalization": false
+  },
+  "candidate_paper_qualification": {
+    "policy_status": "PROPOSED_COMMON_FIVE_MOMENTUM_QUALIFIED_COHORT",
+    "historical_membership_required_at_signal": true,
+    "unique_source_id_and_provider_route_at_signal_required": true,
+    "identity_status_required": "resolved",
+    "identity_review_required_value": false,
+    "resolution_status_required": "resolved",
+    "provider_target_collision_allowed": false,
+    "past_price_history_before_membership_entry_allowed": true,
+    "required_monthly_price_anchors": "All thirteen exact exchange month ends t-12 through t, inclusive, covering every intermediate endpoint required by the five raw momenta.",
+    "monthly_price_anchor": "Exact independent exchange month end; no preceding available stock quote substitution.",
+    "quote_requirements": {
+      "frequency": "daily",
+      "intraperiod": false,
+      "price_quality_status": [
+        "accepted",
+        "ok"
+      ],
+      "adj_close": "finite strictly positive native numeric"
+    },
+    "raw_momentum_requirements": "Each MOM1/3/6/9/12 finite with positive compounded gross return and complete required monthly endpoint history.",
+    "interior_daily_price_path_required_for_paper_momenta": false,
+    "interior_daily_price_path_note": "The monthly baseline requires complete monthly anchors; daily technical windows and future daily backtest completeness have separate dependency contracts.",
+    "missing_month_compression_allowed": false,
+    "forward_fill_or_stale_endpoint_allowed": false,
+    "capitalization_or_size_screen": false,
+    "qualification_reason_codes": [
+      "qualified",
+      "identity_unresolved",
+      "identity_review_required",
+      "provider_target_collision",
+      "unrequested_engineering_sample",
+      "insufficient_calendar_warmup",
+      "missing_exact_month_end",
+      "invalid_endpoint",
+      "source_quality_flag",
+      "nonfinite_momentum"
+    ],
+    "next_month_targets_and_membership_not_consumed": true
+  },
+  "paper_fifteen_candidate_normalization": {
+    "evidence": "PAPER equations 6-8; common-qualified cross-section and sample-SD convention are declared PROPOSED V2 choices, not undocumented author settings.",
+    "raw_momenta": {
+      "MOM1": "r[t]=adj_close[t]/adj_close[t-1]-1",
+      "MOM3": "compound monthly returns t-2 through t-1, two returns",
+      "MOM6": "compound monthly returns t-5 through t-1, five returns",
+      "MOM9": "compound monthly returns t-8 through t-1, eight returns",
+      "MOM12": "compound monthly returns t-11 through t-1, eleven returns"
+    },
+    "raw_momentum_model_input": false,
+    "raw_momentum_diagnostic_retained": true,
+    "registered_paper_inputs": [
+      "zMOM1",
+      "zMOM3",
+      "zMOM6",
+      "zMOM9",
+      "zMOM12",
+      "meanMOM1",
+      "meanMOM3",
+      "meanMOM6",
+      "meanMOM9",
+      "meanMOM12",
+      "stdMOM1",
+      "stdMOM3",
+      "stdMOM6",
+      "stdMOM9",
+      "stdMOM12"
+    ],
+    "cohort_for_every_horizon": "same candidate_paper_population at signal t",
+    "mean": "equal-security arithmetic mean of raw MOMm within the qualified signal cohort",
+    "standard_deviation": "sample cross-sectional SD with ddof=1",
+    "normalized_momentum": "(raw MOMm - meanMOMm)/stdMOMm",
+    "shared_state_variables": "Replicate each horizon's meanMOMm and stdMOMm for qualified stocks at the same signal. Retain time-varying levels.",
+    "shared_state_per_month_cross_sectional_zscoring_allowed": false,
+    "shared_state_reason": "They are identical across stocks within a month; centering would remove the state and cross-sectional SD is zero.",
+    "mathematical_validity": {
+      "qualified_count_at_least": 2,
+      "standard_deviation": "finite and strictly positive for each of five horizons"
+    },
+    "invalid_dispersion_policy": "Keep member rows and raw diagnostics; withhold affected normalized/mean/SD triplets. Do not manufacture zero features. Flag the signal's baseline usability separately.",
+    "paper_comparison_population": "Qualified signal rows with all fifteen baseline inputs mathematically defined and the still-open research coverage gates satisfied; never selected by future target availability."
+  },
+  "empirical_adequacy_gates": {
+    "status": "OPEN_BLOCKED_FOR_MODEL",
+    "minimum_paper_qualified_cohort_count": null,
+    "minimum_paper_qualified_fraction_of_original_cohort": null,
+    "maximum_identity_unresolved_fraction": null,
+    "maximum_unqualified_quote_history_fraction": null,
+    "maximum_unusable_training_month_fraction": null,
+    "minimum_contiguous_usable_training_months": null,
+    "threshold_selection_basis": "Bounded coverage evidence, normalization representativeness and intended model/trial design; no return, validation-score or backtest-performance optimization.",
+    "mathematical_minimum_is_not_empirical_acceptance_threshold": true,
+    "absence_of_thresholds_means_model_ready": false
+  },
+  "added_feature_missingness": {
+    "active_dictionary_registered_columns": 728,
+    "active_dictionary_model_eligible_columns": 715,
+    "dictionary_counts_evidence": "VERIFIED LOCAL definitions: 298 technical + 415 context + 15 paper; ten rank aliases and three structural constants excluded from predictors.",
+    "require_all_715_candidate_columns_complete": false,
+    "feature_availability_mask_retained_per_source_id_signal_and_column": true,
+    "zero_fill_missing_or_undefined_values": false,
+    "automatic_forward_fill": false,
+    "feature_selection_based_on_test_coverage_or_future_targets": false,
+    "candidate_initial_research_policy": "Leave added-feature values NaN. Choose and record an estimator's explicit handling before fitting; do not silently remove paper-qualified rows to create complete cases across the entire library.",
+    "estimator_missing_value_handling": null,
+    "missingness_indicators_as_predictors": "OPEN; audit whether the mask is genuinely available at signal time and whether it proxies source/provider coverage before adding it to the frozen feature dictionary.",
+    "cross_sectional_extension_population": "OPEN. Current engineering workers still require complete original signal cohorts. A common paper-qualified or predeclared feature-specific eligible population needs a separate documented decision before activation.",
+    "context_minimum_count_and_coverage_thresholds": null,
+    "interpretation": "Per-column missingness is distinct from global prediction eligibility. Context values calculated over different populations require separate population labels and coverage."
+  },
+  "target_and_accounting_missingness": {
+    "target_imputation": false,
+    "known_valid_completed_targets_required_for_supervised_loss": true,
+    "missing_targets_select_signal_population": false,
+    "missing_targets_select_normalization_population": false,
+    "missing_target_rows_retained_in_ledger": true,
+    "missing_terminal_outcomes_erased_from_accounting": false,
+    "zero_terminal_returns_fabricated": false,
+    "training_observability": "Only outcomes completed and available by the declared training cutoff; preserve missing-target reasons and original denominators.",
+    "relative_class_definition_and_missing_target_rank_population": "OPEN_FOR_LABEL_PROTOCOL; normalization policy does not silently choose decile/tie rules or certify economic outcomes.",
+    "missing_terminal_event_accounting": "UNRESOLVED; provider-adjusted endpoint ratios do not certify delisting, merger or cash-flow completeness."
+  },
+  "estimator_preprocessing_and_comparison": {
+    "planned_initial_family": "forest_probability_estimators",
+    "universal_scaler_required_for_forests": false,
+    "forest_scaler_choice": "PROPOSED_NONE; feature-specific transforms remain part of the declared feature definitions.",
+    "ridge_or_neural_model_preprocessing": "Conditional future extension; fit any scaler, clipping threshold, imputer and missingness treatment on inner-training rows only during validation and then the outer training window for the final refit.",
+    "training_scaler_fit_on_protected_or_future_validation_test_rows": false,
+    "monthly_cross_sectional_feature_transform": "Observable same-signal cohort operation, distinct from a learned pooled training scaler. It changes feature meaning and is not justified solely as tree preprocessing.",
+    "imputer_choice": null,
+    "clipping_or_winsorization_choice": null,
+    "inner_validation_scheme": null,
+    "common_model_comparison_population": "Same frozen paper-qualified stock/signal prediction rows and same completed-label training rows across candidate models; preserve missing-target prediction rows in coverage and economic accounting.",
+    "additional_feature_complete_case_subset_changes_without_separate_comparison": false,
+    "shared_state_scaler_weighting": "OPEN if scaling is later added: stock-row weighting and equal-month weighting differ because state values repeat across stocks; record the chosen fitting population.",
+    "preprocessing_protocol_changes_require_new_version": true
+  },
+  "bounded_coverage_audit": {
+    "anchor_signal_dates": [
+      "2000-01-31",
+      "2005-01-31",
+      "2009-01-30"
+    ],
+    "anchor_rationale": "Initial, middle and final portions of the chosen initial 2000-2009 training history, preselected without inspecting prediction or strategy performance.",
+    "stage_one": "Source metadata and declared-request audit only: original membership counts, identity routes/quarantine, source date windows and provenance. No new financial-value reads.",
+    "stage_two_current_scope": "Summarize already authorized two-ID engineering raw-momentum and feature-availability diagnostics as sample diagnostics only; do not infer full-cohort dispersion or coverage.",
+    "new_exhaustive_financial_coverage_stage": "Not authorized by this file. Needs a separately measured read/execution plan before actual common-qualified population counts can be verified.",
+    "required_outputs": [
+      "source and calendar pins",
+      "original cohort counts",
+      "identity status counts",
+      "resolved/requested/unrequested counts",
+      "request exhaustiveness classification",
+      "available raw-momentum diagnostic counts with scope",
+      "unknown full-cohort financial qualification stated explicitly",
+      "possible selection/representation limitations",
+      "resource budget and actual metadata-read measurements"
+    ],
+    "performance_metrics_used_to_select_population_or_thresholds": false,
+    "anchor_signal_months": [
+      "2000-01",
+      "2005-01",
+      "2009-01"
+    ],
+    "anchor_clock_note": "Representative signal month-ends inside2000-2009trainingyears. They are not preceding-month signals for Januaryoutcomes; the firstJanuary2000outcome uses1999-12-31."
+  },
+  "source_pit_and_bias_claim_limits": {
+    "mode": "historical_reconstruction",
+    "knowledge_time_verified": false,
+    "identity_continuity_certified": false,
+    "accounting_certified": false,
+    "daily_backtest_ready": false,
+    "causal_arithmetic_is_source_as_of_certification": false,
+    "limitations": [
+      "Retrieval-time identity routes do not prove historical mapping availability or lifetime security continuity.",
+      "Provider-adjusted history lacks independently verified revision-as-of evidence.",
+      "Historical membership availability timestamps are not an independent original-publication certificate.",
+      "A qualified subset may have nonrandom source/identity/history missingness and must not be labelled complete or bias-free.",
+      "No feature transformations repair unresolved terminal-event economic accounting."
+    ],
+    "permitted_claim": "Explicit past-input arithmetic and historical membership reconstruction with preserved coverage denominators; qualification and empirical representativeness still subject to audit."
+  },
+  "activation_requirements": [
+    "Select and record the primary historical universe.",
+    "Review the bounded metadata audit and distinguish sample from exhaustive requests.",
+    "Prepare an appropriate bounded plan before new exhaustive financial qualification reads.",
+    "Verify actual common-qualified five-momentum population coverage and missingness using exhaustive declared cohorts.",
+    "Resolve and freeze empirical count/coverage/training-history adequacy gates without performance-driven selection.",
+    "Choose and freeze added-feature context populations and estimator missing-value treatment.",
+    "Freeze inner-validation and estimator-specific preprocessing rules before any model fit.",
+    "Review adversarial tests for source identity quarantine, original denominator preservation, future-price invariance and independent feature/target clocks.",
+    "Version and document any deliberate departure from active complete-cohort engineering policy before activating it."
+  ],
+  "activation_state": "NOT_ACTIVE_COVERAGE_QUALIFICATION_REQUIRED",
+  "coverage_evidence": {
+    "claim_kind": "VERIFIED_LOCAL_METADATA_ONLY",
+    "audit_dates": [
+      "2000-01-31",
+      "2005-01-31",
+      "2009-01-30"
+    ],
+    "anchor_scope": "Preselected representative dates inside initial2000-2009training window; January2000 is not the December1999 first-outcome signal.",
+    "identity_qualified_bounds": [
+      {
+        "as_of": "2000-01-31",
+        "original_members": 900,
+        "qualified_identity_members": 302,
+        "qualified_identity_fraction": 0.33555555555555555,
+        "candidate_signal_qualified_population_upper_bound": 302,
+        "active_complete_cohort_normalized_rows_upper_bound": 0
+      },
+      {
+        "as_of": "2005-01-31",
+        "original_members": 899,
+        "qualified_identity_members": 192,
+        "qualified_identity_fraction": 0.2135706340378198,
+        "candidate_signal_qualified_population_upper_bound": 192,
+        "active_complete_cohort_normalized_rows_upper_bound": 0
+      },
+      {
+        "as_of": "2009-01-30",
+        "original_members": 902,
+        "qualified_identity_members": 142,
+        "qualified_identity_fraction": 0.1574279379157428,
+        "candidate_signal_qualified_population_upper_bound": 142,
+        "active_complete_cohort_normalized_rows_upper_bound": 0
+      }
+    ],
+    "financial_values_read": false,
+    "price_history_coverage_verified": false,
+    "existing_two_id_diagnostics": "All 298 technical and five raw monthly momenta available at both signal dates for two IDs; no full-cohort price-coverage inference.",
+    "activation_conclusion": "Current identity-qualified subsets are only 15.7–33.6 percent of original members at inspected dates. Keep the proposal inactive; no adequacy threshold is justified. Dated identity review and bounded exhaustive input-history qualification remain required.",
+    "audit_sha256": "ecbb7a9f6b2c29edb29bbea298674c8a22cb296f083bdee39082636fbada60c8",
+    "source_pins_location": "Private outputs/coverage_audits/normalization-v1/identity_anchors.json"
+  }
+}

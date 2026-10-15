@@ -82,7 +82,7 @@ def _package_code_hash(package):
     return records, canonical_sha256(records)
 
 
-def reconcile_exchange_calendar(source_calendar, *, start_month, end_month):
+def reconcile_exchange_calendar(source_calendar, *, start_month, end_month, warmup_sessions=None):
     """Generate bounded independent sessions and expose vendor date differences.
 
 No price IDs, values or quote dates participate. Source-only dates are recorded
@@ -90,6 +90,14 @@ instead of becoming missing-price diagnoses; independent-only dates remain
 visible and required signal-date membership must be checked by the adapter.
 """
     scope_start, scope_end = _scope(start_month, end_month)
+    if warmup_sessions is not None:
+        if type(warmup_sessions) is not int or not 1 <= warmup_sessions <= 600:
+            raise DataContractError("Bounded feature warmup_sessions must be an integer in 1..600")
+        # Metadata envelope only: the feature adapter selects an exact count of
+        # sessions before requesting prices. No average-days-per-month estimate
+        # establishes numerical warmup or replaces the independent calendar.
+        preceding = date.fromisoformat(scope_start)
+        scope_start = _shift_month(preceding, -36).isoformat()
     source_dates = session_dates(source_calendar)
     if set(source_calendar["calendar_name"].to_pylist()) != {"XNYS"}:
         raise DataContractError("Calendar reconciliation requires an explicit XNYS source calendar")
@@ -107,7 +115,12 @@ visible and required signal-date membership must be checked by the adapter.
 
     try:
         calendar = xcals.get_calendar("XNYS", start=scope_start, end=scope_end)
-        labels = calendar.sessions_in_range(scope_start, scope_end)
+        # The constructor's civil-date bounds can fall on weekends/holidays.
+        # sessions_in_range rejects a bound before its first listed session;
+        # select the explicitly constructed session index by civil bounds.
+        labels = calendar.sessions
+        days = labels.strftime("%Y-%m-%d")
+        labels = labels[(days >= scope_start) & (days <= scope_end)]
     except (ValueError, KeyError) as error:
         raise DataContractError("Independent XNYS calendar cannot cover the declared scope") from error
     if calendar.name != "XNYS" or type(calendar).__module__ != "exchange_calendars.exchange_calendar_xnys":
@@ -150,5 +163,10 @@ visible and required signal-date membership must be checked by the adapter.
             "closes do not establish instrument-specific availability or execution fills."),
         "selection_independence": "No price observations, available-price intersection or survivor screening.",
     }
+    if warmup_sessions is not None:
+        provenance["scope"]["feature_warmup_sessions_requested"] = warmup_sessions
+        provenance["scope"]["boundary_policy"] = (
+            "Three-year additional metadata envelope before first signal month; "
+            "prices separately bounded to exact warmup sessions and latest signal.")
     provenance["request_sha256"] = canonical_sha256(provenance)
     return ReconciledExchangeCalendar(independent, source_calendar, provenance)

@@ -7,7 +7,7 @@ name = "deep-momentum-v2-local"
 version = "0.1.0"
 description = "U.S. equity momentum research workspace"
 requires-python = ">=3.11"
-dependencies = ["pyarrow==26.0.0", "exchange-calendars==4.13.2"]
+dependencies = ["pyarrow==26.0.0", "exchange-calendars==4.13.2", "pandas>=2.2,<4", "numpy>=1.26,<3"]
 
 [project.optional-dependencies]
 notebook = ["ipykernel>=6,<8", "nbformat>=5,<6", "nbclient>=0.10,<1", "pandas>=2.2,<4"]

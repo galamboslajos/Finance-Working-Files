@@ -225,7 +225,8 @@ def build_snapshot(membership, bridge, links, *, as_of, universe,
                      "constituents": len(output), "identity_status_counts": statuses})
 
 
-def attach_quotes(snapshot, prices, *, requested_security_ids=None):
+def attach_quotes(snapshot, prices, *, requested_security_ids=None,
+                  identity_policy='strict_unique_unflagged'):
     """Left-attach exact-date quotes, preserving unresolved/missing constituents.
 
     No forward filling, price-based membership selection or return fabrication.
@@ -233,6 +234,8 @@ def attach_quotes(snapshot, prices, *, requested_security_ids=None):
     """
     if snapshot.as_of >= "2024-01-01":
         raise DataContractError("Protected 2024+ financial values cannot be attached")
+    from .identity_policy import qualify_identity_records, identity_policy_provenance
+    sources=qualify_identity_records(snapshot.table.to_pylist(),identity_policy=identity_policy)
     _columns(prices, ["intrinio_security_id", "trading_date", "close"], "prices")
     requested = None
     if requested_security_ids is not None:
@@ -261,11 +264,11 @@ def attach_quotes(snapshot, prices, *, requested_security_ids=None):
             raise DataContractError(f"Duplicate quote key: {sid}, {snapshot.as_of}")
         quotes[sid] = row
     output, counts = [], {}
-    for source in snapshot.table.to_pylist():
+    for source in sources:
         row = dict(source)
         row.update({f"quote_{c}": None for c in quote_columns})
         status = "identity_unresolved"
-        if source["identity_status"] == "resolved":
+        if source['identity_eligible']:
             quote = quotes.get(source["intrinio_security_id"])
             status = "not_requested" if (
                 requested is not None and source["intrinio_security_id"] not in requested
@@ -283,7 +286,11 @@ def attach_quotes(snapshot, prices, *, requested_security_ids=None):
         output.append(row)
     extra_schema = [
         pa.field(f"quote_{c}", prices.schema.field(c).type) for c in quote_columns
-    ] + [pa.field("quote_status", pa.string())]
+    ] + [pa.field("quote_status", pa.string()),pa.field('source_identity_status',pa.string()),
+         pa.field('identity_eligible',pa.bool_()),pa.field('identity_eligibility_policy',pa.string()),
+         pa.field('identity_eligibility_reason',pa.string())]
     schema = pa.schema([*UNIVERSE_SCHEMA, *extra_schema])
     return QuoteSnapshot(pa.Table.from_pylist(output, schema=schema),
-                         {"constituents": len(output), "quote_status_counts": counts})
+                         {"constituents": len(output), "quote_status_counts": counts,
+                          'identity_eligible_members':sum(r['identity_eligible'] for r in output),
+                          **identity_policy_provenance(identity_policy)})

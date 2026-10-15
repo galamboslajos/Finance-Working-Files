@@ -5,6 +5,13 @@ research design remains rolling ten-year training, one-year testing and monthly
 next-month predictions. Monthly return construction does not perform a model
 fit, create ten-class labels or run a portfolio backtest.
 
+USER UPDATE: the active notebook applies
+[provisional identity admission](PROVISIONAL_IDENTITY_POLICY.md). Unique resolved
+review-flagged routes may receive endpoint ratios under the accepted uncertainty;
+their original state is retained alongside separate identity eligibility fields.
+All members and missing outcomes remain in the ledger. Existing endpoint/path,
+calendar, timing and independent daily-table rules are unchanged.
+
 ## Independent daily and monthly views
 
 The master notebook keeps two named tables:

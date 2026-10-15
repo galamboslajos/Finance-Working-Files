@@ -24,6 +24,20 @@ def weekdays(start, end):
 
 
 class IndependentCalendarTests(unittest.TestCase):
+    def test_feature_warmup_envelope_may_begin_on_a_non_session(self):
+        result = reconcile_exchange_calendar(
+            weekdays('1996-12-01', '2000-03-31'), start_month='2000-01',
+            end_month='2000-02', warmup_sessions=503)
+        self.assertEqual(result.provenance['scope']['calendar_start'], '1996-12-01')
+        self.assertEqual(result.table['trading_date'][0].as_py(), '1996-12-02')
+        self.assertGreaterEqual(sum(d <= '1999-12-31' for d in result.table['trading_date'].to_pylist()), 503)
+
+    def test_civil_month_bounds_on_weekends_or_holidays_keep_exact_sessions(self):
+        result = reconcile_exchange_calendar(weekdays('1999-08-01', '1999-10-31'),
+            start_month='1999-09', end_month='1999-09')
+        self.assertEqual(result.table['trading_date'][0].as_py(), '1999-08-02')
+        self.assertEqual(result.table['trading_date'][-1].as_py(), '1999-10-29')
+
     def test_2000_exchange_holidays_are_not_trading_session_price_gaps(self):
         source = weekdays("1999-12-01", "2000-03-31")
         result = reconcile_exchange_calendar(source, start_month="2000-01", end_month="2000-02")

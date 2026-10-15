@@ -12,8 +12,8 @@ S&P 400 or their union, then added features and forest ensembles. These are
 explicit adaptations to its broader CRSP/international analysis, not a promise
 to reproduce its published returns. By user decision, V2 does not use market
 capitalization: its starting set is the 15 momentum/state inputs, omitting the
-size decile, cap-based screening and cap-value weighting. Additional features
-remain to be specified.
+size decile, cap-based screening and cap-value weighting. The bounded feature bank now registers the 15 paper inputs plus daily technical
+and historical context definitions; see [feature contracts](docs/FEATURES.md).
 
 ## Read before research
 
@@ -21,9 +21,10 @@ Start with [`notebooks/00_research_master.ipynb`](notebooks/00_research_master.i
 in VS Code. Select **Deep Momentum V2 (.venv)** and use **Run All** to execute
 the implemented bounded foundation stages. It calls the tested source modules;
 it does not hide a full scan or model fit. See [the notebook guide](docs/NOTEBOOK_WORKFLOW.md).
-The selected study initialization is **2000**, with **rolling 10-year training /
-1-year testing**. The nominal first outcome test is 2010, subject to warmup and
-coverage; the earlier 2010 loader check was not a research-start decision.
+The selected study initialization is **2010**, with **rolling 10-year training /
+1-year testing**. The nominal annual outcome tests are **2020–2023**, subject to
+warmup and coverage. Starting later does not remove the earlier raw history.
+Pre-2010 observations remain available for exact feature warmup.
 
 - [Precise paper reference](docs/PAPER_REFERENCE_HAN_QIN_2026.md): equations,
   timing, features, training, portfolio rules, reported evidence and ambiguities.
@@ -81,6 +82,8 @@ unavailable from these inputs. The modelling packages are not installed.
 - `src/dmv2/`: source catalog, bounded loaders, historical universe and quote audits.
 - `src/dmv2/monthly.py` and `monthly_loading.py`: monthly return/coverage worker
   and bounded source adapter, retaining daily data for later backtesting.
+- `src/dmv2/daily_features.py`, `paper_features.py`, `context_features.py`: daily-to-month-end technical/context features and exact paper monthly inputs.
+- `src/dmv2/features.py`, `feature_loading.py`, `feature_workflow.py`: predictor/target separation, bounded past-only reads and private feature evidence.
 - `notebooks/00_research_master.ipynb`: the readable Run All entry point.
 - `configs/research_workflow.json`: selected study chronology and inspection controls.
 - `tests/`: adversarial source/PIT/coverage tests using structural fixtures only.
@@ -98,23 +101,48 @@ unavailable from these inputs. The modelling packages are not installed.
 
 ## Current state
 
-MASTER NOTEBOOK, DATA FOUNDATIONS AND MONTHLY RETURN ENGINEERING IMPLEMENTED; REMAINING DESIGN OPEN. Source-file integrity
+MASTER NOTEBOOK, DATA FOUNDATIONS, MONTHLY RETURNS AND BOUNDED FEATURE WORKERS IMPLEMENTED; REMAINING EXPERIMENT DESIGN OPEN. Source-file integrity
 and table footer counts were verified. All 115 paper pages were reviewed.
-The 2010-01-29 combined universe audit retained all 902 constituents; only 130
-had a unique identity route without a review flag. Two exact-date quotes loaded
-successfully. Unresolved identities remain in the ledger; do not model the
-mapped subset as if it represented the intended complete cohort.
-No new features, model fits or backtests have been run. Historical capitalization
+The initial strict-policy 2010-01-29 combined audit retained all 902 constituents;
+130 had unique routes without review flags, 755 required review, ten had target
+collisions and seven were unlinked. Two exact-date quotes loaded successfully.
+Under the current provisional policy, unique resolved review-flagged routes may
+enter research with their flags retained; missing/ambiguous routes and collisions
+remain blocked. Original cohort denominators remain intact.
+The separate [2010–2023 endpoint audit](docs/INITIALIZATION_2010.md) measured
+complete 15-input paper coverage on 140,777 of 152,307 original stock-months
+(92.43%). Full 715-predictor/context coverage, model fits and backtests remain outstanding. Historical capitalization
 is absent from the downloaded schemas and deliberately excluded from V2; it
 is not a remaining data task or blocker. The 15-input starting set is a declared
 adaptation, not the paper's complete 16-input baseline. The primary S&P universe,
-usable training coverage, pre-2000 feature warmup, return/execution rules,
-inner validation and experiment budget remain OPEN. Selected rolling chronology
+full added-feature coverage, economic return/execution rules, inner validation
+and experiment budget remain OPEN. Exact per-signal warmup is implemented; the
+15-input endpoint audit does not establish complete daily technical/context history. Selected rolling chronology
 is recorded in configs/research_workflow.json, separate from paper facts.
 Protected 2024+ financial values remain uninspected.
 
 The master now constructs separate `daily_df` and `monthly_df` views for a
-bounded January–February 2000 sample. Monthly cohorts use the preceding month
+bounded January–February 2010 sample. Monthly cohorts use the preceding month
 end, retaining every historical member and missing/unrequested outcome. Numeric
 provider-adjusted ratios are provisional research returns; knowledge-time,
 economic-event completeness and daily backtest readiness are not certified.
+
+The [normalization/missingness protocol](docs/NORMALIZATION_PROTOCOL.md) now
+freezes the active common-five paper population and training-only median/missing
+indicator rules under the accepted provisional identity policy. Earlier proposals
+remain archival. The master verifies and displays the explicit
+[2010-start coverage audit](docs/INITIALIZATION_2010.md), with no automatic
+full-history scan or model fit.
+
+The [historical identity evidence audit](docs/IDENTITY_AUDIT.md) is now called
+from the master as historical reference evidence. It retains all 2,701
+constituent/date rows at three fixed 2000–2009 anchors, distinguishes source aliases from declared lookup evidence and saves
+a private review queue. No mappings were promoted; dated provider identity and
+publication evidence remain missing. A [draft evidence request](docs/IDENTITY_EVIDENCE_REQUEST.md)
+is available to forward.
+
+By user direction, [provisional identity admission](docs/PROVISIONAL_IDENTITY_POLICY.md)
+is active in the master configuration. Unique resolved review-flagged links may
+enter research calculations with their original flags and uncertainty intact;
+missing/ambiguous routes and same-date collisions remain blocked and visible.
+Historical identity/PIT certification no longer stops all provisional development.

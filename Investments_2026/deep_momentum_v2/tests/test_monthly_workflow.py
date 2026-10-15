@@ -95,8 +95,8 @@ class MonthlyControlsTests(unittest.TestCase):
         self.assertIs(run.sample.daily_prices.table, result.daily_prices.table)
         self.assertEqual(run.report['requested_ids'], ['fixture-a'])
         self.assertFalse(run.report['return_provenance']['knowledge_time_verified'])
-        self.assertEqual(loader.call_args.kwargs['start_month'], '2000-01')
-        self.assertEqual(loader.call_args.kwargs['end_month'], '2000-02')
+        self.assertEqual(loader.call_args.kwargs['start_month'], '2010-01')
+        self.assertEqual(loader.call_args.kwargs['end_month'], '2010-02')
         self.assertEqual(loader.call_args.kwargs['sample_size'], 2)
         self.assertEqual(loader.call_args.kwargs['mode'], 'historical_reconstruction')
 

@@ -1,13 +1,13 @@
 """Nominal annual outcome folds; no data reads, feature builds or model fits.
 
 V2 user direction is a rolling ten-year training / one-year test schedule,
-initialized in 2000. ``expanding`` is available only as an explicit comparison
+initialized in 2010. ``expanding`` is available only as an explicit comparison
 to the paper's classifier schedule. The paper's trailing ten-year RET payoff
 window is a separate estimator; this module does not construct it.
 
 All bounds refer to COMPLETED OUTCOME dates, not signal dates. For example,
-a December 2009 signal predicting January 2010 belongs to the 2010 test;
-its label cannot enter the training period ending December 2009.
+a December 2019 signal predicting January 2020 belongs to the 2020 test;
+its label cannot enter the training period ending December 2019.
 
 These are calendar specifications, not coverage certification. Required
 feature warmup, missing labels and delayed source availability can make the
@@ -46,7 +46,7 @@ class AnnualFold:
 
 
 def build_annual_folds(
-    history_start: str = "2000-01-01",
+    history_start: str = "2010-01-01",
     last_test_year: int = LAST_DEVELOPMENT_YEAR,
     train_years: int = 10,
     *,
@@ -59,8 +59,8 @@ def build_annual_folds(
     year; expanding retains that start. Both end training on December 31 of
     the preceding year and test the full next calendar year.
 
-    Defaults implement the selected V2 rolling 10/1 schedule: fourteen folds,
-    training 2000-2009 / testing 2010 through training 2013-2022 / testing 2023.
+    Defaults implement the selected V2 rolling 10/1 schedule: four folds,
+    training 2010-2019 / testing 2020 through training 2013-2022 / testing 2023.
     These bounds do not authorize market-data reads or guarantee a complete
     ten-year usable training panel. Protected 2024+ test years fail closed.
     """

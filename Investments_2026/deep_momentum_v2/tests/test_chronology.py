@@ -9,13 +9,13 @@ from dmv2.chronology import build_annual_folds
 
 
 class AnnualFoldTests(unittest.TestCase):
-    def test_selected_rolling_10_1_has_fourteen_folds_from_2010_through_2023(self):
+    def test_selected_rolling_10_1_has_four_folds_from_2020_through_2023(self):
         folds = build_annual_folds()
-        self.assertEqual(len(folds), 14)
-        self.assertEqual(folds[0].train_start, "2000-01-01")
-        self.assertEqual(folds[0].train_end, "2009-12-31")
-        self.assertEqual(folds[0].test_start, "2010-01-01")
-        self.assertEqual(folds[0].test_end, "2010-12-31")
+        self.assertEqual(len(folds), 4)
+        self.assertEqual(folds[0].train_start, "2010-01-01")
+        self.assertEqual(folds[0].train_end, "2019-12-31")
+        self.assertEqual(folds[0].test_start, "2020-01-01")
+        self.assertEqual(folds[0].test_end, "2020-12-31")
         self.assertEqual(folds[-1].train_start, "2013-01-01")
         self.assertEqual(folds[-1].train_end, "2022-12-31")
         self.assertEqual(folds[-1].test_start, "2023-01-01")
@@ -45,7 +45,7 @@ class AnnualFoldTests(unittest.TestCase):
                           - date.fromisoformat(leap_window.train_start)).days + 1, 366)
 
     def test_expanding_is_explicit_and_keeps_original_training_start(self):
-        folds = build_annual_folds(mode="expanding")
+        folds = build_annual_folds('2000-01-01',mode="expanding")
         self.assertEqual(len(folds), 14)
         self.assertTrue(all(fold.train_start == "2000-01-01" for fold in folds))
         self.assertEqual(folds[-1].train_end, "2022-12-31")

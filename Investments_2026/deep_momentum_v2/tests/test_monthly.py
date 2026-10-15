@@ -5,6 +5,7 @@ import unittest
 import pyarrow as pa
 
 from dmv2.monthly import build_month_windows, build_monthly_returns
+from dmv2.identity_policy import PROVISIONAL_IDENTITY_POLICY, STRICT_IDENTITY_POLICY
 from dmv2.universe import EXCLUDED_SCHEMA, UNIVERSE_SCHEMA, UniverseSnapshot
 
 
@@ -68,12 +69,13 @@ def prices(rows=None):
 
 
 def run(rows=None, *, daily=None, snapshots=None, requested=("id-a",),
-        end_month="2000-01", mode="historical_reconstruction"):
+        end_month="2000-01", mode="historical_reconstruction",
+        identity_policy=STRICT_IDENTITY_POLICY):
     return build_monthly_returns(
         prices(rows) if daily is None else daily, calendar(),
         [snapshot()] if snapshots is None else snapshots,
         start_month="2000-01", end_month=end_month,
-        requested_security_ids=requested, mode=mode,
+        requested_security_ids=requested, mode=mode, identity_policy=identity_policy,
     )
 
 
@@ -150,6 +152,55 @@ class MonthWindowTests(unittest.TestCase):
 
 
 class MonthlyReturnTests(unittest.TestCase):
+    def test_explicit_provisional_admission_preserves_flag_and_source_status(self):
+        cohorts = [snapshot(rows=[member(status="needs_review")])]
+        strict = run(snapshots=cohorts).table.to_pylist()[0]
+        self.assertEqual(strict["return_status"], "identity_unresolved")
+        self.assertFalse(strict["identity_eligible"])
+        panel = run(snapshots=cohorts, identity_policy=PROVISIONAL_IDENTITY_POLICY)
+        row = panel.table.to_pylist()[0]
+        self.assertEqual(row["return_status"], "ok")
+        self.assertEqual(row["provider_adjusted_return"], 1.0)
+        self.assertEqual(row["identity_status"], "needs_review")
+        self.assertEqual(row["source_identity_status"], "needs_review")
+        self.assertTrue(row["identity_review_required"])
+        self.assertTrue(row["identity_eligible"])
+        self.assertEqual(row["identity_eligibility_reason"], "provisional_review_flag_accepted")
+        self.assertEqual(row["identity_eligibility_policy"], PROVISIONAL_IDENTITY_POLICY)
+        self.assertEqual(panel.provenance["identity_policy"], PROVISIONAL_IDENTITY_POLICY)
+        self.assertEqual(panel.summary["by_outcome_month"]["2000-01"]["provisional_review_flags_accepted"], 1)
+        self.assertFalse(row["knowledge_time_verified"])
+        self.assertFalse(row["accounting_certified"])
+        self.assertFalse(row["daily_backtest_ready"])
+        self.assertEqual(cohorts[0].table.to_pylist()[0]["identity_status"], "needs_review")
+
+    def test_provisional_admission_still_blocks_full_cohort_provider_collision(self):
+        cohorts = [snapshot(rows=[member(), member("member-b", "id-a", "needs_review")])]
+        panel = run(snapshots=cohorts, identity_policy=PROVISIONAL_IDENTITY_POLICY)
+        rows = panel.table.to_pylist()
+        self.assertEqual(len(rows), 2)
+        self.assertEqual({row["return_status"] for row in rows}, {"identity_unresolved"})
+        self.assertTrue(all(row["identity_status"] == "target_collision" for row in rows))
+        self.assertTrue(all(not row["identity_eligible"] for row in rows))
+        self.assertTrue(all(row["provider_adjusted_return"] is None for row in rows))
+        self.assertEqual({row["source_identity_status"] for row in rows}, {"resolved", "needs_review"})
+
+    def test_provisional_admission_does_not_accept_unknown_or_failed_route_metadata(self):
+        for changes in ({"identity_review_required": None}, {"resolution_status": None},
+                        {"resolution_status": "pending"}, {"unified_security_id": None},
+                        {"intrinio_security_id": None}):
+            with self.subTest(changes=changes):
+                panel = run(snapshots=[snapshot(rows=[member(status="needs_review", **changes)])],
+                            identity_policy=PROVISIONAL_IDENTITY_POLICY)
+                row = panel.table.to_pylist()[0]
+                self.assertFalse(row["identity_eligible"])
+                self.assertEqual(row["return_status"], "identity_unresolved")
+                self.assertIsNone(row["provider_adjusted_return"])
+
+    def test_unknown_identity_policy_fails_before_financial_conversion(self):
+        with self.assertRaises(ValueError):
+            run(daily=FinancialConversionTrap(prices()), identity_policy="accept_everything")
+
     def test_exact_endpoint_ratio_is_not_accounting_certification(self):
         daily = prices()
         original = daily.combine_chunks()
