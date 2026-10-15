@@ -245,6 +245,9 @@ class MonthlyOrchestrationTests(unittest.TestCase):
         self.calendar_builder.side_effect = None
         self.calendar_builder.return_value = ReconciledExchangeCalendar(
             independent, source, {"policy": CALENDAR_POLICY, "source_only_dates": ["2018-03-30"]})
+        price_rows=self.source['prices'].table.to_pylist()
+        for row in price_rows:row['trading_date']='2018-02-28'
+        self.price.load.return_value=loaded(pa.Table.from_pylist(price_rows),'prices')
         result = self.run_sample(start_month="2018-03", end_month="2018-03")
         self.assertIs(result.source_calendar, source)
         self.assertIs(result.calendar, independent)
@@ -252,6 +255,19 @@ class MonthlyOrchestrationTests(unittest.TestCase):
         self.assertIs(self.panel_builder.call_args.args[1], independent)
         self.assertEqual(result.loading_provenance["calendar_reconciliation"]["source_only_dates"],
                          ["2018-03-30"])
+
+    def test_non_session_quotes_are_audited_without_mutating_raw_daily_input(self):
+        source_rows=self.source['prices'].table.to_pylist()
+        source_rows.append({**source_rows[0],'trading_date':'2000-01-15','adj_close':999.})
+        raw=loaded(pa.Table.from_pylist(source_rows),'prices')
+        self.price.load.return_value=raw
+        result=self.run_sample()
+        self.assertIs(result.daily_prices,raw)
+        self.assertEqual(raw.table.num_rows,2)
+        self.assertEqual(self.panel_builder.call_args.args[0].num_rows,1)
+        audit=result.loading_provenance['quote_session_audit']
+        self.assertEqual(audit['excluded_non_session_rows'],1)
+        self.assertEqual(audit['excluded_quote_keys'][0]['trading_date'],'2000-01-15')
 
     def test_exhausted_cumulative_budget_rejects_next_read_without_autoscaling(self):
         # Calendar alone consumes the whole allowed stage row budget.

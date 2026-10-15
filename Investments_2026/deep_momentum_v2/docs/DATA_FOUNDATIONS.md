@@ -2,9 +2,16 @@
 
 Implemented 2026-10-14. The original foundation stage provides audited loading
 and constituent reconstruction. The subsequent [monthly stage](MONTHLY_RETURNS.md)
-builds bounded provider-adjusted ratios while preserving daily data. No features,
-targets, model fits or backtests are implemented.
+builds bounded provider-adjusted ratios while preserving daily data. Later
+[feature workers](FEATURES.md) are implemented separately; no model fits or
+backtests have been run.
 Market capitalization remains outside the project scope.
+
+USER UPDATE: [provisional identity admission](PROVISIONAL_IDENTITY_POLICY.md)
+now permits unique resolved review-flagged routes for exploratory calculations.
+The source cohort and original audit below remain unchanged. Missing/ambiguous
+routes and same-date collisions stay blocked, while producer flags and uncertainty
+remain visible. Identity certification no longer blocks all research preparation.
 
 The loader is coded in `src/dmv2/loading.py`, with catalog/source/universe
 helpers. A [master notebook](NOTEBOOK_WORKFLOW.md) now exposes those stages.
@@ -67,7 +74,8 @@ The code prevents common survivor/causality errors, but that is not a proof
 that the vendor histories or economic outcomes are survivorship-bias free.
 Identity repair, adjustment semantics, delisting cash flows, missing valuations
 and a complete original-cohort outcome ledger remain required before economics.
-Do not begin modelling on only the easily mapped subset.
+Preserve original-denominator and selection diagnostics when modelling the
+user-accepted provisional population; do not represent it as a certified universe.
 
 ## Holdout and storage bounds
 

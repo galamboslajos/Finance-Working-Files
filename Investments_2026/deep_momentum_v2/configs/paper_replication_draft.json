@@ -78,7 +78,7 @@
     "holdout_policy": "Do not inspect protected financial values until an explicit new research protocol determines their use."
   },
   "v2_user_decisions": {
-    "recorded_at": "2026-10-14",
+    "recorded_at": "2026-10-15",
     "use_market_capitalization": false,
     "market_cap_size_feature": false,
     "market_cap_based_screens": false,
@@ -93,7 +93,7 @@
     "relation_to_paper": "declared_no_size_feature_or_cap_based_screening_adaptation_not_complete_16_input_baseline",
     "portfolio_weighting_remains_open": true,
     "research_workflow_config": "configs/research_workflow.json",
-    "research_workflow_decision": "User selected initialization in 2000 and rolling 10 years train / 1 year test; canonical values are in research_workflow.json"
+    "research_workflow_decision": "User selected initialization in 2010 and rolling 10 years train / 1 year test with monthly predictions; nominal test years are 2020-2023 and canonical values are in research_workflow.json"
   },
   "v2_decisions_open": {
     "primary_universe": null,

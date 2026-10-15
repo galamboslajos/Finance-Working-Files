@@ -17,6 +17,8 @@ import pyarrow as pa
 
 from .catalog import canonical_sha256
 from .data import session_dates
+from .identity_policy import (STRICT_IDENTITY_POLICY, identity_policy_provenance,
+                              qualify_identity_records, validate_identity_policy)
 from .universe import DataContractError, KnowledgeTimeUnavailable, UniverseSnapshot, iso_date
 
 
@@ -132,7 +134,7 @@ def _valid_quote(row):
     return row is not None and _quality(row) and _number(row["adj_close"], positive=True)
 
 
-def _snapshot_cohorts(snapshots, windows):
+def _snapshot_cohorts(snapshots, windows, identity_policy):
     if not isinstance(snapshots, Sequence) or isinstance(snapshots, (str, bytes)):
         raise DataContractError("snapshots must be an explicit sequence of UniverseSnapshot records")
     required_dates = {window.signal_date for window in windows}
@@ -153,9 +155,10 @@ def _snapshot_cohorts(snapshots, windows):
         columns = [name for name in ("source_security_id", "as_of", "unified_security_id",
                                      "intrinio_security_id", "identity_status", "indices",
                                      "membership_tickers", "identity_review_required",
-                                     "resolution_status") if name in snapshot.table.column_names]
+                                     "resolution_status", "source_identity_status")
+                   if name in snapshot.table.column_names]
         records = snapshot.table.select(columns).to_pylist()
-        seen, targets = set(), {}
+        seen = set()
         for record in records:
             sid = _identifier(record["source_security_id"], "source_security_id")
             if sid in seen:
@@ -166,21 +169,12 @@ def _snapshot_cohorts(snapshots, windows):
             status = _identifier(record["identity_status"], "identity_status")
             target = record["intrinio_security_id"]
             if target not in (None, ""):
-                target = _identifier(target, "intrinio_security_id")
-                targets.setdefault(target, []).append(record)
+                _identifier(target, "intrinio_security_id")
             elif status == "resolved":
                 raise DataContractError("A resolved identity has no provider security ID")
-            record["source_identity_status"] = status
-            if status == "resolved" and (
-                ("identity_review_required" in record and record["identity_review_required"] is not False)
-                or ("resolution_status" in record and record["resolution_status"] != "resolved")
-            ):
-                record["identity_status"] = "needs_review"
-        # Defensive quarantine even when a malformed caller labels both routes resolved.
-        for same_target in targets.values():
-            if len(same_target) > 1:
-                for record in same_target:
-                    record["identity_status"] = "target_collision"
+        # Admission is recomputed across every original member, independent of
+        # requested prices. Producer flags/statuses are never approval evidence.
+        records = qualify_identity_records(records, identity_policy=identity_policy)
         cohorts[cutoff] = sorted(records, key=lambda row: row["source_security_id"])
         provenance[cutoff] = snapshot.provenance
     if set(cohorts) != required_dates:
@@ -192,7 +186,8 @@ def _snapshot_cohorts(snapshots, windows):
 
 def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSnapshot], *,
                           start_month, end_month, requested_security_ids,
-                          mode="historical_reconstruction") -> MonthlyReturnPanel:
+                          mode="historical_reconstruction",
+                          identity_policy=STRICT_IDENTITY_POLICY) -> MonthlyReturnPanel:
     """Preserve every signal-cohort name while computing exact endpoint ratios.
 
     Removed names remain in their signal cohort; outcome-month entrants never
@@ -200,12 +195,13 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
     current delisting flag, terminal quote, or end-of-month membership determines
     admission. Missing quote/status fields remain visible, never forward filled.
     """
+    validate_identity_policy(identity_policy)
     if mode == "knowledge_time":
         raise KnowledgeTimeUnavailable("Monthly reconstruction cannot certify historical knowledge-time identity or revisions")
     if mode != "historical_reconstruction":
         raise DataContractError("Unknown monthly PIT mode")
     windows = build_month_windows(calendar, start_month=start_month, end_month=end_month)
-    cohorts, universe, snapshot_provenance = _snapshot_cohorts(snapshots, windows)
+    cohorts, universe, snapshot_provenance = _snapshot_cohorts(snapshots, windows, identity_policy)
     if (not isinstance(requested_security_ids, Sequence)
             or isinstance(requested_security_ids, (str, bytes))):
         raise DataContractError("requested_security_ids must be an explicit sequence")
@@ -247,8 +243,8 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
         expected = set(window.expected_outcome_sessions)
         for constituent in cohorts[window.signal_date]:
             sid = constituent.get("intrinio_security_id")
-            resolved = constituent["identity_status"] == "resolved"
-            admitted = resolved and sid in requested_set
+            eligible = constituent["identity_eligible"]
+            admitted = eligible and sid in requested_set
             start_quote = quotes.get((sid, window.signal_date)) if admitted else None
             end_quote = quotes.get((sid, window.outcome_end)) if admitted else None
             path = {day: quotes[(sid, day)] for day in window.expected_outcome_sessions
@@ -259,7 +255,7 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
             # is an interior session, not the arithmetic start endpoint.
             interior = sorted(day for day in missing if day != window.outcome_end)
             failures = []
-            if not resolved:
+            if not eligible:
                 status = "identity_unresolved"
             elif not admitted:
                 status = "not_requested"
@@ -296,7 +292,7 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
                 return float(value) if _number(value, positive=True) else None
             complete_path = bool(admitted and status == "ok" and not missing and not invalid
                                  and _valid_quote(start_quote))
-            coverage_status = ("identity_unresolved" if not resolved else "not_requested" if not admitted
+            coverage_status = ("identity_unresolved" if not eligible else "not_requested" if not admitted
                                else "complete" if complete_path else "incomplete")
             row = {
                 "source_security_id": constituent["source_security_id"],
@@ -306,6 +302,9 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
                 "source_identity_status": constituent["source_identity_status"],
                 "identity_review_required": constituent.get("identity_review_required"),
                 "resolution_status": constituent.get("resolution_status"),
+                "identity_eligible": eligible,
+                "identity_eligibility_policy": constituent["identity_eligibility_policy"],
+                "identity_eligibility_reason": constituent["identity_eligibility_reason"],
                 "universe": universe, "signal_date": window.signal_date,
                 "outcome_month": window.outcome_month, "outcome_start": window.outcome_start,
                 "outcome_end": window.outcome_end, "return_status": status,
@@ -352,6 +351,8 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
         ("intrinio_security_id", pa.string()), ("identity_status", pa.string()),
         ("source_identity_status", pa.string()), ("universe", pa.string()),
         ("identity_review_required", pa.bool_()), ("resolution_status", pa.string()),
+        ("identity_eligible", pa.bool_()), ("identity_eligibility_policy", pa.string()),
+        ("identity_eligibility_reason", pa.string()),
         ("signal_date", pa.string()), ("outcome_month", pa.string()),
         ("outcome_start", pa.string()), ("outcome_end", pa.string()),
         ("return_status", pa.string()), ("provider_adjusted_return", pa.float64()),
@@ -376,6 +377,9 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
         month_counts[window.outcome_month] = {
             "signal_date": window.signal_date, "constituents": len(records),
             "return_status_counts": dict(sorted(Counter(row["return_status"] for row in records).items())),
+            "identity_eligible": sum(row["identity_eligible"] for row in records),
+            "provisional_review_flags_accepted": sum(
+                row["identity_eligibility_reason"] == "provisional_review_flag_accepted" for row in records),
             "daily_quote_path_complete": sum(row["daily_quote_path_complete"] for row in records),
         }
     summary = {
@@ -383,10 +387,14 @@ def build_monthly_returns(daily_prices, calendar, snapshots: Sequence[UniverseSn
         "return_status_counts": dict(sorted(Counter(row["return_status"] for row in output).items())),
         "daily_quote_path_complete": sum(row["daily_quote_path_complete"] for row in output),
         "daily_backtest_ready": 0, "by_outcome_month": month_counts,
+        "identity_policy": identity_policy,
+        "identity_eligible_rows": sum(row["identity_eligible"] for row in output),
         "knowledge_time_verified": False, "accounting_certified": False,
     }
     provenance = {
         "mode": mode, "start_month": start_month, "end_month": end_month,
+        **identity_policy_provenance(identity_policy),
+        "identity_admission": "Declared research eligibility; original producer flags/statuses retained; no historical identity certification",
         "requested_security_ids": sorted(requested), "universe": universe,
         "cohort_rule": "historical source-ID membership at preceding source month-end; never outcome/end membership or quote availability",
         "return_column": "provider_adjusted_return",

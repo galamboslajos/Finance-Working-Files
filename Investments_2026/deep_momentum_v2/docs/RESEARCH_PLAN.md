@@ -1,19 +1,27 @@
 # Starting research workflow
 
-Status: DATA FOUNDATIONS AND MONTHLY RETURN ENGINEERING IMPLEMENTED; EXPERIMENT DESIGN OPEN.
+Status: DATA FOUNDATIONS, MONTHLY RETURNS AND BOUNDED FEATURE WORKERS IMPLEMENTED; EXPERIMENT DESIGN OPEN.
 New strategy research begins here; the previous attempt is a reference.
 
-**USER DIRECTION:** initialize research in 2000 and use rolling ten-year
+**USER DIRECTION, 2026-10-15:** initialize research in 2010 and use rolling ten-year
 training / one-year outcome tests. The canonical settings and readable master
 notebook are described in [the notebook workflow](NOTEBOOK_WORKFLOW.md).
-Nominal tests run from 2010 through the existing pre-holdout boundary in 2023;
-actual usable coverage and pre-2000 feature warmup remain to be established.
+Nominal tests run from 2020 through the existing pre-holdout boundary in 2023:
+2010–2019 training precedes 2020 testing, advancing annually to 2013–2022
+training / 2023 testing. There are four nominal folds; the rolling window and
+monthly prediction frequency are unchanged. The [2010–2023 endpoint audit](INITIALIZATION_2010.md)
+measures complete 15-input paper coverage under the accepted provisional identity
+policy. Full 715-predictor/context coverage remains open. The feature worker
+uses exact pre-signal warmup, including pre-2010 prices, described in [FEATURES.md](FEATURES.md).
 
 The first source/date/identity/quote contracts and adversarial tests are in
 [data foundations](DATA_FOUNDATIONS.md). One real 2010-01-29 combined snapshot
-retains all 902 names, with 772 unresolved or review/collision identity states.
-Next, audit the dated evidence behind those mappings before treating a small
-uniquely mapped subset as an intended research universe.
+retains all 902 names. Its original strict-policy audit counted 130 clear
+identity routes, 755 review-flagged routes, ten collisions and seven unlinked
+names. The [active provisional policy](PROVISIONAL_IDENTITY_POLICY.md) accepts
+unique resolved review-flagged routes while preserving the flags; missing/ambiguous
+routes and collisions remain blocked. Dated identity evidence remains unverified,
+without blocking provisional development or changing original denominators.
 
 The [monthly worker and notebook stage](MONTHLY_RETURNS.md) now preserve daily
 data independently and construct bounded provider-adjusted ratios from full
@@ -36,7 +44,7 @@ forest ensembles are our intended adaptations.
    explicit; obtaining capitalization is not a task or blocker. Portfolio
    weighting remains a separate OPEN decision.
 3. Choose the primary historical S&P cohort and audit usable history within the
-   selected 2000 initialization / rolling 10-1 chronology. Freeze
+   selected 2010 initialization / rolling 10-1 chronology. Freeze
    feature/label conventions, cleaning, signal/entry timing, completed-outcome
    cutoffs, annual retraining, class-payoff windows, validation, costs and trials.
    Resolve paper underspecification in the ledger instead of inventing author settings.
@@ -63,3 +71,8 @@ determines its use.
 The previous comparison's economics were inconclusive due to missing valuations
 and event/identity limitations. Successful model fits, source-file verification
 or feature construction are not evidence of complete economic performance.
+
+The user-authorized [feature stage](FEATURES.md) registers 728 definitions with
+715 eligible predictor names. It preserves original cohorts, signal-only history
+and a separate completed-outcome X/y interface. Two-ID samples withhold complete
+cohort statistics; no model fit or full-context scan is implicit.

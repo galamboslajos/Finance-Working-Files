@@ -67,13 +67,33 @@ Two explicitly requested exact-date price/volume records loaded; unqueried
 and unresolved names were retained. See [the foundation contract and evidence](DATA_FOUNDATIONS.md).
 These are retrieval-time mappings, not certified knowledge-time PIT identities.
 
-No feature build, model fit or backtest has been run. Reusing/rebuilding derived
-panels requires correct path, identity, calendar and accounting rules and the
-project's agreed execution plan.
+A bounded feature engineering stage is now implemented; see [FEATURES.md](FEATURES.md).
+The separate [2010–2023 monthly-endpoint audit](INITIALIZATION_2010.md) measured
+all 15 paper inputs under the accepted [provisional identity policy](PROVISIONAL_IDENTITY_POLICY.md):
+140,777 of 152,307 original stock-months (92.43%) qualified. This is not a full
+715-predictor/context panel, model fit or backtest. Provisional development may
+continue without full identity certification; its original flags and missing,
+ambiguous and collision exclusions remain explicit. A full added-feature build
+requires the measured execution plan; historical-knowledge and economic
+accounting limitations remain unverified.
 
 The user-authorized [monthly return engineering stage](MONTHLY_RETURNS.md)
 is now implemented. It preserves daily source tables separately, uses
 preceding-month historical cohorts and emits exact provider-adjusted endpoint
 ratios with missing/identity/coverage states. The local notebook example is
-January–February 2000 with two requested price IDs, not a complete universe
+January–February 2010 with two requested price IDs, not a complete universe
 panel or certified economic/PIT return history.
+
+Current source definitions were separately audited at organizational commit
+`e9a7a01881a46374694f60fc34eb7d7e4a26c2b8`. The private ignored inventory
+records 745 candidates; our implemented bank omits22 external-source-dependent
+columns and10 SP600 spreads and adds15 exact paper inputs. Formula availability
+is separate from population/coverage verification.
+
+The [identity evidence audit](IDENTITY_AUDIT.md) is implemented and run at
+2000-01-31, 2005-01-31 and 2009-01-30. It retains all 2,701 original constituent
+rows, verifies source ISIN syntax/check digits, distinguishes declared queries
+from alias agreement and records same-date collisions without using eventual
+price inventory for eligibility. No identities were promoted. Every current
+identifier-history validity boundary is blank; native provider links remain
+undated. The master exposes aggregate evidence and a private full review queue.

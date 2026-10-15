@@ -41,31 +41,39 @@ rerun from the top. It is the source of truth for notebook chronology and
 bounded inspection controls. The paper reference/draft retains author facts;
 it points to this configuration for selected V2 workflow decisions.
 
+Schema version 4 now also records the user's explicit provisional identity
+policy. The master shows `research_identity_df` separately from original
+identity evidence; all monthly/feature workers use the same policy. See
+[PROVISIONAL_IDENTITY_POLICY.md](PROVISIONAL_IDENTITY_POLICY.md).
+
 The user selected:
 
-- Research initialization: **2000-01-01**.
+- Research initialization: **2010-01-01** (user change, 2026-10-15).
 - Training: **rolling ten completed outcome years**.
 - Testing: **one completed outcome year**, advancing annually.
-- Nominal tests: **2010–2023**, subject to usable coverage and warmup.
+- Nominal tests: **2020–2023**, subject to usable coverage and warmup.
 - Protected financial holdout: **2024+**, unchanged.
 
-For example, outcome training 2000–2009 precedes test outcomes in 2010;
-training 2001–2010 precedes 2011. There are fourteen nominal annual folds.
-The code does not put a December 2009 signal's January 2010 label into the
-2009 training window. Label observation timing must also be enforced when
+For example, outcome training 2010–2019 precedes test outcomes in 2020;
+training 2011–2020 precedes 2021. There are four nominal annual folds, ending
+with training 2013–2022 / testing 2023. The code does not put a December 2019
+signal's January 2020 label into the 2019 training window. Label observation timing must also be enforced when
 actual labels are implemented. Proposed calendar-year cutoffs differ from
 the paper's January-31 annual fit convention and expanding classifier history.
 
-The engineering snapshot defaults to **2000-01-31** and is independent of
-the research start and fold boundaries. The old 2010 snapshot was only a
-loader test. Raw files retain their earlier histories: price footers begin
-1962, and the historical constituent sources extend before 2000.
+The engineering snapshot defaults to **2010-01-29** and is independent of
+the research start and fold boundaries. Raw files retain their earlier
+histories: price footers begin in 1962, and the historical constituent sources
+extend before 2000. The start change selects later analysis outcomes; it does
+not truncate raw histories or erase the earlier coverage diagnosis.
 
-Pre-2000 feature warmup remains to be specified. Early 2000 momentum values
-may need earlier monthly prices; initialization does not truncate the raw
-files or certify 120 complete training months. `warmup.raw_start` stays null
-until the return/feature contract is defined. The final modelling universe
-also remains open; `engineering_sample=combined` is a loader demonstration.
+Pre-initialization feature warmup is per-signal: the bounded feature read starts exactly
+503 independent sessions through the first signal, then ends at the last signal.
+The paper's monthly endpoints and each technical dependency have their own
+complete-window gates. `warmup.raw_start` stays null because a global date is not
+an exact rolling window. This does not certify 120 usable training months. The
+final modelling universe remains open; `engineering_sample=combined` is a
+loader demonstration. See [feature contracts](FEATURES.md).
 
 ## What Run All currently executes
 
@@ -73,13 +81,22 @@ also remains open; `engineering_sample=combined` is a loader demonstration.
 2. Display the rolling fold calendar without reading outcomes or fitting models.
 3. Check the pinned local source inventory and file sizes.
 4. Run one bounded historical membership/identity audit.
+   Run the separate three-anchor metadata identity evidence worker, retaining
+   the original cohorts and saving its non-promoting review queue. Its dates
+   are fixed historical reference anchors at 2000-01-31, 2005-01-31 and
+   2009-01-30, independent of the selected research initialization and monthly
+   price sample; see [the exact diagnostic contract](IDENTITY_AUDIT.md).
 5. Optionally sample a few exact-date quotes, disabled by default.
 6. Save complete audit evidence under ignored `outputs/notebook_audits/`.
-7. Construct the configured January–February 2000 monthly engineering sample
+7. Build a separate past-only feature history and month-end snapshots; withhold
+   full-cohort normalization and daily context where unavailable.
+8. Save feature history/values/coverage/dictionary/diagnostics independently.
+9. Construct the configured January–February 2010 monthly engineering sample
    using preceding-month cohorts and two requested daily price IDs.
-8. Save independent daily/monthly Parquet tables and a private return audit.
+10. Save independent daily/monthly Parquet tables and a private return audit.
 
-**VERIFIED LOCAL, 2026-10-14:** the installed master completed Run All in two
+**HISTORICAL VERIFICATION, 2026-10-14 (former 2000 settings):** the installed
+master completed Run All in two
 fresh kernels, from both the V2 root and the notebook directory, using Python
 3.14.6, PyArrow 26.0.0 and ipykernel 7.4.0. Each run retained all **900** source
 constituents on 2000-01-31: 302 uniquely mapped without review flags, 529 with
@@ -90,7 +107,7 @@ preceded the separately controlled monthly stage. Repeated runs produced identic
 audit evidence; the versioned master stayed without outputs. All 103 worker
 tests passed, using structural fixtures rather than financial outcomes.
 
-It does not turn the entire 2000–2023 period into an implicit scan. Every
+Run All does not turn the selected research period into an implicit full scan. Every
 loader read uses explicit row/file/column-byte limits. The one-date membership
 query has a 12-million candidate-row ceiling because the vendor storage is
 ordered by security/index history; that ceiling is not permission for a full
@@ -117,6 +134,7 @@ raw market records in the public notebook.
 | [`src/dmv2/catalog.py`](../src/dmv2/catalog.py) | Manifest pins, source inventory, schema/integrity checks |
 | [`src/dmv2/loading.py`](../src/dmv2/loading.py) | Bounded date/ID price and metadata loading |
 | [`src/dmv2/universe.py`](../src/dmv2/universe.py) | Dated cohort, identity states and retained quote coverage |
+| [`src/dmv2/identity_audit.py`](../src/dmv2/identity_audit.py) | Non-promoting historical identity evidence, metadata-only loader and private review queue |
 | [`src/dmv2/data.py`](../src/dmv2/data.py) | Source adapters and source-calendar helpers |
 | [`src/dmv2/exchange_sessions.py`](../src/dmv2/exchange_sessions.py) | Independent XNYS sessions and vendor-calendar reconciliation |
 | [`src/dmv2/monthly.py`](../src/dmv2/monthly.py) | Full-cohort monthly ratios, endpoint/path and volume audits |
@@ -138,9 +156,44 @@ a confirmed incorrect link or missing-price diagnosis. The prior 755 flagged
 matching. All original constituents remain in the audit ledger.
 
 Provisional monthly endpoint arithmetic and daily preservation are implemented.
-Next are complete monthly event accounting, a feature dictionary and labels,
+The feature dictionary and workers are implemented in [FEATURES.md](FEATURES.md).
+Next are complete monthly event accounting and labels,
 class-payoff estimation, forest/XGBoost estimators and portfolio evaluation.
 Those modules will be added when implemented and verified; there are no
 placeholder model calls that pretend to execute the research. Source
 knowledge-time and terminal-event limitations remain documented in
 [`DATA_FOUNDATIONS.md`](DATA_FOUNDATIONS.md).
+
+## Feature-stage verification, 2026-10-14
+
+The updated installed master completed all 13 code cells from both the V2 root
+and notebooks folder in fresh kernels. All 265 tests passed. The separate
+503-session warmup read produced 1,046 daily records; features retained 1,799
+original cohort rows and all 298 technical values on each of four requested
+stock/signal rows. Full-cohort paper/context outputs remained withheld rather
+than using two-stock sample statistics. Repeated runs reused identical private
+evidence and the versioned notebook remained without outputs. See
+[FEATURES.md](FEATURES.md) for exact policies and source certification limits.
+
+## Identity-evidence-stage verification, 2026-10-14
+
+The installed master completed all **15 code cells** in a fresh V2-root kernel
+with the separate three-anchor identity worker. All **298 tests** passed,
+including 21 new identity/clock/contamination/persistence tests. Its metadata
+audit retained all 2,701 original constituent/date rows and promoted no mappings.
+The existing bounded two-ID feature/monthly samples completed unchanged in
+scope; the identity worker itself read no financial values or outcomes. The
+versioned notebook remained output-free. See [IDENTITY_AUDIT.md](IDENTITY_AUDIT.md)
+for evidence classes, exact populations, budgets and unresolved source evidence.
+
+## Provisional-policy-stage verification, 2026-10-14
+
+Under the user's explicit identity waiver, the installed master completed all
+**16 code cells** and **330 tests** passed. The sample now exercises one clean
+route and one review-flagged route without clearing its flag. Both produce 298
+technical values at both signals and four accepted monthly endpoint ratios;
+all 1,799 original rows and the independent daily tables remain intact. The
+separate admission display reports 831/860/878 eligible routes at the three
+anchor dates. No predictor contains admission metadata, no fit was performed,
+and no cross-sectional sample normalization or historical certification is
+inferred. See [the recorded provisional decision](PROVISIONAL_IDENTITY_POLICY.md).

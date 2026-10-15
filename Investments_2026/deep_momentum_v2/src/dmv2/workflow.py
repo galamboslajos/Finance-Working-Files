@@ -49,12 +49,26 @@ def load_workflow(root):
 
 def validate_workflow(settings):
     if (not isinstance(settings, dict) or type(settings.get("schema_version")) is not int
-            or settings.get("schema_version") != 2):
-        raise ValueError("Workflow requires schema_version 2")
+            or settings.get("schema_version") not in (3,4)):
+        raise ValueError("Workflow requires schema_version 3 or 4")
     required = {"schema_version", "research_start", "training", "warmup",
-                "universe", "inspection", "monthly_returns", "execution"}
+                "universe", "inspection", "monthly_returns", "features", "execution"}
+    if settings['schema_version']==4:
+        required.add('identity')
     if set(settings) != required:
         raise ValueError("Workflow settings have missing or unknown top-level fields")
+    if settings['schema_version']==4:
+        from .identity_policy import validate_identity_policy,PROVISIONAL_IDENTITY_POLICY
+        identity=settings['identity']
+        if not isinstance(identity,dict) or set(identity)!= {'policy','policy_version','accept_identity_uncertainty','research_status'}:
+            raise ValueError('Identity settings require an explicit policy/version/uncertainty/research status')
+        validate_identity_policy(identity['policy'])
+        provisional=identity['policy']==PROVISIONAL_IDENTITY_POLICY
+        if (type(identity['policy_version']) is not int or identity['policy_version']!=1
+            or type(identity['accept_identity_uncertainty']) is not bool
+            or identity['accept_identity_uncertainty'] is not provisional
+            or identity['research_status']!='PROVISIONAL_IDENTITY_UNVERIFIED'):
+            raise ValueError('Identity acceptance must match the explicit versioned research policy')
     fields = {
         "training": {"mode", "train_years", "test_years", "last_test_year"},
         "warmup": {"policy", "raw_start"},
@@ -63,6 +77,7 @@ def validate_workflow(settings):
                        "price_sample_size", "persist_audit", "read_budget"},
         "monthly_returns": {"enabled", "start_month", "end_month", "sample_size",
                             "return_basis", "calendar_basis", "persist", "read_budget"},
+        "features": {"enabled", "history_sessions", "cohort_policy", "context_scope", "persist", "read_budget"},
         "execution": {"scope", "full_panel_build_enabled", "model_execution_enabled"},
     }
     for name, expected in fields.items():
@@ -74,8 +89,8 @@ def validate_workflow(settings):
     build_annual_folds(settings["research_start"], training["last_test_year"],
                        training["train_years"], mode=training["mode"])
     warmup = settings["warmup"]
-    if warmup != {"policy": "pending_feature_and_return_audit", "raw_start": None}:
-        raise ValueError("Feature warmup is not yet defined; do not freeze it through a notebook override")
+    if warmup != {"policy": "per_signal_exact_feature_windows", "raw_start": None}:
+        raise ValueError("Use per-signal exact feature windows; a global raw-start override is unsupported")
     universe = settings["universe"]
     if universe.get("primary") not in (None, "sp500", "sp400", "combined"):
         raise ValueError("Unknown primary universe")
@@ -127,8 +142,21 @@ def validate_workflow(settings):
         ReadBudget(**monthly["read_budget"])
     except TypeError as error:
         raise ValueError("Unknown monthly read_budget setting") from error
+    features = settings['features']
+    if any(type(features[key]) is not bool for key in ('enabled', 'persist')):
+        raise ValueError('Feature enabled/persist controls require explicit booleans')
+    if type(features['history_sessions']) is not int or features['history_sessions'] != 503:
+        raise ValueError('The feature bank requires 503 exact warmup sessions')
+    if features['cohort_policy'] not in ('complete_cohort','signal_qualified_common_momentum_v1') or features['context_scope'] != 'primary_indices':
+        raise ValueError('Features require an explicit historical primary-index population policy; sample ranks and SP600 context are unsupported')
+    if not isinstance(features['read_budget'], dict):
+        raise ValueError('Feature read_budget must be an explicit object')
+    try:
+        ReadBudget(**features['read_budget'])
+    except TypeError as error:
+        raise ValueError('Unknown feature read_budget setting') from error
     if settings["execution"] != {
-        "scope": "bounded_foundations_and_monthly_sample", "full_panel_build_enabled": False,
+        "scope": "bounded_foundations_monthly_and_feature_sample", "full_panel_build_enabled": False,
         "model_execution_enabled": False,
     }:
         raise ValueError("Full panels and models are not implemented in this foundation workflow")
@@ -146,14 +174,23 @@ def worker_code_provenance():
     """Fingerprint the workers actually imported, independent of an unrelated Git HEAD."""
     directory = Path(__file__).resolve().parent
     names = ("__init__.py", "catalog.py", "chronology.py", "data.py",
-             "exchange_sessions.py", "loading.py", "monthly.py", "monthly_loading.py", "universe.py", "workflow.py")
+             "exchange_sessions.py", "loading.py", "monthly.py", "monthly_loading.py", "universe.py", "workflow.py",
+             "daily_features.py", "paper_features.py", "context_features.py", "features.py", "feature_loading.py", "feature_workflow.py",
+             "identity_policy.py", "identity_audit.py", "coverage_audit.py","preprocessing.py","start_coverage.py","quote_sessions.py")
     return {
         "worker_sha256": {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
                           for name in names},
         "python_version": platform.python_version(), "pyarrow_version": pa.__version__,
         "exchange_calendars_version": version("exchange-calendars"),
         "pandas_version": version("pandas"),
+        "numpy_version": version("numpy"),
     }
+
+
+def workflow_identity_policy(settings):
+    """Version 3 remains strict; version 4 records the user's explicit waiver."""
+    from .identity_policy import STRICT_IDENTITY_POLICY
+    return settings.get('identity',{}).get('policy',STRICT_IDENTITY_POLICY)
 
 
 def run_inspection(catalog, settings):
@@ -168,6 +205,9 @@ def run_inspection(catalog, settings):
         mode="historical_reconstruction", budget=ReadBudget(**controls["read_budget"]),
     )
     snapshot = loaded.snapshot
+    from .identity_policy import qualify_identity_records,identity_policy_provenance,select_engineering_ids
+    identity_policy=workflow_identity_policy(settings)
+    eligibility=qualify_identity_records(snapshot.table.to_pylist(),identity_policy=identity_policy)
     report = {
         "schema_version": 1, "workflow_sha256": canonical_sha256(settings),
         "research_start": settings["research_start"],
@@ -179,18 +219,22 @@ def run_inspection(catalog, settings):
         "constituent_ledger": snapshot.table.to_pylist(),
         "membership_exclusions": snapshot.excluded.to_pylist(),
         "price_sampling": {"enabled": controls["run_price_sample"]},
+        'identity_eligibility':{**identity_policy_provenance(identity_policy),
+            'original_members':len(eligibility),'eligible_members':sum(r['identity_eligible'] for r in eligibility),
+            'review_flag_accepted_members':sum(r['identity_eligibility_reason']=='provisional_review_flag_accepted' for r in eligibility),
+            'ledger':[{c:r[c] for c in ('source_security_id','identity_status','source_identity_status',
+                'identity_eligible','identity_eligibility_policy','identity_eligibility_reason')} for r in eligibility]},
     }
     prices = coverage = None
     if controls["run_price_sample"]:
-        ids = sorted({row["intrinio_security_id"] for row in snapshot.table.to_pylist()
-                      if row["identity_status"] == "resolved"})[:controls["price_sample_size"]]
+        ids=list(select_engineering_ids(snapshot,controls['price_sample_size'],identity_policy=identity_policy))
         if not ids:
             raise ValueError("No uniquely mapped engineering IDs; source identity review is required")
         prices = PriceLoader(catalog, ReadBudget(**controls["read_budget"])).load(
             ids, snapshot.as_of, snapshot.as_of,
             ["close", "volume", "adj_close", "adj_volume", "price_quality_status"],
         )
-        coverage = attach_quotes(snapshot, prices.table, requested_security_ids=ids)
+        coverage = attach_quotes(snapshot, prices.table, requested_security_ids=ids,identity_policy=identity_policy)
         report["price_sampling"].update({
             "requested_ids": ids, "stats": prices.stats, "provenance": prices.provenance,
             "rows": prices.table.to_pylist(), "coverage_summary": coverage.summary,
@@ -216,7 +260,7 @@ def run_monthly_sample(catalog, settings):
         catalog, start_month=controls["start_month"], end_month=controls["end_month"],
         universe=settings["universe"]["engineering_sample"],
         sample_size=controls["sample_size"], budget=ReadBudget(**controls["read_budget"]),
-        mode="historical_reconstruction",
+        mode="historical_reconstruction",identity_policy=workflow_identity_policy(settings),
     )
     report = {
         "schema_version": 1, "workflow_sha256": canonical_sha256(settings),

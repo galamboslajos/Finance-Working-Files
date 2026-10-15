@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-normalization-missingness-v2-2010",
+  "version": "2.0.0",
+  "status": "ACTIVE_ENGINEERING_IDENTITY_UNVERIFIED",
+  "effective_date": "2026-10-15",
+  "supersedes": "normalization_protocol.proposed.json remains historical inactive evidence",
+  "authority": "User requested normalization/missingness completion under provisional identity policy, then changed initialization to 2010 before model results.",
+  "chronology": {
+    "initial_outcome_year": 2010,
+    "training": "rolling preceding 10 completed outcome years",
+    "first_training_outcome_years": [
+      2010,
+      2019
+    ],
+    "first_nominal_test_outcome_year": 2020,
+    "prediction_frequency": "monthly",
+    "refit_frequency": "annual",
+    "development_outcome_end": "2023-12-31",
+    "protected_financial_start": "2024-01-01",
+    "feature_warmup": "explicit pre-signal exact sessions/months; not additional supervised training years"
+  },
+  "universe": {
+    "engineering_cohort": "dated historical SP500/SP400 union, original denominators preserved",
+    "primary_universe": null,
+    "identity_policy": "provisional_unique_resolved_link",
+    "identity_status": "PROVISIONAL_IDENTITY_UNVERIFIED",
+    "future_survivor_intersection": false,
+    "capitalization_used": false
+  },
+  "paper_normalization": {
+    "policy": "signal_qualified_common_momentum_v1",
+    "original_membership_before_price_join": true,
+    "exhaustive_request": "Every admitted native ID from each original cohort must be requested; otherwise all15 are withheld.",
+    "population": "At each signal, provisionally identity-admitted original members with all five finite exact past-input raw momenta; one common population for all horizons.",
+    "horizons_months": [
+      1,
+      3,
+      6,
+      9,
+      12
+    ],
+    "momentum_one": "adj_close[t]/adj_close[t-1]-1",
+    "momentum_long": "product(1+r[j], j=t-m+1..t-1)-1: m-1 completed monthly returns",
+    "all_intermediate_monthly_endpoints_required": true,
+    "stale_quotes_fill_or_month_compression": false,
+    "standard_deviation_ddof": 1,
+    "minimum_population_count": 2,
+    "all_five_standard_deviations_positive_and_finite": true,
+    "minimum_coverage_fraction": null,
+    "coverage_threshold_policy": "No empirical coverage fraction is invented. Mathematical computability does not establish representativeness.",
+    "prediction_population": "All15 available only on the common population when the signal passes every gate; all original rows retained outside X.",
+    "shared_mean_and_sd": "Preserve time-varying levels. Do not cross-sectionally z-score shared means/SDs to zero.",
+    "test_signal_cross_section": "Recompute with current signal's available past inputs only; no future labels or pooled-time fit.",
+    "paper_attribution": "Momentum formulas follow paper equations6-8; common population, ddof and gates are declared V2 adaptations."
+  },
+  "context_policy": {
+    "active_worker_policy": "complete_cohort",
+    "status": "Full-cohort context remains withheld unless its exhaustive original and daily historical cohort requirements are met.",
+    "daily_benchmarks": "Use each daily historical cohort; never reuse month-end membership throughout past days.",
+    "all_715_full_history_predictors_ready": false
+  },
+  "missingness": {
+    "preprocessing_policy": "train_partition_median_missing_indicator_v1",
+    "fit_interface": "Existing TrainingSlice plus explicitly aligned boolean fit_mask",
+    "fit_population": "Selected rows must independently have all15 finite baseline inputs, finite available y and completed outcomes within the explicit training/label cutoffs.",
+    "prediction_population": "Explicit prediction_mask intersected with all15 finite baseline inputs; no y or future outcome availability consumed.",
+    "added_feature_missingness_changes_prediction_population": false,
+    "all_715_complete_case_selection": false,
+    "nonfinite_extra_values": "Treat as missing",
+    "imputation": "Median of finite values in the applicable training partition only",
+    "drop_rules": [
+      "all finite values missing in that training partition",
+      "all finite values constant in that training partition"
+    ],
+    "missing_indicators": "One binary column for every retained predictor, with frozen columns even if training had no missing values",
+    "fit_scope": "Fit independently within each inner-training partition and each outer-training window; transform validation/test without refitting.",
+    "global_coverage_based_feature_selection": false,
+    "scaling": null,
+    "clipping": null,
+    "winsorization": null,
+    "label_imputation": false,
+    "missing_labels": "Exclude from supervised loss only; retain original prediction/outcome/accounting ledger rows.",
+    "manifest": "Fingerprint fitted input/output schemas, medians, drop reasons, fit-key hash and cutoffs. Indicators are derived preprocessing schema, not silently added to the715 base dictionary."
+  },
+  "coverage_evidence": {
+    "private_directory": "outputs/initialization_coverage/2010-v3",
+    "role": "Past-input coverage and initialization comparison, not model scores or proof of valid economic outcomes",
+    "normalization_uses_outcomes": false
+  },
+  "certification": {
+    "knowledge_time_verified": false,
+    "accounting_certified": false,
+    "model_ready": false,
+    "daily_backtest_ready": false,
+    "model_fitted": false,
+    "remaining_design": [
+      "primary universe",
+      "label classes/ties and missing-target rank policy",
+      "inner validation and experiment bounds",
+      "execution, terminal events, costs and portfolio accounting"
+    ]
+  }
+}

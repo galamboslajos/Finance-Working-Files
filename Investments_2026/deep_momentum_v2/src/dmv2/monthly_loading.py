@@ -14,14 +14,17 @@ import pyarrow as pa
 import pyarrow.compute as pc
 
 from .catalog import SourceCatalog, canonical_sha256
-from .data import BRIDGE_COLUMNS, CALENDAR_COLUMNS, LINK_COLUMNS, MEMBERSHIP_COLUMNS
+from .data import BRIDGE_COLUMNS, CALENDAR_COLUMNS, LINK_COLUMNS, MEMBERSHIP_COLUMNS,session_dates
 from .exchange_sessions import CALENDAR_POLICY, reconcile_exchange_calendar
+from .quote_sessions import exact_session_quotes
 from .loading import (
     BoundedTableReader, BudgetExceeded, HOLDOUT_START, LoadedTable, PriceLoader,
     ProtectedDataError, ReadBudget,
 )
 from .monthly import MonthlyReturnPanel, build_month_windows, build_monthly_returns
 from .universe import DataContractError, KnowledgeTimeUnavailable, UniverseSnapshot, build_snapshot
+from .identity_policy import (STRICT_IDENTITY_POLICY,validate_identity_policy,
+                             select_engineering_ids,identity_policy_provenance)
 
 
 DAILY_SAMPLE_COLUMNS = (
@@ -105,13 +108,15 @@ def _remaining_budget(ceiling, stats):
 
 
 def load_monthly_sample(catalog: SourceCatalog, *, start_month, end_month, universe,
-                        sample_size=2, budget=None, mode="historical_reconstruction"):
+                        sample_size=2, budget=None, mode="historical_reconstruction",
+                        identity_policy=STRICT_IDENTITY_POLICY):
     """Load at most three outcome months and retain unchanged daily input rows.
 
 Budgets cover this complete stage cumulatively, including small shared metadata
 tables. The sample is an engineering diagnostic; it is not the intended complete
 research universe. No current-master or future-price filter chooses its IDs.
 """
+    validate_identity_policy(identity_policy)
     ceiling = _preflight(start_month, end_month, universe, sample_size, mode, budget)
     reader = BoundedTableReader(catalog, ceiling)
     stats, provenance = {}, {}
@@ -170,19 +175,19 @@ research universe. No current-master or future-price filter chooses its IDs.
         snapshots.append(replace(snapshot, provenance={**snapshot.provenance, "source_pins": pins}))
     snapshots = tuple(snapshots)
 
-    requested_ids = tuple(sorted({row["intrinio_security_id"]
-                                 for row in snapshots[0].table.select(
-                                     ["identity_status", "intrinio_security_id"]).to_pylist()
-                                 if row["identity_status"] == "resolved"})[:sample_size])
+    requested_ids=select_engineering_ids(snapshots[0],sample_size,identity_policy=identity_policy)
     if not requested_ids:
         raise DataContractError("First signal cohort has no resolved engineering price IDs")
     daily_prices = PriceLoader(catalog, _remaining_budget(ceiling, stats)).load(
         requested_ids, signal_dates[0], windows[-1].outcome_end, DAILY_SAMPLE_COLUMNS)
     capture("daily_prices", daily_prices)
+    analysis_prices,session_audit=exact_session_quotes(daily_prices.table,
+        session_dates(calendar),
+        start=signal_dates[0],end=windows[-1].outcome_end)
     panel = build_monthly_returns(
-        daily_prices.table, calendar, snapshots,
+        analysis_prices, calendar, snapshots,
         start_month=start_month, end_month=end_month,
-        requested_security_ids=requested_ids, mode=mode)
+        requested_security_ids=requested_ids, mode=mode,identity_policy=identity_policy)
 
     totals = {field: sum(stage[field] for stage in stats.values())
               for field in _BUDGET_STATS.values()}
@@ -198,9 +203,11 @@ research universe. No current-master or future-price filter chooses its IDs.
                     "calendar_basis": CALENDAR_POLICY,
                     "signal_dates": list(signal_dates), "requested_ids": list(requested_ids)},
         "calendar_reconciliation": reconciliation.provenance,
+        "quote_session_audit":session_audit,
         "sample_selection": (
-            "Sorted resolved provider IDs from the first signal-time cohort only; "
-            "engineering sample, not a complete universe or future-survivor intersection."),
+            "Deterministic first-signal eligible IDs; provisional smoke includes a clean control and flagged route when available. "
+            "Engineering sample chosen before prices; no replacement after observing history/outcomes."),
+        'identity_policy':identity_policy_provenance(identity_policy),
         "daily_preservation": "Unchanged LoadedTable from the bounded daily OHLCV/action/quality read.",
         "stage_budget": asdict(ceiling),
         "budget_semantics": (
