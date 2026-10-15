@@ -100,7 +100,7 @@ bounded sample and its limits; no volume-feature formulas are frozen here.
 |---|---|---|
 | S&P 500 | Constituents known/eligible as of the signal cutoff | More liquid large-cap sample; excludes the small-stock channel emphasized by the paper |
 | S&P 400 | Historical mid-cap constituents at the cutoff | Different size/liquidity distribution; no assumption of the same return effect |
-| S&P 500 + 400 | Dated union, deduplicated by stable security identity | Larger domestic cross-section; one combined normalization/ranking cohort is a proposed default, still OPEN |
+| S&P 500 + 400 | Dated union, deduplicated by stable security identity | Larger domestic cross-section; one combined cohort is selected; target ranks use observed outcomes within the signal-time Paper15 cohort |
 
 Never substitute today's constituents or require a future price to admit a
 security. Decide whether membership needs an effective date, an availability
@@ -108,7 +108,7 @@ date, or both; an after-cutoff announcement cannot become an earlier signal.
 Resolve overlaps, share classes, exchange/type eligibility, entries/exits and
 identifier conflicts explicitly. Decide whether features and target ranks use
 only the signal-time cohort or a broader reference market; this changes the
-meaning of the ten shared state inputs. No universe has yet been selected.
+meaning of the ten shared state inputs. The user selected the historical S&P 500/400 union; the target-ranking convention is fixed by [the shared contract](TARGET_CLASSES_RET.md).
 
 ## 4. Causal monthly workflow and audit artifacts
 
@@ -231,10 +231,10 @@ CVaR/CVR may be separate extensions; they are not needed to satisfy this paper.
 
 | Decision | Why it matters | Current state |
 |---|---|---|
-| Primary S&P universe and target-rank cohort | Defines the prediction distribution and eligible trades | OPEN; engineering universe is the S&P 500/400 union, with active common-five paper normalization |
+| Primary S&P universe and target-rank cohort | Defines the prediction distribution and eligible trades | USER SELECTED historical S&P 500/400 union; target ranks use valid observed outcomes inside the signal-time Paper15 prediction cohort; missing outcomes remain explicit |
 | Return/terminal-event accounting and identity rules | Determines whether labels and portfolio cash flows are credible | Provisional identity admission selected; knowledge-time identity and economic accounting remain unverified |
 | Coverage and experiment chronology | Ten-year startup, development/outer tests, holdout | 2010 initialization and rolling10/1 selected; 15-input endpoint coverage measured; full-bank coverage measured; 80% primary/90% sensitivity selected; 2024+ protected |
-| Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | Active normalization/missingness rules frozen separately; target ties and model mechanics remain OPEN; size encoding applies only to the paper account |
+| Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | Active normalization/missingness rules frozen separately; exact midrank target ties are fixed by the shared target contract; model mechanics remain OPEN; size encoding applies only to the paper account |
 | Execution/cost/exposure/borrow rules | Separates predictive results from investable returns | OPEN |
 | Models, feature groups and trial bounds | Prevents results-driven expansion of the search | OPEN; forests/features proposed |
 | Calibration/ensemble weighting and acceptance criteria | RET relies on probabilities and payoff estimation | OPEN |
@@ -245,8 +245,8 @@ provider-adjusted ratios, retains full signal cohorts and preserves daily data.
 These are not certified total returns or a complete model-ready panel. Next are
 economic event/coverage accounting and continued dated identity evidence review.
 The [accepted identity waiver](PROVISIONAL_IDENTITY_POLICY.md) permits provisional
-development while those source limits remain explicit. Choosing the primary S&P
-cohort can proceed alongside that work. Capitalization
+development while those source limits remain explicit. The user has selected the historical S&P 500/400 union as the primary modelling
+cohort; its target-ranking and missing-outcome rules are now fixed by [the shared target contract](TARGET_CLASSES_RET.md). Capitalization
 source procurement is excluded from the work plan. These are design tasks,
 not permission to grant IAM, mutate GCS, launch compute or start an unbounded scan.
 
@@ -298,3 +298,38 @@ manifest or authorization for a full model/backtest run.
 ## Full feature panel verification, 2026-10-15
 
 The [full 2010–2023 feature panel](FULL_FEATURE_PANEL.md) is now built and audited under the provisional identity policy. It retains 152,307 original rows and 168 monthly signals. Daily observations feed technical/context calculations and are also preserved independently for later backtesting, including complete annual warmup and signal anchors. All 715 eligible names remain in the dictionary; missing context is reported rather than filled or silently excluded. The master verifies saved coverage and exposes separate lazy feature/daily datasets. Notebook Run All does not relaunch the full build, fit imputation/models or backtest.
+
+## Initial classifier comparison, 2026-10-15
+
+**USER DIRECTION:** the primary modelling universe is the dated historical S&P
+500 plus S&P 400 union. **PROPOSED:** compare XGBoost and random forest on Paper15
+and the expanded 715-name candidate bank, sharing prediction eligibility, labels,
+outer folds, preprocessing policy and RET payoff estimates. The
+[modelling sketch](MODEL_COMPARISON.md) records the paper/V2 distinctions, proposed
+chronological inner validation, pilot boundary and remaining label/compute rules.
+Its standalone draft and metadata worker are displayed in the master notebook;
+no financial values were read and no model, preprocessing or backtest was fitted
+for this design task. This draft leaves existing pinned panel configs unchanged.
+
+## Shared monthly class/RET engineering, 2026-10-15
+
+The [shared workers](TARGET_CLASSES_RET.md) now implement exact tie-aware monthly
+classes, original-cohort/missing-outcome ledgers, the label-aware training adapter
+and strict 120-calendar-month realized-class RET payoffs. Forward-outcome requests
+are distinguished from past feature requests. The master checks already loaded
+bounded samples and keeps daily/feature data separate. Full historical label and
+payoff coverage, estimator fitting and economic accounting remain unverified;
+no model or backtest has run for this implementation.
+
+
+## Full target/RET coverage, 2026-10-15
+
+**USER DIRECTION / VERIFIED LOCAL:** the separately authorized
+[full 2010–2023 target audit](FULL_TARGET_PANEL.md) preserves all 152,307 original
+cohort rows and the same 140,777 Paper15 prediction rows. It releases 140,485
+classes, with 276 missing-end and 16 source-quality eligible outcomes left
+unlabelled. All 168 months contain all ten classes. All 48 nominal 2020–2023
+RET states have complete preceding 120-month grids; the first available signal
+is December 31, 2019 for January 2020. This resolves empirical structural
+class/payoff coverage under the provisional policy, while terminal cash flows
+and knowledge-time certification remain open. No model or preprocessor is fitted.

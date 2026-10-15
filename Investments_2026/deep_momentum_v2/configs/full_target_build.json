@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-full-monthly-targets-ret-2010-2023-v1",
+  "authority": "User explicitly requested the full local 2010–2023 target panel and class/RET coverage audit before fitting either model; preserve cohorts, PIT checks and daily data.",
+  "start_year": 2010,
+  "end_year": 2023,
+  "universe": "combined",
+  "source": "verified_saved_daily_history_raw_and_original_feature_cohorts",
+  "identity_policy": "provisional_unique_resolved_link",
+  "target_protocol": "configs/target_ret_protocol.json",
+  "feature_panel_roles": "configs/context_panel_roles.json",
+  "execution": {
+    "workers": 1,
+    "backend": "local_verified_cache",
+    "maximum_wall_seconds": 10800,
+    "maximum_peak_rss_bytes": 4294967296,
+    "maximum_output_bytes": 1073741824,
+    "maximum_projected_read_bytes": 2147483648,
+    "model_fitting": false,
+    "imputation_fitting": false,
+    "backtesting": false,
+    "cloud_mutations": false,
+    "raw_source_fallback": false
+  },
+  "ret_audit": {
+    "all_feature_signals": 168,
+    "canonical_outcome_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "expected_canonical_signals": 48,
+    "calendar_months": 120,
+    "all_ten_classes_every_month": true,
+    "missing_grid_policy": "withhold_entire_payoff_vector"
+  },
+  "purpose": "Coverage diagnostics and shared supervised labels only; no full-history feature selection or fitting. Daily and feature artifacts remain immutable. Targets retain missing outcomes and original denominators."
+}

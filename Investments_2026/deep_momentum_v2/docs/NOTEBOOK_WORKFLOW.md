@@ -57,8 +57,9 @@ The user selected:
 For example, outcome training 2010–2019 precedes test outcomes in 2020;
 training 2011–2020 precedes 2021. There are four nominal annual folds, ending
 with training 2013–2022 / testing 2023. The code does not put a December 2019
-signal's January 2020 label into the 2019 training window. Label observation timing must also be enforced when
-actual labels are implemented. Proposed calendar-year cutoffs differ from
+signal's January 2020 label into the 2019 training window. The shared target
+and training workers enforce completed-outcome observation cutoffs separately
+from feature dates. Proposed calendar-year cutoffs differ from
 the paper's January-31 annual fit convention and expanding classifier history.
 
 The engineering snapshot defaults to **2010-01-29** and is independent of
@@ -72,8 +73,9 @@ Pre-initialization feature warmup is per-signal: the bounded feature read starts
 The paper's monthly endpoints and each technical dependency have their own
 complete-window gates. `warmup.raw_start` stays null because a global date is not
 an exact rolling window. This does not certify 120 usable training months. The
-final modelling universe remains open; `engineering_sample=combined` is a
-loader demonstration. See [feature contracts](FEATURES.md).
+primary modelling universe is now the user-selected historical S&P 500/400
+union. The bounded `engineering_sample=combined` remains a loader demonstration,
+not evidence of full-history target coverage. See [feature contracts](FEATURES.md).
 
 ## What Run All currently executes
 
@@ -94,6 +96,14 @@ loader demonstration. See [feature contracts](FEATURES.md).
 9. Construct the configured January–February 2010 monthly engineering sample
    using preceding-month cohorts and two requested daily price IDs.
 10. Save independent daily/monthly Parquet tables and a private return audit.
+11. Verify saved full feature panels and the active 80% primary / 90% sensitivity
+    roles; expose feature and daily datasets separately without rebuilding them.
+12. Display the four-arm model-comparison plan without importing or fitting an estimator.
+13. Check shared class/RET guards using already loaded bounded samples.
+14. Verify the separately authorized full target build's saved class/RET coverage
+    in section 16. Expose lazy full-target and monthly-outcome datasets, keeping
+    full target materialization an explicit separate call. Run All does not
+    rebuild outcomes or fit a model. See [the full target workflow](FULL_TARGET_PANEL.md).
 
 **HISTORICAL VERIFICATION, 2026-10-14 (former 2000 settings):** the installed
 master completed Run All in two
@@ -140,6 +150,11 @@ raw market records in the public notebook.
 | [`src/dmv2/monthly.py`](../src/dmv2/monthly.py) | Full-cohort monthly ratios, endpoint/path and volume audits |
 | [`src/dmv2/monthly_loading.py`](../src/dmv2/monthly_loading.py) | Capped cumulative-budget sample with unchanged daily prices |
 | [`src/dmv2/chronology.py`](../src/dmv2/chronology.py) | Pure rolling outcome-window calendar |
+| [`src/dmv2/targets.py`](../src/dmv2/targets.py), [`src/dmv2/ret.py`](../src/dmv2/ret.py) | Shared tie-aware classes and strictly trailing realized-class RET payoffs |
+| [`src/dmv2/classification.py`](../src/dmv2/classification.py) | Shared class-label training adapter with completed-outcome guards |
+| [`src/dmv2/full_target_loading.py`](../src/dmv2/full_target_loading.py) | Cache-only annual target planning and exact monthly outcome construction |
+| [`src/dmv2/target_coverage.py`](../src/dmv2/target_coverage.py) | Original-denominator class/missingness reports and full RET calendar grids |
+| [`src/dmv2/full_target_panel.py`](../src/dmv2/full_target_panel.py) | Explicit full-target build, immutable checkpoints and saved report/target readers |
 | [`src/dmv2/workflow.py`](../src/dmv2/workflow.py) | Notebook settings, orchestration and private audit persistence |
 | `tests/` | Adversarial worker tests; structural fixtures only |
 
@@ -150,16 +165,17 @@ the master notebook, with source and request provenance saved locally.
 
 ## Next worker stages
 
-Historical identity adjudication comes first; a producer review flag is not
-a confirmed incorrect link or missing-price diagnosis. The prior 755 flagged
+Historical identity adjudication remains separate from provisional admission;
+a producer review flag is not a confirmed incorrect link or missing-price diagnosis. The prior 755 flagged
 2010 links all had resolved provider IDs, predominantly through ticker/company
 matching. All original constituents remain in the audit ledger.
 
 Provisional monthly endpoint arithmetic and daily preservation are implemented.
 The feature dictionary and workers are implemented in [FEATURES.md](FEATURES.md).
-Next are complete monthly event accounting and labels,
-class-payoff estimation, forest/XGBoost estimators and portfolio evaluation.
-Those modules will be added when implemented and verified; there are no
+Shared monthly class labels and class-payoff workers are now implemented; the
+full-history empirical coverage audit is complete. Estimator adapters, a measured
+pilot, complete monthly event accounting and portfolio evaluation follow their
+remaining authorization and methodology decisions. There are no
 placeholder model calls that pretend to execute the research. Source
 knowledge-time and terminal-event limitations remain documented in
 [`DATA_FOUNDATIONS.md`](DATA_FOUNDATIONS.md).
@@ -221,3 +237,53 @@ saved comparison evidence with `dmv2.context_panel_roles.read_context_panel_role
 Historical comparison tables retain their original **90% → 80%** orientation.
 Notebook Run All verifies saved evidence without starting a build or fitting a model.
 See [the comparison and promotion record](CONTEXT_SENSITIVITY_80.md).
+
+## Model-comparison planning cell
+
+Section 14 reads `configs/model_comparison.proposed.json` through
+`dmv2.model_design`, displays four proposed estimator/input arms, and generates
+48 monthly calendar specifications for the 2020–2023 nominal tests. This stage
+reads no market observations and imports no estimator. It clears planning state
+on rerun and displays unresolved decisions; Run All does not start fitting.
+See [MODEL_COMPARISON.md](MODEL_COMPARISON.md) before implementing estimator
+adapters. The combined primary universe is selected, and the shared target
+contract fixes exact ties, missing-outcome ranking and strict RET grid handling.
+Estimator validation/settings and measured fit budgets remain draft.
+
+## Shared class labels and RET
+
+Section 15 loads `configs/target_ret_protocol.json`, defines the shared
+`prepare_classification_inputs` helper and reuses existing bounded feature and
+monthly samples through `target_workflow.run_shared_target_sample`. It adds no
+source-price request. The partial two-ID sample correctly withholds class ranks
+and 120-month RET; inspect reasons rather than treating it as population coverage.
+Both models must use the class-label helper; the older continuous-return
+preparation helper serves a different target interface. Missing class rows stay
+in prediction/coverage ledgers. See [TARGET_CLASSES_RET.md](TARGET_CLASSES_RET.md).
+
+## Full target audit and saved-evidence cell
+
+The separately authorized full 2010–2023 build is complete from verified saved
+caches. Section 16 uses
+`dmv2.full_target_panel.read_full_target_run(catalog)` to verify immutable saved
+state and display small aggregate class/RET reports. It keeps
+`full_feature_dataset` and `full_daily_dataset` separate from lazy
+`full_target_dataset` and `full_monthly_outcome_dataset` views. Full labels are
+loaded only by the explicit `read_full_targets(run)` call. Neither reader launches
+a target build or estimator. The audit has verified 140,485 labels among
+140,777 signal-time prediction-eligible rows, retaining all 152,307 original rows.
+All 168 months populate all ten classes; 292 eligible missing labels remain
+explicit. All 48 nominal test signals have strict 120-month RET payoff vectors;
+the first is 2019-12-31 for January 2020. Earlier 120 signals remain explicitly
+withheld for insufficient history. The saved audit verifies 475 recorded input
+files unchanged. Read [FULL_TARGET_PANEL.md](FULL_TARGET_PANEL.md) for exact
+coverage, artifact pins and the remaining identity/knowledge-time/economic limits.
+
+
+The installed master completed all **23 original code cells** in a fresh kernel
+after the full target audit. Three private verification cells blocked implicit
+full builds/preprocessing fits, asserted exact unchanged bounded daily/monthly/
+feature frames, and reloaded the full shared class state. All **620 tests** and
+the independent full class/RET verifier passed. Private receipts and the executed
+notebook are under ignored `outputs/full_target_panel/verification/`; the
+versioned notebook remains output-free. No classifier or backtest ran.

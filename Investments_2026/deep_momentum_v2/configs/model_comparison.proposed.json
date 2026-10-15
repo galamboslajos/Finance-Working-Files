@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-model-comparison-draft-v1",
+  "status": "PROPOSED_NOT_EXECUTION_AUTHORITY",
+  "purpose": "Metadata-only sketch of comparable paper-inspired XGBoost and random-forest classifiers. This file authorizes no label construction, fitting, selection, backtest or compute launch.",
+  "universe": {
+    "primary": "combined",
+    "description": "Dated historical S&P 500 plus S&P 400 union at each signal, with original membership and exclusions retained in the ledger.",
+    "selection_status": "USER_SELECTED",
+    "membership_basis": "historical_signal_date",
+    "identity_policy": "provisional_unique_resolved_link",
+    "identity_status": "PROVISIONAL_IDENTITY_UNVERIFIED"
+  },
+  "panels": {
+    "primary": "available_cohort_80pct",
+    "sensitivity": "available_cohort_90pct",
+    "paper15_policy": "signal_qualified_common_momentum_v1",
+    "paper15_changed": false,
+    "daily_inputs_and_backtest_tables_separate": true
+  },
+  "chronology": {
+    "history_start": "2010-01-01",
+    "mode": "rolling",
+    "train_years": 10,
+    "test_years": 1,
+    "last_test_year": 2023,
+    "prediction_frequency": "monthly",
+    "refit_frequency": "annual",
+    "label_cutoff": "preceding_completed_outcome_year_end",
+    "protected_financial_start": "2024-01-01",
+    "knowledge_time_certified": false,
+    "calendar_dates_define_execution": false
+  },
+  "experiment_matrix": [
+    {
+      "arm_id": "xgb_paper15",
+      "estimator": "xgboost_multiclass",
+      "feature_set": "paper15",
+      "candidate_base_predictors": 15
+    },
+    {
+      "arm_id": "rf_paper15",
+      "estimator": "random_forest_multiclass",
+      "feature_set": "paper15",
+      "candidate_base_predictors": 15
+    },
+    {
+      "arm_id": "xgb_extended",
+      "estimator": "xgboost_multiclass",
+      "feature_set": "extended715_candidates",
+      "candidate_base_predictors": 715
+    },
+    {
+      "arm_id": "rf_extended",
+      "estimator": "random_forest_multiclass",
+      "feature_set": "extended715_candidates",
+      "candidate_base_predictors": 715
+    }
+  ],
+  "comparison": {
+    "same_outer_windows": true,
+    "same_prediction_cohort": true,
+    "same_label_definition": true,
+    "same_return_basis": true,
+    "same_class_payoff_estimator": true,
+    "same_preprocessing_policy": true,
+    "full_history_coverage_selects_features": false,
+    "sensitivity_parameters_selected_on_test": false
+  },
+  "target_proposal": {
+    "status": "IMPLEMENTED_ENGINEERING_FULL_HISTORY_UNVERIFIED",
+    "kind": "next_month_cross_sectional_return_decile",
+    "number_of_classes": 10,
+    "class_order": "1_highest_return_10_lowest_return",
+    "cohort_origin": "historical_signal_membership",
+    "rank_tie_rule": "exact_descending_midrank_integer_bins_v1",
+    "rank_population_with_missing_targets": "valid_observed_returns_within_signal_time_paper15_prediction_cohort",
+    "economic_return_and_terminal_event_policy": null,
+    "missing_labels_imputed": false,
+    "prediction_membership_uses_future_targets": false,
+    "retain_original_membership_ledger": true,
+    "shared_worker_protocol": "configs/target_ret_protocol.json"
+  },
+  "probabilities_and_score": {
+    "aligned_class_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "persist_estimator_class_mapping": true,
+    "absent_training_class_policy": "raise_missing_canonical_probability_class_no_zero_padding",
+    "primary_score": "RET",
+    "RET_formula": "sum_k probability_k * trailing_class_mean_return_k",
+    "payoff_window_completed_months": 120,
+    "payoff_update_frequency": "monthly",
+    "monthly_class_mean": "equal_weight_observed_realized_class_returns",
+    "class_payoff_time_weighting": "equal_month_weights",
+    "payoffs_use_true_realized_classes": true,
+    "payoff_missing_month_rule": "withhold_entire_vector_unless_all_120_months_and_10_classes_observed",
+    "payoff_cutoff": "preceding_completed_outcome_month",
+    "calendar_proposal_is_paper_exact_claim": false
+  },
+  "preprocessing": {
+    "policy": "train_partition_median_missing_indicator_v1",
+    "baseline_all15_required_before_extra_inputs": true,
+    "fit_scope": "inner_training_partition_then_frozen_outer_training_refit",
+    "impute_targets": false,
+    "drop_all_missing_in_fit_partition": true,
+    "drop_constant_in_fit_partition": true,
+    "missing_indicators": "one_per_retained_predictor_frozen_schema",
+    "extended_predictor_count_is_guaranteed": false,
+    "scaling": null,
+    "clipping": null,
+    "winsorization": null
+  },
+  "validation_proposal": {
+    "status": "PROPOSED_NOT_RUN",
+    "mode": "last_completed_outcome_months_chronological",
+    "validation_months": 24,
+    "development_months": 96,
+    "all_stocks_of_same_outcome_month_stay_together": true,
+    "random_row_split": false,
+    "oob_is_outer_forecast_test": false,
+    "preprocessing_fit_on_inner_training_only": true,
+    "parameters_frozen_before_outer_test": true,
+    "final_refit": "full_preceding_120_completed_outcome_months_after_parameters_frozen",
+    "selection_metric": null,
+    "candidate_search_budget": null
+  },
+  "paper_reference": {
+    "classifier": "XGBoost_multiclass",
+    "paper_predictors": 16,
+    "paper_size_decile_omitted_in_v2": true,
+    "paper_classifier_history": "expanding_after_initial_ten_years",
+    "paper_inner_validation": "random_historical_row_80_20",
+    "paper_annual_probability_average_fits": 100,
+    "paper_fit_variation_and_exact_defaults_unspecified": true,
+    "v2_primary_is_exact_replication": false
+  },
+  "estimator_proposals": {
+    "random_forest": {
+      "status": "UNTUNED_PROPOSAL_NOT_AUTHOR_SETTING",
+      "package_version": null,
+      "n_estimators": 500,
+      "max_features": "sqrt",
+      "max_depth": null,
+      "min_samples_leaf": 20,
+      "bootstrap": true,
+      "class_weight": null,
+      "n_jobs": 1,
+      "random_state": 1729,
+      "annual_models": "one_forest_per_annual_cutoff",
+      "trees_are_not_500_independent_complete_forests": true
+    },
+    "xgboost": {
+      "status": "OPEN_NO_INVENTED_AUTHOR_PARAMETERS",
+      "objective": "multi:softprob",
+      "num_class": 10,
+      "package_version": null,
+      "parameter_snapshot": null,
+      "boosting_round_cap": null,
+      "early_stopping_patience": null,
+      "seed_and_variation_scheme": null,
+      "confirmatory_fits_per_annual_cutoff_proposal": 100,
+      "ensemble_variation_requires_specification": true
+    }
+  },
+  "execution": {
+    "metadata_only": true,
+    "label_build_enabled": false,
+    "preprocessing_fit_enabled": false,
+    "model_fit_enabled": false,
+    "parameter_search_enabled": false,
+    "backtest_enabled": false,
+    "cloud_launch_enabled": false,
+    "dependency_install_enabled": false,
+    "automatic_execution": false,
+    "pilot_proposal": {
+      "status": "PROPOSED_NOT_RUN",
+      "first_outer_test_year": 2020,
+      "scope": "inner_development_validation_only",
+      "outer_test_metrics_inspected": false,
+      "inner_training_outcome_start": "2010-01-01",
+      "inner_training_outcome_end": "2017-12-31",
+      "inner_validation_outcome_start": "2018-01-01",
+      "inner_validation_outcome_end": "2019-12-31",
+      "outer_refit_enabled": false,
+      "RET_evaluation_enabled": false,
+      "additional_pre2010_outcome_reads_enabled": false,
+      "metrics_scope": "classification_probabilities_only",
+      "fits_per_arm": 1,
+      "paper100fit_ensemble_equivalent": false,
+      "resource_and_trial_budget": null
+    },
+    "remaining_decisions": [
+      "economic_return_terminal_events_and_label_coverage",
+      "validation_metric_and_candidate_budget",
+      "XGBoost_version_rounds_patience_final_refit_and_fit_variation",
+      "resource_budget_and_explicit_execution_authority",
+      "empirical_full_history_target_and_payoff_coverage"
+    ]
+  }
+}

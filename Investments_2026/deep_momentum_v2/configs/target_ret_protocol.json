@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-shared-monthly-target-ret-v1",
+  "status": "ACTIVE_ENGINEERING_IDENTITY_AND_ECONOMICS_UNVERIFIED",
+  "effective_date": "2026-10-15",
+  "authority": "User requested shared monthly target classes and RET payoff workers with explicit ties/missing-return rules, shared historical cohorts, PIT guards and rolling ten-year setup. Authorizes pure workers and bounded checks; no model fit or full-history rebuild.",
+  "targets": {
+    "policy_id": "monthly_paper_qualified_midrank_deciles_v1",
+    "universe": "historical_sp500_sp400_union",
+    "classes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "class_1": "highest_return",
+    "ranking_population": "signal_time_identity_and_paper15_prediction_eligible",
+    "ranking": "descending_average_rank_exact_equal_values",
+    "class_formula": "clip(1+floor(10*(average_rank-0.5)/observed_n),1,10)",
+    "minimum_observed_population": 10,
+    "exhaustive_requests": "past_feature_and_forward_outcome_all_original_identity_eligible_members",
+    "missing_return": "retain_original_row_never_impute",
+    "return_basis": "provider_adjusted_close_ratio",
+    "accepted_return_status": "ok",
+    "minimum_return": -1,
+    "outcome_years": [
+      2010,
+      2023
+    ],
+    "target_availability_determines_prediction_eligibility": false
+  },
+  "ret": {
+    "policy_id": "realized_class_equal_month_120_v1",
+    "class_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "completed_calendar_months": 120,
+    "window_end": "signal_calendar_month",
+    "monthly_class_mean": "equal_weight_observed_realized_class_returns",
+    "time_weighting": "equal_calendar_month_weights",
+    "incomplete_month_class_grid": "withhold_entire_payoff_vector",
+    "probability_sum_tolerance": 1e-08,
+    "probability_renormalization": false,
+    "absent_class_zero_padding": false
+  },
+  "model_chronology": {
+    "training": "rolling_preceding_10_completed_outcome_years",
+    "refit": "annual",
+    "prediction": "monthly",
+    "nominal_outer_test_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "primary_universe": "historical_sp500_sp400_union",
+    "primary_context": "available_cohort_80pct",
+    "sensitivity_context": "available_cohort_90pct",
+    "paper15_changed": false
+  },
+  "coverage": {
+    "denominators": [
+      "all_original_historical_members",
+      "signal_time_paper15_prediction_eligible_members"
+    ],
+    "target_coverage_fraction_gate": null,
+    "context_gate_applies_to_targets": false,
+    "interpretation": "Available-outcome relative labels and payoffs are conditional on observed valid returns. Missing terminal outcomes remain unresolved; no survivorship-free or economic certification."
+  },
+  "execution": {
+    "bounded_existing_sample_enabled": true,
+    "maximum_sample_outcome_months": 3,
+    "maximum_sample_original_rows": 3000,
+    "full_history_build_enabled": false,
+    "model_fitting_enabled": false,
+    "preprocessing_fitting_enabled": false,
+    "backtest_enabled": false,
+    "raw_downloads_enabled": false,
+    "cloud_mutations_enabled": false
+  },
+  "certification": {
+    "knowledge_time_verified": false,
+    "accounting_certified": false,
+    "model_ready": false,
+    "survivorship_bias_free_certified": false
+  }
+}
