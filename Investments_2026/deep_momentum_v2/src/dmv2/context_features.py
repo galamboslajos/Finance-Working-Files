@@ -1,8 +1,9 @@
 """Past-only context candidates with original historical cohort denominators.
 
-Definitions follow the pinned Sadig monthly catalogue. V2 deliberately requires
-complete calendar windows and complete source cohorts, instead of silently
-normalizing a requested subset. Missing daily membership is never reconstructed
+Definitions follow the pinned Sadig monthly catalogue. V2 requires complete
+individual calendar windows. Context statistics use either the legacy complete
+cohort policy or an explicit 90-/80-percent original-cohort policy, always after
+exhaustive requests for identity-admitted members. Missing daily membership is never reconstructed
 from month-end membership or future quote availability. Numerical calculation
 does not certify retrieval-time identity, price revisions or terminal accounting.
 """
@@ -31,6 +32,50 @@ MARKET_METRICS = ("ew_return", "median_return", "positive_breadth", "return_disp
 STRUCTURAL_CONSTANTS = frozenset(("market_new_high_breadth_1s",
                                  "market_new_low_breadth_1s", "market_volume_up_breadth_1s"))
 KEYS = ("source_security_id", "signal_date")
+COMPLETE_CONTEXT_POLICY = "complete_cohort"
+AVAILABLE_CONTEXT_POLICY = "available_cohort_90pct"
+SENSITIVITY_CONTEXT_POLICY = "available_cohort_80pct"
+# Historical aliases above remain stable for reproducible archived recipes.
+PRIMARY_CONTEXT_POLICY = "available_cohort_80pct"
+PRIMARY_SENSITIVITY_POLICY = "available_cohort_90pct"
+
+
+def validate_context_policy(context_policy):
+    if context_policy not in (COMPLETE_CONTEXT_POLICY, AVAILABLE_CONTEXT_POLICY,
+                              SENSITIVITY_CONTEXT_POLICY):
+        raise DataContractError(f"Unknown context policy: {context_policy}")
+
+
+def context_coverage_fraction(context_policy):
+    """Return the named policy threshold without changing the default policy."""
+    validate_context_policy(context_policy)
+    return {COMPLETE_CONTEXT_POLICY: 1., AVAILABLE_CONTEXT_POLICY: .9,
+            SENSITIVITY_CONTEXT_POLICY: .8}[context_policy]
+
+
+def _request_diagnostics(rows, requested):
+    """Original identity-admitted members must all have been requested.
+
+    Identity-blocked rows remain in the coverage denominator. A missing quote is
+    allowed by the coverage policy; an intentionally omitted admitted route is
+    not. Counts describe original rows, not the size of a caller's price sample.
+    """
+    admitted = rows["identity_eligible"].eq(True)
+    requested_rows = admitted & rows["intrinio_security_id"].isin(requested)
+    return dict(identity_eligible_members=int(admitted.sum()),
+                requested_identity_eligible_members=int(requested_rows.sum()),
+                request_exhaustive=bool((~admitted | requested_rows).all()))
+
+
+def _coverage_gate(count, observed, request_complete, context_policy=COMPLETE_CONTEXT_POLICY):
+    validate_context_policy(context_policy)
+    if context_policy == COMPLETE_CONTEXT_POLICY:
+        return "ok" if count > 0 and observed == count else "incomplete_cohort"
+    if not request_complete:
+        return "incomplete_request"
+    # Exact integer arithmetic makes both eight/nine of ten inclusive boundaries.
+    numerator = 9 if context_policy == AVAILABLE_CONTEXT_POLICY else 8
+    return "ok" if count > 0 and observed * 10 >= count * numerator else "below_coverage_threshold"
 
 
 @dataclass(frozen=True)
@@ -269,13 +314,23 @@ def _finite(values):
     return numeric.where(np.isfinite(numeric))
 
 
-def _coverage_row(day, name, group, count, observed, status):
-    return dict(signal_date=day, feature_name=name, context_group=group,
+def _coverage_row(day, name, group, count, observed, status, *,
+                  context_policy=COMPLETE_CONTEXT_POLICY, request_info=None):
+    result = dict(signal_date=day, feature_name=name, context_group=group,
                 cohort_size=int(count), observed_members=int(observed), status=status,
-                normalization_policy="complete_original_cohort", latest_input_date=day)
+                coverage_fraction=float(observed / count) if count else np.nan,
+                minimum_coverage_fraction=context_coverage_fraction(context_policy),
+                context_policy=context_policy,
+                normalization_policy=("complete_original_cohort" if context_policy == COMPLETE_CONTEXT_POLICY
+                                      else context_policy), latest_input_date=day,
+                identity_eligible_members=None, requested_identity_eligible_members=None,
+                request_exhaustive=None)
+    if request_info is not None:
+        result.update(request_info)
+    return result
 
 
-def _xs(table, cohorts, indicators, requested, coverage):
+def _xs(table, cohorts, indicators, requested, coverage, *, context_policy=COMPLETE_CONTEXT_POLICY):
     attached = cohorts.merge(indicators, on=["intrinio_security_id", "signal_date"], how="left", validate="many_to_one")
     identity_ok = attached["identity_eligible"] & attached["intrinio_security_id"].isin(requested)
     for day, universe in attached.groupby("signal_date", sort=True):
@@ -285,27 +340,32 @@ def _xs(table, cohorts, indicators, requested, coverage):
                 for group, rows in groups:
                     values = _finite(rows[base])
                     valid = values.notna() & identity_ok.loc[rows.index]
-                    complete = bool(valid.all()) and len(rows) > 0
+                    request_info = _request_diagnostics(rows, requested)
+                    gate_status = _coverage_gate(len(rows), int(valid.sum()),
+                                                request_info["request_exhaustive"], context_policy)
                     rank_name = f"xs_{scope}_rank_pct__{base}"
                     z_name = f"xs_{scope}_robust_zscore__{base}"
-                    rank_status = "incomplete_cohort"
-                    z_status = "incomplete_cohort"
-                    if complete:
-                        if len(rows) > 1:
-                            ranked = (values.rank(method="average") - 1) / (len(rows) - 1)
-                            _assign(table, day, rows["source_security_id"], rank_name, ranked)
+                    rank_status = z_status = gate_status
+                    if gate_status == "ok":
+                        observed_values = values[valid]
+                        observed_rows = rows.loc[valid]
+                        if len(observed_values) > 1:
+                            ranked = (observed_values.rank(method="average") - 1) / (len(observed_values) - 1)
+                            _assign(table, day, observed_rows["source_security_id"], rank_name, ranked)
                             rank_status = "ok"
                         else:
                             rank_status = "undefined_single_member"
-                        center = values.median()
-                        mad = (values - center).abs().median()
+                        center = observed_values.median()
+                        mad = (observed_values - center).abs().median()
                         if mad > 0:
-                            _assign(table, day, rows["source_security_id"], z_name, (values-center)/(1.4826*mad))
+                            _assign(table, day, observed_rows["source_security_id"], z_name,
+                                    (observed_values-center)/(1.4826*mad))
                             z_status = "ok"
                         else:
                             z_status = "undefined_zero_dispersion"
                     for name, status in ((rank_name, rank_status), (z_name, z_status)):
-                        coverage.append(_coverage_row(day, name, str(group), len(rows), valid.sum(), status))
+                        coverage.append(_coverage_row(day, name, str(group), len(rows), valid.sum(), status,
+                                                     context_policy=context_policy, request_info=request_info))
 
 
 def _assign(table, day, source_ids, name, values):
@@ -402,11 +462,24 @@ def _price_metrics(arrays, sid, i, h):
     return result
 
 
-def _daily_context(daily_cohorts, arrays, sessions, requested):
-    """Produce complete daily benchmarks from that day's historical members."""
+def _daily_context(daily_cohorts, arrays, sessions, requested, *,
+                   context_policy=COMPLETE_CONTEXT_POLICY, coverage=None, through=None):
+    """Gate benchmarks separately on each day's original universe and sleeves."""
     positions = {day: i for i, day in enumerate(sessions)}
     market, sleeve, members = {}, {}, {}
-    for day, rows in daily_cohorts.groupby("signal_date", sort=True):
+    groups = dict(tuple(daily_cohorts.groupby("signal_date", sort=True)))
+    through = through or daily_cohorts["signal_date"].max()
+    for day in (day for day in sessions if day <= through):
+        rows = groups.get(day)
+        if rows is None:
+            market[day] = np.nan
+            for group in ("universe", *SLEEVES):
+                if group != "universe":
+                    sleeve[(day, group)] = np.nan
+                if coverage is not None:
+                    coverage.append(_coverage_row(day, "benchmark_daily_ew_return_1s", group, 0, 0,
+                                                  "context_missing_date", context_policy=context_policy))
+            continue
         i = positions[day]
         current = []
         for row in rows.to_dict("records"):
@@ -415,14 +488,26 @@ def _daily_context(daily_cohorts, arrays, sessions, requested):
             current.append((row, value))
             members[(row["source_security_id"], day)] = dict(row, stock_return=value)
         returns = np.asarray([value for _, value in current], dtype=float)
-        market[day] = returns.mean() if len(returns) and np.isfinite(returns).all() else np.nan
-        for index in SLEEVES:
-            values = np.asarray([value for row, value in current if row["index_id"] == index], dtype=float)
-            sleeve[(day, index)] = values.mean() if len(values) and np.isfinite(values).all() else np.nan
+        for group in ("universe", *SLEEVES):
+            group_rows = rows if group == "universe" else rows[rows["index_id"] == group]
+            values = returns if group == "universe" else np.asarray(
+                [value for row, value in current if row["index_id"] == group], dtype=float)
+            request_info = _request_diagnostics(group_rows, requested)
+            observed = int(np.isfinite(values).sum())
+            status = _coverage_gate(len(values), observed, request_info["request_exhaustive"], context_policy)
+            value = values[np.isfinite(values)].mean() if status == "ok" else np.nan
+            if group == "universe":
+                market[day] = value
+            else:
+                sleeve[(day, group)] = value
+            if coverage is not None:
+                coverage.append(_coverage_row(day, "benchmark_daily_ew_return_1s", group,
+                    len(values), observed, status, context_policy=context_policy, request_info=request_info))
     return market, sleeve, members
 
 
-def _market(table, signal_cohorts, daily_cohorts, arrays, sessions, requested, coverage):
+def _market(table, signal_cohorts, daily_cohorts, arrays, sessions, requested, coverage, *,
+            context_policy=COMPLETE_CONTEXT_POLICY):
     groups = dict(tuple(daily_cohorts.groupby("signal_date", sort=True)))
     for day in sorted(signal_cohorts["signal_date"].unique()):
         rows = groups.get(day)
@@ -444,27 +529,42 @@ def _market(table, signal_cohorts, daily_cohorts, arrays, sessions, requested, c
                          if metric == "market_concentration" else "stock_return")
                 values = frame[field].to_numpy(dtype=float) if counts else np.array([])
                 observed = int(np.isfinite(values).sum())
-                value, status = np.nan, "context_missing_date" if rows is None else "incomplete_cohort"
-                if counts and observed == counts:
-                    value, status = _market_aggregate(metric, values)
+                request_info = _request_diagnostics(rows, requested) if rows is not None else None
+                value, status = np.nan, ("context_missing_date" if rows is None else
+                    _coverage_gate(counts, observed, request_info["request_exhaustive"], context_policy))
+                if status == "ok":
+                    value, status = _market_aggregate(metric, values[np.isfinite(values)])
                     if not np.isfinite(value) and status == "ok":
                         status = "nonfinite_calculation"
                 if np.isfinite(value):
                     table.loc[table["signal_date"] == day, name] = value
-                coverage.append(_coverage_row(day, name, "universe", counts, observed, status))
+                coverage.append(_coverage_row(day, name, "universe", counts, observed, status,
+                                             context_policy=context_policy, request_info=request_info))
             if h == 1:
                 continue
             name = f"market_sleeve_spread_sp400_minus_sp500_{h}s"
-            means, observed = {}, 0
+            means, observed, leg_statuses = {}, 0, []
             for index in SLEEVES:
                 values = frame.loc[frame["index_id"] == index, "stock_return"].to_numpy(dtype=float) if counts else np.array([])
-                observed += int(np.isfinite(values).sum())
-                means[index] = values.mean() if len(values) and np.isfinite(values).all() else np.nan
+                leg_observed = int(np.isfinite(values).sum())
+                observed += leg_observed
+                leg_rows = rows[rows["index_id"] == index] if rows is not None else None
+                request_info = _request_diagnostics(leg_rows, requested) if leg_rows is not None else None
+                leg_status = ("context_missing_date" if rows is None else
+                    _coverage_gate(len(values), leg_observed, request_info["request_exhaustive"], context_policy))
+                leg_statuses.append(leg_status)
+                means[index] = values[np.isfinite(values)].mean() if leg_status == "ok" else np.nan
+                coverage.append(_coverage_row(day, name, index, len(values), leg_observed, leg_status,
+                                             context_policy=context_policy, request_info=request_info))
             value = means["sp400"]-means["sp500"]
-            status = "ok" if np.isfinite(value) else "context_missing_date" if rows is None else "incomplete_cohort"
+            status = "ok" if np.isfinite(value) else (
+                "context_missing_date" if rows is None else "incomplete_request" if "incomplete_request" in leg_statuses
+                else "incomplete_cohort" if context_policy == COMPLETE_CONTEXT_POLICY else "below_coverage_threshold")
             if np.isfinite(value):
                 table.loc[table["signal_date"] == day, name] = value
-            coverage.append(_coverage_row(day, name, "sp400_minus_sp500", counts, observed, status))
+            request_info = _request_diagnostics(rows, requested) if rows is not None else None
+            coverage.append(_coverage_row(day, name, "sp400_minus_sp500", counts, observed, status,
+                                         context_policy=context_policy, request_info=request_info))
 
 
 def _market_aggregate(metric, values):
@@ -491,7 +591,8 @@ def _market_aggregate(metric, values):
     return np.sort(values)[-top:].sum()/values.sum(), "ok"
 
 
-def _relative(table, signal_cohorts, market, sleeve, members, sessions, coverage):
+def _relative(table, signal_cohorts, market, sleeve, members, sessions, coverage, *,
+              context_policy=COMPLETE_CONTEXT_POLICY):
     stats = {}
     for row in signal_cohorts.to_dict("records"):
         day, sid = row["signal_date"], row["source_security_id"]
@@ -555,12 +656,13 @@ def _relative(table, signal_cohorts, market, sleeve, members, sessions, coverage
                     record["states"].add(status[name])
     for (day, name), summary in sorted(stats.items()):
         status = "ok" if summary["states"] == {"ok"} else ";".join(sorted(summary["states"]))
-        coverage.append(_coverage_row(day, name, "source_members", summary["total"], summary["valid"], status))
+        coverage.append(_coverage_row(day, name, "source_members", summary["total"], summary["valid"], status,
+                                     context_policy=context_policy))
 
 
 def compute_context_features(daily_result, daily_prices, session_dates, *, signal_cohorts,
                              requested_security_ids, daily_cohorts=None,
-                             context_policy="complete_cohort",
+                             context_policy=COMPLETE_CONTEXT_POLICY,
                              identity_policy=STRICT_IDENTITY_POLICY) -> ContextFeaturesResult:
     """Compute snapshots, never admitting constituents through target availability.
 
@@ -569,8 +671,7 @@ not inferred from signal-date lists. ``coverage`` records original denominators
 and withheld definitions. Numeric model input selection must exclude the three
 declared constants and retain the separate identity/coverage ledger.
 """
-    if context_policy != "complete_cohort":
-        raise DataContractError("Only the complete_cohort context policy is implemented")
+    validate_context_policy(context_policy)
     validate_identity_policy(identity_policy)
     if isinstance(requested_security_ids, (str, bytes)):
         raise DataContractError("requested_security_ids must be an explicit sequence")
@@ -608,13 +709,14 @@ declared constants and retain the separate identity/coverage ledger.
     table = pd.concat([cohorts[list(KEYS)].reset_index(drop=True),
                        pd.DataFrame(np.nan, index=range(len(cohorts)), columns=[r["name"] for r in specs])], axis=1)
     coverage = []
-    _xs(table, cohorts, indicators, requested, coverage)
+    _xs(table, cohorts, indicators, requested, coverage, context_policy=context_policy)
     arrays = _validated_price_arrays(daily_prices, sessions, requested, cohorts["signal_date"].max())
     if daily_cohorts is None:
         for day, rows in cohorts.groupby("signal_date", sort=True):
             for spec in specs:
                 if spec["role"] != "cross_sectional":
-                    coverage.append(_coverage_row(day, spec["name"], "not_loaded", len(rows), 0, "context_not_loaded"))
+                    coverage.append(_coverage_row(day, spec["name"], "not_loaded", len(rows), 0, "context_not_loaded",
+                                                 context_policy=context_policy))
     else:
         historical = _cohorts(daily_cohorts, "daily_cohorts", identity_policy=identity_policy)
         if historical.empty or not historical["signal_date"].isin(sessions).all():
@@ -622,12 +724,15 @@ declared constants and retain the separate identity/coverage ledger.
         if (historical["signal_date"] > cohorts["signal_date"].max()).any():
             raise DataContractError("Daily cohort rows exceed the final declared context signal")
         _validate_signal_context_inventory(cohorts, historical)
-        _market(table, cohorts, historical, arrays, sessions, requested, coverage)
-        market, sleeve, members = _daily_context(historical, arrays, sessions, requested)
-        _relative(table, cohorts, market, sleeve, members, sessions, coverage)
+        _market(table, cohorts, historical, arrays, sessions, requested, coverage, context_policy=context_policy)
+        market, sleeve, members = _daily_context(historical, arrays, sessions, requested,
+            context_policy=context_policy, coverage=coverage, through=cohorts["signal_date"].max())
+        _relative(table, cohorts, market, sleeve, members, sessions, coverage, context_policy=context_policy)
     provenance = dict(source_commit=SOURCE_COMMIT, registered_columns=415,
         cross_sectional_bases=80, context_scope="historical_sp500_sp400_union",
         context_policy=context_policy, identity_eligibility_policy=identity_policy,
+        minimum_original_cohort_coverage=context_coverage_fraction(context_policy),
+        exhaustive_identity_admitted_requests_required=True,
         complete_calendar_windows_required=True,
         signal_identity_eligible_rows=int(cohorts["identity_eligible"].sum()),
         signal_provisional_identity_eligible_rows=int((cohorts["identity_eligible"] &
@@ -639,6 +744,6 @@ declared constants and retain the separate identity/coverage ledger.
         current_security_master_filter_used=False, future_quote_eligibility_used=False,
         target_fields_used=False, no_fill_no_zero_imputation=True,
         sleeve_switch_policy="complete same-index history required within relative window",
-        window_policy="V2 complete sessions/cohorts; stricter than source 80-percent windows")
+        window_policy="complete individual temporal windows; explicit original-cohort context gate")
     provenance.update(identity_policy_provenance(identity_policy))
     return ContextFeaturesResult(table, pd.DataFrame(coverage), specs, provenance)

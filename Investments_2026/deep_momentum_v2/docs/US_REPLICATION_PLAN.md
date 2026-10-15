@@ -171,7 +171,7 @@ training / one-year outcome tests, annual refits and monthly predictions. Values
 classifier history. The one-date engineering check is a separate control.
 Raw pre-2010 history is retained for exact per-signal warmup (503 sessions for
 the complete registered bank). The [2010–2023 endpoint audit](INITIALIZATION_2010.md)
-measured the 15 paper inputs; full 715-predictor/context coverage remains OPEN.
+measured the 15 paper inputs; full-bank coverage is now measured in [the full-panel audit](FULL_FEATURE_PANEL.md); the 80% primary/90% sensitivity policies are selected, with residual coverage limitations.
 See [feature contracts](FEATURES.md).
 
 The paper requires at least ten years before initial model fitting and uses a
@@ -231,9 +231,9 @@ CVaR/CVR may be separate extensions; they are not needed to satisfy this paper.
 
 | Decision | Why it matters | Current state |
 |---|---|---|
-| Primary S&P universe and target-rank cohort | Defines the prediction distribution and eligible trades | OPEN; engineering universe is the S&P500/400 union, with active common-five paper normalization |
+| Primary S&P universe and target-rank cohort | Defines the prediction distribution and eligible trades | OPEN; engineering universe is the S&P 500/400 union, with active common-five paper normalization |
 | Return/terminal-event accounting and identity rules | Determines whether labels and portfolio cash flows are credible | Provisional identity admission selected; knowledge-time identity and economic accounting remain unverified |
-| Coverage and experiment chronology | Ten-year startup, development/outer tests, holdout | 2010 initialization and rolling10/1 selected; 15-input endpoint coverage measured; full added-feature coverage open; 2024+ protected |
+| Coverage and experiment chronology | Ten-year startup, development/outer tests, holdout | 2010 initialization and rolling10/1 selected; 15-input endpoint coverage measured; full-bank coverage measured; 80% primary/90% sensitivity selected; 2024+ protected |
 | Active V2 underspecification conventions | Ties, SD, winsorization, moments, seed/early-stop mechanics | Active normalization/missingness rules frozen separately; target ties and model mechanics remain OPEN; size encoding applies only to the paper account |
 | Execution/cost/exposure/borrow rules | Separates predictive results from investable returns | OPEN |
 | Models, feature groups and trial bounds | Prevents results-driven expansion of the search | OPEN; forests/features proposed |
@@ -273,8 +273,8 @@ snapshots, alongside the15 exact monthly paper momentum/state variables. The
 728-definition bank has715 eligible predictors after three constants and ten
 exact rank aliases. Complete required windows and sample SD(ddof=1) are explicit
 V2 engineering adaptations. The initial complete-original-cohort paper policy
-was superseded on 2026-10-15 by the active common-five policy below; context
-retains its complete-cohort requirements.
+was superseded on 2026-10-15 by the active common-five policy below. Context
+now uses 80% original-cohort coverage as primary and 90% as sensitivity.
 Features and future targets have separate tables, loaders and allowlists;
 completed outcome cutoffs and canonical calendar windows guard later X/y
 alignment. No fit, preprocessing, trial selection or full panel is authorized
@@ -287,9 +287,14 @@ The [normalization/missingness protocol](NORMALIZATION_PROTOCOL.md) requires
 exhaustive admitted-original requests and one common population with all five
 finite exact momenta and positive finite sample dispersions. All 15 paper inputs
 use that population; shared mean/dispersion levels are retained. Arbitrary
-two-ID samples withhold those statistics. Context still requires its complete
-original cohorts and dated daily membership. Added-feature medians, missing
+two-ID samples withhold those statistics. Context requires exhaustive admitted-ID requests against original
+cohorts,80% per-variable/date/group coverage and dated daily membership, with 90%
+as sensitivity. Complete individual temporal windows remain unchanged. Added-feature medians, missing
 indicators and all-missing/constant exclusions are fitted only on explicit
 completed training rows, including within inner splits; prediction consumes no
 labels. The 2010 endpoint audit is coverage evidence, not a fitted preprocessing
 manifest or authorization for a full model/backtest run.
+
+## Full feature panel verification, 2026-10-15
+
+The [full 2010–2023 feature panel](FULL_FEATURE_PANEL.md) is now built and audited under the provisional identity policy. It retains 152,307 original rows and 168 monthly signals. Daily observations feed technical/context calculations and are also preserved independently for later backtesting, including complete annual warmup and signal anchors. All 715 eligible names remain in the dictionary; missing context is reported rather than filled or silently excluded. The master verifies saved coverage and exposes separate lazy feature/daily datasets. Notebook Run All does not relaunch the full build, fit imputation/models or backtest.

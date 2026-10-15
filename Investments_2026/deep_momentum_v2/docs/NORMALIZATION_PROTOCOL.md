@@ -1,6 +1,6 @@
 # Active normalization and missingness protocol
 
-**ACTIVE ENGINEERING, IDENTITY UNVERIFIED — version2.0.0, 2026-10-15.**
+**ACTIVE ENGINEERING, IDENTITY UNVERIFIED — version 4.0.0, 2026-10-15.**
 The machine-readable contract is
 [`configs/normalization_protocol.json`](../configs/normalization_protocol.json).
 The user authorized completing this protocol under provisional identity admission,
@@ -37,12 +37,12 @@ The active paper policy is `signal_qualified_common_momentum_v1`:
 2. Apply `provisional_unique_resolved_link`, preserving original review flags and
    unresolved/collision rows in the ledger. Admission is not identity certification.
 3. Request **every admitted native ID** in that original signal cohort. If the
-   request is partial, withhold all15 statistical features. Missing quotes after
+   request is partial, withhold all 15 statistical features. Missing quotes after
    an exhaustive request are source coverage evidence; an unrequested ID is not.
 4. Qualify one common population of admitted members with all five finite raw
    momenta. Each signal qualifies independently; do not intersect future survivors.
 5. Require at least two common members and finite, strictly positive sample SD
-   for **all five horizons** (`ddof=1`). If any gate fails, withhold all15.
+   for **all five horizons** (`ddof=1`). If any gate fails, withhold all 15.
 6. On that same common population, calculate five z-scores, five cross-sectional
    means and five SDs. Only its members receive these15 inputs. Every original
    member remains in the coverage ledger with explicit eligibility/status.
@@ -75,7 +75,7 @@ and explicit attestation; it cannot prove a source query it did not perform.
 
 ## Added features and missingness
 
-The715 base predictor allowlist stays fixed. Do not require all715 to be
+The715 base predictor allowlist stays fixed. Do not require all 715 to be
 complete or let added-feature availability change the paper-qualified prediction
 population. Unavailable/undefined added inputs remain missing; no forward fill
 or global zero replacement occurs. Original audit flags remain outside X.
@@ -85,7 +85,7 @@ For forest experiments, the frozen missingness policy is
 [`src/dmv2/preprocessing.py`](../src/dmv2/preprocessing.py):
 
 - Fit from an existing `TrainingSlice` with an explicitly aligned boolean
-  `fit_mask`. Selected rows must independently have all15 finite paper inputs,
+  `fit_mask`. Selected rows must independently have all 15 finite paper inputs,
   finite available labels, and completed outcomes inside the recorded training
   and label-observation cutoffs. Invalid selected rows raise; they are not
   silently removed. Labels are never imputed.
@@ -105,7 +105,7 @@ For forest experiments, the frozen missingness policy is
   normalization does not justify an additional universal z-score for forests.
 - Fingerprint the fitted input/output schema, medians, drop reasons, training
   keys and cutoffs. Missingness columns belong to this serialized derived
-  preprocessing schema; they do not silently expand the715 source definitions.
+  preprocessing schema; they do not silently expand the 715 source definitions.
 
 Example for a later modeling stage, after completing the separate label policy:
 
@@ -129,12 +129,16 @@ reconstruct them.
 
 ## Context and empirical limits
 
-The active context worker still uses explicit `complete_cohort`. Cross-sectional
-and market/relative context stays withheld when its exhaustive original or
-DAILY historical-cohort requirements are unmet. Reusing one month-end cohort
-across historical daily benchmark windows is prohibited. The active paper
-policy and technical definitions do not claim all715 features have full-history
-coverage. Full context adaptation needs its own tested implementation.
+The active context policy is `available_cohort_80pct`, explicitly selected by
+the user on 2026-10-15, with 90% retained as a separate sensitivity check. It requires exhaustive admitted-ID requests and at
+least 80% valid observations against each original historical variable/date/cohort
+denominator. Valid available members determine ranks/MAD; individual missing
+values are not imputed before ranking. Every historical daily benchmark has its
+own union/sleeve gate. Sleeve spreads require both sleeves to pass separately.
+Exact individual lookbacks and complete relative calendar pairs remain unchanged.
+The paper15 common population is unchanged. See [the exact context contract](CONTEXT_AVAILABILITY.md).
+A threshold pass does not establish representativeness or historical identity
+certification. The older complete-cohort run remains historical evidence.
 
 Bounded two-ID notebook samples can demonstrate exact raw momentum and
 technical formulas. They cannot establish full-cohort statistics; their paper
@@ -146,3 +150,11 @@ past-input population and actual normalized outputs.
 `model_ready` remain false. Retrieval-time identities/adjusted history, missing
 quotes and terminal payouts remain material empirical limitations. Provisional
 identity uncertainty was accepted by the user and does not block all engineering.
+
+The user promoted the already verified 80% panel to primary and retained 90% as
+sensitivity. `configs/context_panel_roles.json` pins both immutable runs and
+records those roles. `configs/context_sensitivity_80.json` preserves the earlier
+80%-versus 90% build/comparison recipe; its historical filename does not establish
+the active role. Promotion leaves the paper15 population, training-only
+preprocessing and prediction eligibility unchanged. See [the comparison and
+promotion record](CONTEXT_SENSITIVITY_80.md).

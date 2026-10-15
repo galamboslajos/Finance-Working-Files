@@ -80,6 +80,8 @@ def validate_workflow(settings):
         "features": {"enabled", "history_sessions", "cohort_policy", "context_scope", "persist", "read_budget"},
         "execution": {"scope", "full_panel_build_enabled", "model_execution_enabled"},
     }
+    if "context_policy" in settings.get("features", {}):
+        fields["features"].add("context_policy")
     for name, expected in fields.items():
         if not isinstance(settings[name], dict) or set(settings[name]) != expected:
             raise ValueError(f"{name} has missing or unknown settings")
@@ -149,6 +151,8 @@ def validate_workflow(settings):
         raise ValueError('The feature bank requires 503 exact warmup sessions')
     if features['cohort_policy'] not in ('complete_cohort','signal_qualified_common_momentum_v1') or features['context_scope'] != 'primary_indices':
         raise ValueError('Features require an explicit historical primary-index population policy; sample ranks and SP600 context are unsupported')
+    from .context_features import validate_context_policy
+    validate_context_policy(features.get('context_policy', 'complete_cohort'))
     if not isinstance(features['read_budget'], dict):
         raise ValueError('Feature read_budget must be an explicit object')
     try:

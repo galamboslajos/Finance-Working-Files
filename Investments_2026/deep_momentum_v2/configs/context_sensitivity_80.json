@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-context80-sensitivity-2010-2023-v1",
+  "authorization": "User explicitly requested80% sensitivity alongside90% for2010-2023, comparisoncoverage/cohorts/values especiallybefore2016; paper15/PIT/daily unchanged.",
+  "start_year": 2010,
+  "end_year": 2023,
+  "universe": "combined",
+  "history_sessions": 503,
+  "identity_policy": "provisional_unique_resolved_link",
+  "normalization_policy": "signal_qualified_common_momentum_v1",
+  "context_policy": "available_cohort_80pct",
+  "include_outcome_daily": true,
+  "execution": {
+    "backend": "local_downloaded_sources",
+    "partition": "outcome_year",
+    "workers": 1,
+    "maximum_wall_seconds": 10800,
+    "maximum_peak_rss_bytes": 4294967296,
+    "maximum_output_bytes": 10737418240,
+    "maximum_projected_read_bytes": 21474836480,
+    "model_fitting": false,
+    "imputation_fitting": false,
+    "backtesting": false,
+    "cloud_mutations": false
+  },
+  "purpose": "Descriptive80% sensitivity only; preserve90% reference and primary settings. Reuse hashed past-only cached feature histories and unchanged paper/technical columns. No full-period feature selection or model performance.",
+  "reference_policy": "available_cohort_90pct",
+  "primary_policy_changed": false,
+  "reference": {
+    "directory": "outputs/full_feature_panel/2010-2023-9992dcb5c83acdf2",
+    "audit_sha256": "89542dcd94d387878f93882e781eca4f424f814016985bfab57045da75f19620",
+    "build_identity_sha256": "sha256:9992dcb5c83acdf29f316a37c68cdb4e97f7855b3e46e3b04a3cb38edd9a0217",
+    "worker_snapshot_directory": "outputs/reference_code/context90-9992dcb5c83acdf2"
+  }
+}

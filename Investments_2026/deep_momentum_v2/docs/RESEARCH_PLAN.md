@@ -11,7 +11,7 @@ Nominal tests run from 2020 through the existing pre-holdout boundary in 2023:
 training / 2023 testing. There are four nominal folds; the rolling window and
 monthly prediction frequency are unchanged. The [2010–2023 endpoint audit](INITIALIZATION_2010.md)
 measures complete 15-input paper coverage under the accepted provisional identity
-policy. Full 715-predictor/context coverage remains open. The feature worker
+policy. Full-bank coverage is now measured in [the full-panel audit](FULL_FEATURE_PANEL.md); unavailable context coverage limitations and economic certification remain unresolved. The feature worker
 uses exact pre-signal warmup, including pre-2010 prices, described in [FEATURES.md](FEATURES.md).
 
 The first source/date/identity/quote contracts and adversarial tests are in
@@ -76,3 +76,23 @@ The user-authorized [feature stage](FEATURES.md) registers 728 definitions with
 715 eligible predictor names. It preserves original cohorts, signal-only history
 and a separate completed-outcome X/y interface. Two-ID samples withhold complete
 cohort statistics; no model fit or full-context scan is implicit.
+
+The historical user-authorized 90% context rebuild is complete: all 402 previously empty
+context predictors have observations somewhere in 2010–2023; none are entirely
+missing over that full period. Paper15,298 technical features and every preserved
+daily artifact match the previous run exactly. Among paper-qualified rows,
+context-value coverage is 59.52% in 2010–2019 and 98.08% in 2020–2023. Early missingness
+remains material; these are descriptive counts, not full-history feature selection.
+See [the full-panel verification](FULL_FEATURE_PANEL.md) and the active
+context contract for detailed annual/feature coverage.
+
+## Active context panel roles, 2026-10-15
+
+By user direction, the verified 80% original-cohort panel is now primary; the 90%
+panel is retained as sensitivity. The [promotion/comparison record](CONTEXT_SENSITIVITY_80.md)
+preserves original 90% →80% comparison tables and exact immutable run pins.
+Context-value coverage among paper-qualified rows is 96.27% versus 71.06% over
+2010–2023, and 92.09% versus 33.57% in 2010–2015 (80% versus 90%). Exhaustive requests,
+original denominators, paper15, technical298, PIT cutoffs and separate daily
+artifacts are unchanged. This is a user policy choice, not selection by model
+performance or proof that remaining omissions are random.

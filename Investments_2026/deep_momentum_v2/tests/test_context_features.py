@@ -7,7 +7,9 @@ import pandas as pd
 import pyarrow as pa
 
 from dmv2.context_features import (
-    _cohorts, balanced_cross_sectional_bases, compute_context_features, context_feature_specs,
+    AVAILABLE_CONTEXT_POLICY, COMPLETE_CONTEXT_POLICY, SENSITIVITY_CONTEXT_POLICY,
+    _cohorts, balanced_cross_sectional_bases, compute_context_features,
+    context_coverage_fraction, context_feature_specs,
 )
 from dmv2.identity_policy import PROVISIONAL_IDENTITY_POLICY, STRICT_IDENTITY_POLICY
 from dmv2.universe import DataContractError
@@ -26,15 +28,15 @@ class ContextFeaturesTests(unittest.TestCase):
             frame.loc[reviewed, "identity_review_required"] = True
         return args
 
-    def fixture(self, n=80, signal_index=59):
+    def fixture(self, n=80, signal_index=59, nstocks=4):
         sessions = pd.bdate_range("1999-01-04", periods=n).strftime("%Y-%m-%d").tolist()
-        ids = ("P1", "P2", "P3", "P4")
+        ids = tuple(f"P{j+1}" for j in range(nstocks))
         signals, historical, prices = [], [], []
         for j, provider in enumerate(ids):
             for i, day in enumerate(sessions):
                 member = dict(source_security_id=f"S{j+1}", signal_date=day,
                     intrinio_security_id=provider, identity_status="resolved",
-                    index_id="sp500" if j < 2 else "sp400",
+                    index_id="sp500" if j < nstocks // 2 else "sp400",
                     membership_effective_date="1998-01-01", membership_availability_date="1998-01-01")
                 historical.append(member)
                 if i == signal_index:
@@ -79,6 +81,311 @@ class ContextFeaturesTests(unittest.TestCase):
         # Median=2 and MAD=.5; all four original members determine normalization.
         np.testing.assert_allclose(indexed["xs_universe_robust_zscore__px_simple_return_5s"],
                                    np.array([-1, 0, 0, 2])/(1.4826*.5))
+
+    def test_named_context_policy_thresholds_are_explicit_and_default_stays_complete(self):
+        self.assertEqual(context_coverage_fraction(COMPLETE_CONTEXT_POLICY), 1.)
+        self.assertEqual(context_coverage_fraction(AVAILABLE_CONTEXT_POLICY), .9)
+        self.assertEqual(context_coverage_fraction(SENSITIVITY_CONTEXT_POLICY), .8)
+        with self.assertRaises(DataContractError):
+            context_coverage_fraction("available_cohort_85pct")
+        result = compute_context_features(**self.fixture())
+        self.assertEqual(result.provenance["context_policy"], COMPLETE_CONTEXT_POLICY)
+        self.assertEqual(result.provenance["minimum_original_cohort_coverage"], 1.)
+
+    def test_eighty_percent_inclusive_boundary_is_per_variable_and_not_ninety_percent(self):
+        args = self.fixture(nstocks=10)
+        args["daily_result"].table.loc[[8, 9], "px_simple_return_5s"] = np.nan
+        args["daily_result"].table.loc[[7, 8, 9], "px_simple_return_20s"] = np.nan
+        result = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        rank = "xs_universe_rank_pct__px_simple_return_5s"
+        robust = "xs_universe_robust_zscore__px_simple_return_5s"
+        indexed = result.table.set_index("source_security_id")
+        observed_ids = [f"S{i}" for i in range(1, 9)]
+        np.testing.assert_allclose(indexed.loc[observed_ids, rank], np.arange(8)/7)
+        np.testing.assert_allclose(indexed.loc[observed_ids, robust],
+                                   (np.arange(1, 9)-4.5)/(1.4826*2))
+        self.assertTrue(indexed.loc[["S9", "S10"], [rank, robust]].isna().all().all())
+        row = result.coverage.query("feature_name==@rank").iloc[0]
+        self.assertEqual((row.cohort_size, row.observed_members, row.status), (10, 8, "ok"))
+        self.assertEqual(row.minimum_coverage_fraction, .8)
+        self.assertEqual(row.normalization_policy, SENSITIVITY_CONTEXT_POLICY)
+        self.assertEqual(result.provenance["minimum_original_cohort_coverage"], .8)
+        failed = result.coverage.query("feature_name=='xs_universe_rank_pct__px_simple_return_20s'").iloc[0]
+        self.assertEqual((failed.observed_members, failed.status), (7, "below_coverage_threshold"))
+        self.assertTrue(result.table.xs_universe_rank_pct__px_simple_return_20s.isna().all())
+        reference = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        self.assertTrue(reference.table[rank].isna().all())
+        self.assertEqual(reference.coverage.query("feature_name==@rank").iloc[0].minimum_coverage_fraction, .9)
+
+    def test_eighty_percent_requires_exhaustive_requests_even_above_coverage_threshold(self):
+        args = self.fixture(nstocks=10)
+        args["requested_security_ids"] = args["requested_security_ids"][:-1]
+        args["daily_prices"] = args["daily_prices"][args["daily_prices"].intrinio_security_id.ne("P10")]
+        args["daily_result"].table = args["daily_result"].table.iloc[:-1]
+        result = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        rank = "xs_universe_rank_pct__px_simple_return_5s"
+        row = result.coverage.query("feature_name==@rank").iloc[0]
+        self.assertEqual((row.cohort_size, row.observed_members, row.status), (10, 9, "incomplete_request"))
+        self.assertFalse(row.request_exhaustive)
+        self.assertTrue(result.table[rank].isna().all())
+        self.assertTrue(result.table.market_ew_return_5s.isna().all())
+        daily = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s' and context_group=='universe'")
+        self.assertEqual(set(daily.status), {"incomplete_request"})
+
+    def test_eighty_percent_original_denominator_retains_identity_blocked_members(self):
+        for blocked_count in (2, 3):
+            with self.subTest(blocked_count=blocked_count):
+                args = self.fixture(nstocks=10)
+                blocked = {f"S{i}" for i in range(11-blocked_count, 11)}
+                for name in ("signal_cohorts", "daily_cohorts"):
+                    args[name].loc[args[name].source_security_id.isin(blocked), "identity_status"] = "needs_review"
+                result = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+                rank = "xs_universe_rank_pct__px_simple_return_5s"
+                row = result.coverage.query("feature_name==@rank").iloc[0]
+                self.assertEqual((row.cohort_size, row.observed_members), (10, 10-blocked_count))
+                self.assertTrue(row.request_exhaustive)
+                self.assertEqual(result.table[rank].notna().sum(), 8 if blocked_count == 2 else 0)
+                self.assertEqual(row.status, "ok" if blocked_count == 2 else "below_coverage_threshold")
+
+    def test_eighty_percent_each_sleeve_gates_independently_for_rank_and_market_spread(self):
+        args = self.fixture(nstocks=20)
+        args["daily_result"].table.loc[[17, 18, 19], "px_simple_return_5s"] = np.nan
+        day = args["signal_cohorts"].signal_date.iloc[0]
+        mask = args["daily_prices"].intrinio_security_id.isin(("P18", "P19", "P20")) & args["daily_prices"].trading_date.eq(day)
+        args["daily_prices"].loc[mask, "adj_close"] = np.nan
+        result = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        table = result.table.set_index("source_security_id")
+        self.assertEqual(table.xs_universe_rank_pct__px_simple_return_5s.notna().sum(), 17)
+        self.assertTrue(table.loc[[f"S{i}" for i in range(1, 11)], "xs_index_sleeve_rank_pct__px_simple_return_5s"].notna().all())
+        self.assertTrue(table.loc[[f"S{i}" for i in range(11, 21)], "xs_index_sleeve_rank_pct__px_simple_return_5s"].isna().all())
+        self.assertTrue(table.market_ew_return_5s.notna().all())
+        self.assertTrue(table.market_sleeve_spread_sp400_minus_sp500_5s.isna().all())
+        legs = result.coverage.query("feature_name=='market_sleeve_spread_sp400_minus_sp500_5s'").set_index("context_group")
+        self.assertEqual(legs.at["sp500", "status"], "ok")
+        self.assertEqual(legs.at["sp400", "status"], "below_coverage_threshold")
+        self.assertEqual(legs.at["sp400_minus_sp500", "status"], "below_coverage_threshold")
+
+    def test_eighty_percent_daily_benchmark_boundary_does_not_fill_stock_gaps(self):
+        args = self.fixture(nstocks=10)
+        bad_day = args["session_dates"][45]
+        mask = args["daily_prices"].intrinio_security_id.isin(("P5", "P10")) & args["daily_prices"].trading_date.eq(bad_day)
+        args["daily_prices"].loc[mask, "adj_close"] = np.nan
+        result = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        indexed = result.table.set_index("source_security_id")
+        daily = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s' and context_group=='universe'")
+        row = daily[daily.signal_date.eq(bad_day)].iloc[0]
+        self.assertEqual((row.cohort_size, row.observed_members, row.status), (10, 8, "ok"))
+        self.assertTrue(np.isfinite(indexed.at["S1", "relative_market_beta_20s"]))
+        self.assertTrue(np.isfinite(indexed.at["S1", "relative_sleeve_beta_20s"]))
+        self.assertTrue(pd.isna(indexed.at["S5", "relative_market_beta_20s"]))
+        self.assertTrue(pd.isna(indexed.at["S10", "relative_market_beta_20s"]))
+        reference = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        self.assertTrue(reference.table.relative_market_beta_20s.isna().all())
+
+    def test_eighty_percent_keeps_complete_calendar_pairs_and_explicit_daily_membership(self):
+        for missing_membership in (False, True):
+            with self.subTest(missing_membership=missing_membership):
+                args = self.fixture(nstocks=10)
+                bad_day = args["session_dates"][45]
+                if missing_membership:
+                    args["daily_cohorts"] = args["daily_cohorts"][args["daily_cohorts"].signal_date.ne(bad_day)]
+                else:
+                    mask = args["daily_prices"].intrinio_security_id.isin(("P8", "P9", "P10")) & args["daily_prices"].trading_date.eq(bad_day)
+                    args["daily_prices"].loc[mask, "adj_close"] = np.nan
+                result = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+                self.assertTrue(result.table.market_ew_return_5s.notna().all())
+                self.assertTrue(result.table.relative_market_beta_20s.isna().all())
+                self.assertTrue(result.table.relative_relative_return_market_20s.isna().all())
+                daily = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s' and context_group=='universe'")
+                row = daily[daily.signal_date.eq(bad_day)].iloc[0]
+                self.assertEqual(row.status, "context_missing_date" if missing_membership else "below_coverage_threshold")
+
+    def test_eighty_and_ninety_shared_finite_values_are_exactly_identical(self):
+        args = self.fixture(nstocks=10)
+        args["daily_result"].table.loc[[8, 9], "px_simple_return_5s"] = np.nan
+        args["daily_result"].table.loc[9, "px_simple_return_20s"] = np.nan
+        sensitivity = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        reference = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        names = [spec["name"] for spec in context_feature_specs()]
+        left = sensitivity.table[names].to_numpy(dtype=float)
+        right = reference.table[names].to_numpy(dtype=float)
+        shared = np.isfinite(left) & np.isfinite(right)
+        self.assertGreater(shared.sum(), 0)
+        self.assertTrue((~np.isfinite(right) | np.isfinite(left)).all())
+        np.testing.assert_array_equal(left[shared], right[shared])
+        self.assertGreater(np.isfinite(left).sum(), np.isfinite(right).sum())
+
+    def test_eighty_percent_future_inputs_do_not_change_prior_features_or_coverage(self):
+        args = self.fixture(nstocks=10, signal_index=79)
+        earlier_day = args["session_dates"][59]
+        earlier = args["daily_cohorts"][args["daily_cohorts"].signal_date.eq(earlier_day)]
+        args["signal_cohorts"] = pd.concat([earlier, args["signal_cohorts"]], ignore_index=True)
+        indicators = args["daily_result"].table.copy()
+        indicators["signal_date"] = earlier_day
+        args["daily_result"].table = pd.concat([indicators, args["daily_result"].table], ignore_index=True)
+        original = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        args["daily_prices"].loc[args["daily_prices"].trading_date.gt(earlier_day), ["adj_close", "close", "volume"]] *= 100
+        for name in ("signal_cohorts", "daily_cohorts"):
+            frame = args[name]
+            frame.loc[frame.signal_date.gt(earlier_day) & frame.source_security_id.isin(("S8", "S9", "S10")), "identity_status"] = "needs_review"
+        args["daily_result"].table.loc[args["daily_result"].table.signal_date.gt(earlier_day), "px_simple_return_5s"] = np.nan
+        changed = compute_context_features(**args, context_policy=SENSITIVITY_CONTEXT_POLICY)
+        pd.testing.assert_frame_equal(original.table[original.table.signal_date.eq(earlier_day)],
+                                      changed.table[changed.table.signal_date.eq(earlier_day)])
+        pd.testing.assert_frame_equal(original.coverage[original.coverage.signal_date.le(earlier_day)],
+                                      changed.coverage[changed.coverage.signal_date.le(earlier_day)])
+
+    def test_ninety_percent_inclusive_boundary_uses_only_valid_values_per_base(self):
+        args = self.fixture(nstocks=10)
+        base = "px_simple_return_5s"
+        args["daily_result"].table.loc[9, base] = np.nan
+        args["daily_result"].table.loc[[8, 9], "px_simple_return_20s"] = np.nan
+        result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        indexed = result.table.set_index("source_security_id")
+        rank = f"xs_universe_rank_pct__{base}"
+        robust = f"xs_universe_robust_zscore__{base}"
+        np.testing.assert_allclose(indexed.loc[[f"S{i}" for i in range(1, 10)], rank], np.arange(9)/8)
+        self.assertTrue(pd.isna(indexed.at["S10", rank]))
+        self.assertTrue(pd.isna(indexed.at["S10", robust]))
+        np.testing.assert_allclose(indexed.loc[[f"S{i}" for i in range(1, 10)], robust],
+                                   (np.arange(1, 10)-5)/(1.4826*2))
+        self.assertTrue(indexed.xs_universe_rank_pct__px_simple_return_20s.isna().all())
+        record = result.coverage.query("feature_name==@rank").iloc[0]
+        self.assertEqual((record.cohort_size, record.observed_members, record.status), (10, 9, "ok"))
+        self.assertEqual(record.coverage_fraction, .9)
+        self.assertEqual(record.minimum_coverage_fraction, .9)
+        self.assertTrue(record.request_exhaustive)
+        self.assertEqual(record.context_policy, AVAILABLE_CONTEXT_POLICY)
+        failed = result.coverage.query("feature_name=='xs_universe_rank_pct__px_simple_return_20s'").iloc[0]
+        self.assertEqual(failed.status, "below_coverage_threshold")
+
+    def test_ninety_percent_exhaustive_requests_are_separate_from_observed_coverage(self):
+        args = self.fixture(nstocks=10)
+        args["requested_security_ids"] = args["requested_security_ids"][:-1]
+        args["daily_prices"] = args["daily_prices"][args["daily_prices"].intrinio_security_id != "P10"]
+        args["daily_result"].table = args["daily_result"].table.iloc[:-1]
+        result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        rank = "xs_universe_rank_pct__px_simple_return_5s"
+        self.assertTrue(result.table[rank].isna().all())
+        self.assertTrue(result.table.market_ew_return_5s.isna().all())
+        row = result.coverage.query("feature_name==@rank").iloc[0]
+        self.assertEqual((row.cohort_size, row.observed_members), (10, 9))
+        self.assertEqual(row.status, "incomplete_request")
+        self.assertFalse(row.request_exhaustive)
+        self.assertEqual((row.identity_eligible_members, row.requested_identity_eligible_members), (10, 9))
+        daily = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s' and context_group=='universe'")
+        self.assertEqual(set(daily.status), {"incomplete_request"})
+
+    def test_ninety_percent_original_denominator_includes_identity_blocked_members(self):
+        for blocked_count in (1, 2):
+            with self.subTest(blocked_count=blocked_count):
+                args = self.fixture(nstocks=10)
+                blocked_ids = {f"S{i}" for i in range(11-blocked_count, 11)}
+                for name in ("signal_cohorts", "daily_cohorts"):
+                    args[name].loc[args[name].source_security_id.isin(blocked_ids), "identity_status"] = "needs_review"
+                result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+                name = "xs_universe_rank_pct__px_simple_return_5s"
+                row = result.coverage.query("feature_name==@name").iloc[0]
+                self.assertEqual((row.cohort_size, row.observed_members), (10, 10-blocked_count))
+                self.assertEqual(row.identity_eligible_members, 10-blocked_count)
+                self.assertTrue(row.request_exhaustive)
+                self.assertEqual(result.table[name].notna().sum(), 9 if blocked_count == 1 else 0)
+                self.assertEqual(row.status, "ok" if blocked_count == 1 else "below_coverage_threshold")
+
+    def test_ninety_percent_each_sleeve_gates_independently_for_ranks_and_market_spread(self):
+        args = self.fixture(nstocks=20)
+        args["daily_result"].table.loc[[18, 19], "px_simple_return_5s"] = np.nan
+        day = args["signal_cohorts"].signal_date.iloc[0]
+        mask = args["daily_prices"].intrinio_security_id.isin(("P19", "P20")) & args["daily_prices"].trading_date.eq(day)
+        args["daily_prices"].loc[mask, "adj_close"] = np.nan
+        result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        table = result.table.set_index("source_security_id")
+        self.assertEqual(table.xs_universe_rank_pct__px_simple_return_5s.notna().sum(), 18)
+        self.assertTrue(table.loc[[f"S{i}" for i in range(1, 11)], "xs_index_sleeve_rank_pct__px_simple_return_5s"].notna().all())
+        self.assertTrue(table.loc[[f"S{i}" for i in range(11, 21)], "xs_index_sleeve_rank_pct__px_simple_return_5s"].isna().all())
+        self.assertTrue(table.market_ew_return_5s.notna().all())
+        self.assertTrue(table.market_sleeve_spread_sp400_minus_sp500_5s.isna().all())
+        legs = result.coverage.query("feature_name=='market_sleeve_spread_sp400_minus_sp500_5s'").set_index("context_group")
+        self.assertEqual(legs.at["sp500", "status"], "ok")
+        self.assertEqual(legs.at["sp400", "status"], "below_coverage_threshold")
+        self.assertEqual(legs.at["sp400", "coverage_fraction"], .8)
+
+    def test_ninety_percent_daily_gate_keeps_complete_temporal_relative_pairs(self):
+        args = self.fixture(nstocks=20)
+        bad_day = args["session_dates"][45]
+        mask = args["daily_prices"].intrinio_security_id.isin(("P18", "P19", "P20")) & args["daily_prices"].trading_date.eq(bad_day)
+        args["daily_prices"].loc[mask, "adj_close"] = np.nan
+        result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        # The current 5-session aggregate recovers, but a historical bad day is
+        # never skipped from a 20-session relative feature window.
+        self.assertTrue(result.table.market_ew_return_5s.notna().all())
+        self.assertTrue(result.table.relative_market_beta_20s.isna().all())
+        self.assertTrue(result.table.relative_relative_return_market_20s.isna().all())
+        daily = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s' and context_group=='universe'")
+        row = daily[daily.signal_date.eq(bad_day)].iloc[0]
+        self.assertEqual((row.cohort_size, row.observed_members, row.status), (20, 17, "below_coverage_threshold"))
+        self.assertEqual(row.latest_input_date, bad_day)
+
+    def test_ninety_percent_daily_benchmark_accepts_boundary_without_filling_stock_gaps(self):
+        args = self.fixture(nstocks=20)
+        bad_day = args["session_dates"][45]
+        mask = args["daily_prices"].intrinio_security_id.isin(("P19", "P20")) & args["daily_prices"].trading_date.eq(bad_day)
+        args["daily_prices"].loc[mask, "adj_close"] = np.nan
+        result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        indexed = result.table.set_index("source_security_id")
+        daily = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s' and context_group=='universe'")
+        row = daily[daily.signal_date.eq(bad_day)].iloc[0]
+        self.assertEqual((row.cohort_size, row.observed_members, row.status), (20, 18, "ok"))
+        self.assertTrue(np.isfinite(indexed.at["S1", "relative_market_beta_20s"]))
+        # Neither valid market context nor 90-percent cross-sectional coverage
+        # repairs the missing stock's own complete-window requirement.
+        self.assertTrue(pd.isna(indexed.at["S19", "relative_market_beta_20s"]))
+        self.assertTrue(pd.isna(indexed.at["S20", "relative_market_beta_20s"]))
+        self.assertTrue(pd.isna(indexed.at["S11", "relative_sleeve_beta_20s"]))
+
+    def test_ninety_percent_does_not_fill_missing_daily_membership_dates(self):
+        args = self.fixture(nstocks=10)
+        missing_day = args["session_dates"][45]
+        args["daily_cohorts"] = args["daily_cohorts"][args["daily_cohorts"].signal_date.ne(missing_day)]
+        result = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        records = result.coverage.query("feature_name=='benchmark_daily_ew_return_1s'")
+        missing = records[records.signal_date.eq(missing_day)]
+        self.assertEqual(set(missing.context_group), {"universe", "sp500", "sp400"})
+        self.assertEqual(set(missing.status), {"context_missing_date"})
+        self.assertTrue(result.table.relative_market_beta_20s.isna().all())
+
+    def test_ninety_percent_future_changes_cannot_change_prior_values_or_coverage(self):
+        args = self.fixture(nstocks=10, signal_index=79)
+        earlier_day = args["session_dates"][59]
+        earlier = args["daily_cohorts"][args["daily_cohorts"].signal_date.eq(earlier_day)]
+        args["signal_cohorts"] = pd.concat([earlier, args["signal_cohorts"]], ignore_index=True)
+        earlier_indicators = args["daily_result"].table.copy()
+        earlier_indicators["signal_date"] = earlier_day
+        args["daily_result"].table = pd.concat([earlier_indicators, args["daily_result"].table], ignore_index=True)
+        original = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        args["daily_prices"].loc[args["daily_prices"].trading_date.gt(earlier_day), ["adj_close", "close", "volume"]] *= 100
+        for name in ("signal_cohorts", "daily_cohorts"):
+            frame = args[name]
+            frame.loc[frame.signal_date.gt(earlier_day) & frame.source_security_id.eq("S10"), "identity_status"] = "needs_review"
+        args["daily_result"].table.loc[args["daily_result"].table.signal_date.gt(earlier_day), "px_simple_return_5s"] = np.nan
+        changed = compute_context_features(**args, context_policy=AVAILABLE_CONTEXT_POLICY)
+        pd.testing.assert_frame_equal(original.table[original.table.signal_date.eq(earlier_day)],
+                                      changed.table[changed.table.signal_date.eq(earlier_day)])
+        pd.testing.assert_frame_equal(original.coverage[original.coverage.signal_date.le(earlier_day)],
+                                      changed.coverage[changed.coverage.signal_date.le(earlier_day)])
+
+    def test_ninety_percent_target_fields_remain_rejected_and_unknown_policy_fails(self):
+        args = self.fixture(nstocks=10)
+        with self.assertRaises(DataContractError):
+            compute_context_features(**args, context_policy="available_80pct")
+        for policy in (AVAILABLE_CONTEXT_POLICY, SENSITIVITY_CONTEXT_POLICY):
+            for input_name in ("daily_prices", "daily_cohorts", "signal_cohorts", "daily_result"):
+                with self.subTest(context_policy=policy, input_name=input_name):
+                    args = self.fixture(nstocks=10)
+                    frame = args[input_name].table if input_name == "daily_result" else args[input_name]
+                    frame["future_target"] = 123.
+                    with self.assertRaises(DataContractError):
+                        compute_context_features(**args, context_policy=policy)
 
     def test_partial_requested_sample_withholds_universe_normalization(self):
         args = self.fixture()

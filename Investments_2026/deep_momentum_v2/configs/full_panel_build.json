@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-full-feature-panel-2010-2023-context80-primary-v3",
+  "authorization": "User promoted the verified 80% original-cohort context panel to primary and retained 90% as sensitivity on 2026-10-15; paper15, PIT, daily inputs and exact lookbacks unchanged.",
+  "start_year": 2010,
+  "end_year": 2023,
+  "universe": "combined",
+  "history_sessions": 503,
+  "identity_policy": "provisional_unique_resolved_link",
+  "normalization_policy": "signal_qualified_common_momentum_v1",
+  "context_policy": "available_cohort_80pct",
+  "include_outcome_daily": true,
+  "execution": {
+    "backend": "local_downloaded_sources",
+    "partition": "outcome_year",
+    "workers": 1,
+    "maximum_wall_seconds": 10800,
+    "maximum_peak_rss_bytes": 4294967296,
+    "maximum_output_bytes": 10737418240,
+    "maximum_projected_read_bytes": 21474836480,
+    "model_fitting": false,
+    "imputation_fitting": false,
+    "backtesting": false,
+    "cloud_mutations": false
+  },
+  "purpose": "Diagnostic coverage only. Full-period missingness must never select or fit transformations for an earlier forecast. Preserve raw daily prices, original cohorts and unfilled feature values separately."
+}

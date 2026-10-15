@@ -43,7 +43,8 @@ def registered_feature_specs():
 
 def build_feature_panel(daily_prices, calendar, signal_cohorts, *, requested_security_ids,
                         daily_cohorts=None, mode='historical_reconstruction',
-                        identity_policy=STRICT_IDENTITY_POLICY,normalization_policy='complete_cohort'):
+                        identity_policy=STRICT_IDENTITY_POLICY,normalization_policy='complete_cohort',
+                        context_policy='complete_cohort'):
     """Retain every original signal member; compute only registered past inputs."""
     if mode == 'knowledge_time':
         raise KnowledgeTimeUnavailable('Current membership/identity/adjustment evidence cannot certify knowledge time')
@@ -72,7 +73,7 @@ def build_feature_panel(daily_prices, calendar, signal_cohorts, *, requested_sec
                                    identity_policy=identity_policy)
     context = compute_context_features(daily, daily_prices, sessions, signal_cohorts=snapshots,
                                        requested_security_ids=ids, daily_cohorts=daily_cohorts,
-                                       context_policy='complete_cohort', identity_policy=identity_policy)
+                                       context_policy=context_policy, identity_policy=identity_policy)
     specs = (*daily.specs,*paper.specs,*context.specs)
     names = [s['name'] for s in specs]
     ledger = []
@@ -152,7 +153,9 @@ def build_feature_panel(daily_prices, calendar, signal_cohorts, *, requested_sec
     provenance.update(identity_policy_provenance(identity_policy))
     return FeaturePanel(pa.Table.from_pandas(frame, preserve_index=False),
                         pa.Table.from_pandas(ledger_frame, preserve_index=False), specs,
-                        {'daily': daily.coverage, 'paper': paper.coverage, 'context': context.coverage,
+                        {'daily': daily.coverage, 'paper': paper.coverage,
+                         'context': context.coverage.loc[context.coverage.feature_name.ne('benchmark_daily_ew_return_1s')].reset_index(drop=True),
+                         'daily_benchmark': context.coverage.loc[context.coverage.feature_name.eq('benchmark_daily_ew_return_1s')].reset_index(drop=True),
                          'paper_raw_momentum': paper.table[[*KEYS, *(c for c in paper.table if c.startswith('MOM') and ('_raw' in c))]].copy()},
                         summary, provenance)
 

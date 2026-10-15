@@ -11,7 +11,7 @@ their original flags/statuses remain in separate coverage. Missing/ambiguous
 routes and collisions remain blocked. Formula definitions, predictor allowlists,
 and past-input clocks are preserved. The later active paper normalization uses
 one common five-momentum population after an exhaustive original-cohort request;
-the context worker retains its explicit complete-cohort policy.
+the active context policy now uses 80% original-cohort coverage, with 90% sensitivity. Earlier complete-cohort results remain historical evidence.
 
 ## Definition bank and explicit adaptations
 
@@ -51,12 +51,12 @@ roles, source reference and model exclusions are emitted by each worker's
 `*_feature_specs()` and saved to `feature_dictionary.json`.
 
 The strict V2 engineering policy requires complete exact required session
-inputs, rather than adopting the external code's 80-percent gates. Incomplete
+inputs, for individual time windows. The 80% context threshold is a cross-sectional coverage rule; it does not relax temporal windows. Incomplete
 or undefined features remain null with reasons; no missing-date collapse,
 forward fill, stale-price fallback, missing-to-zero conversion or sample ranks.
 The paper does not specify its SD divisor: **sample SD, ddof=1**, is a declared
-V2 adaptation. The active common-five paper population and the legacy complete
-context policy are explicit V2 choices, not author-specified cleaning rules.
+V2 adaptation. The active common-five paper population and explicit context
+coverage policies are V2 choices, not author-specified cleaning rules.
 
 ## Clock and separation
 
@@ -108,11 +108,13 @@ and colliding identities. Current delisted flags, future quotes, missing future
 targets and future membership never select these rows. Price attachment uses
 defensive quarantine even if a caller incorrectly labels a flagged route resolved.
 
-The default notebook is a two-ID engineering sample. A feature requiring all
-original members is withheld when an identity, request or required value is
-missing. It cannot normalize two requested stocks as the intended market.
-Within-sleeve statistics require their complete original sleeve; broader
-universe statistics require the complete original declared universe.
+The default notebook is a two-ID engineering sample. Statistical features
+require exhaustive admitted-ID requests over the original group, then their
+own population/coverage gate. Two requested stocks cannot stand in for the
+intended market. For added context, each sleeve and the declared union require
+at least 80% valid original members independently;90% remains sensitivity.
+Blocked identities remain in the denominator. Individual temporal windows
+must still be complete.
 
 Market/relative workers additionally require **dated DAILY original cohorts**.
 Monthly snapshots cannot be frozen backward to manufacture daily benchmark
@@ -217,8 +219,23 @@ Its shared means/SDs preserve their time-series levels. Arbitrary two-ID samples
 withhold normalized values rather than redefining the universe.
 
 The [2010 initialization audit](INITIALIZATION_2010.md) measures those 15 paper
-inputs across the original historical cohorts. It does not certify all715
+inputs across the original historical cohorts. It does not certify all 715
 candidate columns or full daily context. Extra predictor missingness does not
 remove paper-qualified prediction rows. The preprocessing worker fits medians,
 constant/all-missing exclusions and a fixed indicator schema on selected
 completed training rows only; prediction transformation consumes no labels.
+
+## Active added-context availability, 2026-10-15
+
+The user first authorized a 90% rebuild, then an 80% sensitivity comparison, and
+subsequently selected `available_cohort_80pct` as primary with 90% as sensitivity.
+The already verified panels are retained byte-for-byte under explicit role pins.
+These choices supersede the complete-cohort context policy in earlier engineering
+records. Exhaustive admitted-ID requests remain mandatory;
+coverage uses all original historical members, including blocked identities.
+Ranks/MAD use per-base valid values only; no pre-rank imputation occurs. Daily
+benchmarks check 80% on every historical daily union/sleeve, sleeve spreads gate
+both sleeves, and individual exact lookbacks/relative pairs remain unchanged.
+The paper15 and 298 technical definitions are unchanged. The frozen728 definitions
+and715-name allowlist are preserved. Read [the detailed policy](CONTEXT_AVAILABILITY.md)
+and [full-build results](FULL_FEATURE_PANEL.md).
