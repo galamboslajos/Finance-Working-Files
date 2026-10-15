@@ -1,5 +1,40 @@
 # Data and reference status
 
+## Active classifier pilot, 2026-10-15
+
+**COMPLETE AND VERIFIED:** the user authorized four probability-model arms: RF/XGBoost
+on Paper15 and the expanded candidate feature bank, with 2010–2017 fitting and
+2018–2019 validation. The [pilot record](CLASSIFIER_PILOT.md) and frozen
+[`classifier_pilot.json`](../configs/classifier_pilot.json) define this separate
+execution. The completed run retains 86,825 original training rows, 77,690 supervised
+fit rows, 21,827 original validation rows, 20,755 signal-time eligible validation
+predictions and 20,709 observed validation classes. The 46 missing-label
+predictions are retained. Training-only preprocessing retained all 15/715
+candidate inputs, with 30/1,430 final columns including missing indicators.
+
+Each arm received one fit with seed 1729, using the primary 80% context policy
+and training-only preprocessing. No 90% sensitivity model, early stopping,
+parameter search, RET, backtest or 2020–2023 outcome evaluation is included.
+The paper's 100-fit ensemble is a separate reference method. Existing features,
+cohorts, PIT checks and daily tables are preserved. Historical no-fit statements
+below describe their respective earlier stages; the active execution authority
+is the pilot contract, not the original model-design draft.
+
+Mean monthly log loss is 2.277891 for RF/Paper15, 2.276638 for XGBoost/Paper15,
+2.263056 for RF/expanded and 2.264372 for XGBoost/expanded, against 2.302585 for
+the uniform reference. Expanded RF's 13.60% mean monthly accuracy and lowest
+observed loss are descriptive development results, without an economic or
+significance claim. Four fits took 911.08 seconds with 5.01 GiB peak RSS; all
+726 recorded feature/daily/target/pointer source files remained unchanged.
+Independent verification checked 71 artifacts, 730 training input-column
+statistics, every prepared matrix, all six forecast reports and exact probability
+reproduction from all four reloaded models. The 690-test suite and seven later
+focused verifier tests passed. The fresh master completed 24 code cells without
+implicit fitting/building or changes to its separate daily/monthly/feature
+frames. See the [full pilot audit](CLASSIFIER_PILOT.md) for provenance and limits.
+
+## Source and earlier engineering evidence
+
 Independent copies of three repository-pinned source releases are in data/raw/:
 
 - Intrinio daily market data, plus identity and quality metadata.
@@ -130,7 +165,7 @@ and strict 120-calendar-month realized-class RET payoffs. Forward-outcome reques
 are distinguished from past feature requests. The master checks already loaded
 bounded samples and keeps daily/feature data separate. Full historical label and
 payoff coverage is now measured by the separate explicit audit below.
-No estimator or backtest has run for this implementation; economic accounting
+No estimator or backtest ran during that shared-worker implementation; economic accounting
 remains unresolved.
 
 ## Full monthly target and RET coverage audit, 2026-10-15

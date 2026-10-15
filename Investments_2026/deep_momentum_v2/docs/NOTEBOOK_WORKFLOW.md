@@ -104,6 +104,9 @@ not evidence of full-history target coverage. See [feature contracts](FEATURES.m
     in section 16. Expose lazy full-target and monthly-outcome datasets, keeping
     full target materialization an explicit separate call. Run All does not
     rebuild outcomes or fit a model. See [the full target workflow](FULL_TARGET_PANEL.md).
+15. Verify the completed first classifier pilot's saved artifact hashes and
+    display six small comparison rows in section 17. This reader does not load
+    estimators, prepare full matrices or fit preprocessing/models.
 
 **HISTORICAL VERIFICATION, 2026-10-14 (former 2000 settings):** the installed
 master completed Run All in two
@@ -173,9 +176,10 @@ matching. All original constituents remain in the audit ledger.
 Provisional monthly endpoint arithmetic and daily preservation are implemented.
 The feature dictionary and workers are implemented in [FEATURES.md](FEATURES.md).
 Shared monthly class labels and class-payoff workers are now implemented; the
-full-history empirical coverage audit is complete. Estimator adapters, a measured
-pilot, complete monthly event accounting and portfolio evaluation follow their
-remaining authorization and methodology decisions. There are no
+full-history empirical coverage audit is complete. Estimator adapters and the
+first measured development pilot are implemented in
+[CLASSIFIER_PILOT.md](CLASSIFIER_PILOT.md). Complete monthly event accounting and
+portfolio evaluation retain their remaining methodology decisions. There are no
 placeholder model calls that pretend to execute the research. Source
 knowledge-time and terminal-event limitations remain documented in
 [`DATA_FOUNDATIONS.md`](DATA_FOUNDATIONS.md).
@@ -248,7 +252,9 @@ on rerun and displays unresolved decisions; Run All does not start fitting.
 See [MODEL_COMPARISON.md](MODEL_COMPARISON.md) before implementing estimator
 adapters. The combined primary universe is selected, and the shared target
 contract fixes exact ties, missing-outcome ranking and strict RET grid handling.
-Estimator validation/settings and measured fit budgets remain draft.
+That draft is historical planning evidence. The separately authorized first
+pilot's validation/settings and measured fit budget are fixed in
+`configs/classifier_pilot.json`; section 17 displays its saved results.
 
 ## Shared class labels and RET
 
@@ -287,3 +293,30 @@ feature frames, and reloaded the full shared class state. All **620 tests** and
 the independent full class/RET verifier passed. Private receipts and the executed
 notebook are under ignored `outputs/full_target_panel/verification/`; the
 versioned notebook remains output-free. No classifier or backtest ran.
+
+## First four-arm classifier pilot
+
+Section 17 uses `dmv2.classifier_pilot.read_classifier_pilot_run(catalog)` and
+displays RF and XGBoost on Paper15 and the expanded bank, alongside uniform and
+training-prior references. The explicit pilot trains on 2010–2017 completed
+outcomes and validates on 2018–2019. Its input preparation and four fits occur
+only through the separate CLI action, never Run All. The reader verifies
+current recipe/source/artifact hashes and reads only the flat comparison table;
+it does not load serialized estimators or prepared matrices. A missing run
+prints a message; an invalid saved run fails after clearing old notebook state.
+
+`classifier_pilot_run` and `classifier_pilot_comparison_df` hold the verified
+result. The existing bounded `daily_df`, `monthly_df`, `features_df` and
+`feature_history_df` stay independent and unchanged. RET, 2020–2023 evaluation
+and backtesting remain outside this development pilot. See
+[the frozen protocol and complete results](CLASSIFIER_PILOT.md).
+
+The installed master completed all **24 original code cells** in a fresh
+kernel in **32.99 seconds** after the pilot. Added verification cells blocked
+full pilot loading/fitting, imputer fitting, full target rebuilding and saved
+matrix/model loads; none was called. All six comparison rows were displayed
+and exact before/after checks preserved the separate daily/monthly/feature
+samples. All **690 tests** and the independent full pilot verifier passed; the
+four reloaded models reproduced every probability exactly. Private receipts and
+the executed notebook live under ignored `outputs/model_pilot/verification/`;
+the versioned notebook remains output-free.

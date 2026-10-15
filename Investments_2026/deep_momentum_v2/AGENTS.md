@@ -110,7 +110,7 @@ See [the comparison and promotion record](docs/CONTEXT_SENSITIVITY_80.md).
 For model planning, read docs/MODEL_COMPARISON.md and the standalone
 configs/model_comparison.proposed.json. The primary modelling universe is the
 user-selected historical S&P 500/400 union. The four-arm design and temporal
-inner validation remain proposals, not execution authority. model_design.py
+inner validation in that draft remain historical proposals, not execution authority. model_design.py
 reads draft metadata only. Keep the paper's original expanding/16-input/100-fit
 method distinct from V2's rolling/no-size baseline. Existing panel recipe
 configs are pinned historical contracts; model planning must not rewrite them.
@@ -140,3 +140,33 @@ of the master verifies saved reports and exposes lazy target/outcome views;
 Run All never rebuilds full targets, fits preprocessing/models or backtests.
 Original daily/feature files and the protected 2024+ financial guard remain unchanged.
 Do not treat observed-label coverage as certified delisting or survivorship accounting.
+
+For the first authorized classifier development pilot, read
+`docs/CLASSIFIER_PILOT.md` and `configs/classifier_pilot.json`. This separate
+frozen recipe supersedes the old draft's pilot readiness fields only for four
+fits: RF/XGBoost on Paper15/expanded, 2010–2017 training outcomes and 2018–2019
+validation outcomes. Use `pilot_loading.py`, `pilot_models.py`,
+`pilot_metrics.py` and `classifier_pilot.py`; never rewrite the pinned feature,
+target or normalization recipes to run a model. The approved local ceiling is
+four sequential single-thread fits total, 8 GiB peak RSS and 90 minutes; no
+searches, early stopping, validation-driven refits or implicit additional fits.
+Future experiments need their own explicit scope and frozen protocol.
+
+Fit both preprocessing states on the same supervised training mask only, and
+share each state between RF and XGBoost. Retain all original cohort keys and
+flags, predict every signal-time Paper15-qualified validation row, and score
+only the identical observed-label mask. Do not filter by added-feature
+completeness or future labels. Use saved observed trading-session cutoffs
+within calendar bounds. No 2020–2023 financial values enter this pilot's
+preparation/fitting/evaluation; integrity hashing does not decode those values.
+RET, outer refits/evaluation, protected 2024+ values and backtesting are disabled.
+
+Section 17 calls `read_classifier_pilot_run` to verify saved hashes and small
+reports only. It must not load serialized models, prepare full matrices or fit
+anything. The explicit CLI `run` reuses a completed identical recipe and refuses
+to repeat an incomplete same-identity attempt automatically. Keep generated
+matrices, estimators, probability ledgers and verification receipts private under
+ignored outputs. `scripts/verify_classifier_pilot.py` independently reconciles
+source populations, training-only medians/matrices, scores and saved-model
+inference without refitting. Preserve separate daily/monthly/feature data and
+the provisional identity, source knowledge-time and terminal-event limitations.

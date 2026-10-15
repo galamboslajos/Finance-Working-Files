@@ -1,0 +1,8 @@
+# Exact additional packages for the first classifier pilot; base runtime is pinned in its run identity.
+scikit-learn==1.9.1
+xgboost==3.4.1
+scipy==1.18.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+narwhals==2.27.1
+cloudpickle==3.1.2

@@ -75,7 +75,9 @@ without reading financial values. The last verifies local file sizes and
 SHA-256 values. Local reads do not require Google login. The package now also
 provides bounded price readers and historical constituent reconstruction.
 The explicit mode records source limitations; knowledge-time certification is
-unavailable from these inputs. The modelling packages are not installed.
+unavailable from these inputs. The local pilot uses the exact modelling package
+pins in `requirements-models.lock.txt`; a fresh checkout can install them with
+`.venv/bin/python -m pip install -r requirements-models.lock.txt`.
 
 ## Layout
 
@@ -97,7 +99,7 @@ unavailable from these inputs. The modelling packages are not installed.
 - `reference/papers/`: ignored local source PDFs.
 - `.agents/skills/han-qin-deep-momentum/`: repository-local paper skill.
 - `docs/`: original paper analysis, data status and research design.
-- `outputs/`: future reports and experiment artifacts, ignored.
+- `outputs/`: saved reports, panels and experiment artifacts, ignored.
 
 ## Current state
 
@@ -111,12 +113,14 @@ enter research with their flags retained; missing/ambiguous routes and collision
 remain blocked. Original cohort denominators remain intact.
 The separate [2010–2023 endpoint audit](docs/INITIALIZATION_2010.md) measured
 complete 15-input paper coverage on 140,777 of 152,307 original stock-months
-(92.43%). Full-bank coverage is now measured in [the full-panel audit](docs/FULL_FEATURE_PANEL.md); model fits and backtests remain outstanding. Historical capitalization
+(92.43%). Full-bank coverage is measured in [the full-panel audit](docs/FULL_FEATURE_PANEL.md).
+The first four-arm classifier pilot is described below; backtesting remains outstanding. Historical capitalization
 is absent from the downloaded schemas and deliberately excluded from V2; it
 is not a remaining data task or blocker. The 15-input starting set is a declared
 adaptation, not the paper's complete 16-input baseline. The selected primary modelling universe is the historical S&P 500/400 union.
-Economic return/execution rules, inner validation
-and experiment budget remain OPEN. Exact per-signal warmup is implemented; the
+Economic return/execution rules and subsequent experiment budgets remain OPEN.
+The first development pilot has its own frozen validation, settings and budget
+in `configs/classifier_pilot.json`. Exact per-signal warmup is implemented; the
 15-input endpoint audit does not establish complete daily technical/context history. Selected rolling chronology
 is recorded in configs/research_workflow.json, separate from paper facts.
 Protected 2024+ financial values remain uninspected.
@@ -183,7 +187,7 @@ The retained 90% sensitivity has 71.06% and 33.57%, respectively. All shared fin
 values, paper15, technical298 and daily artifacts are unchanged. Missingness may
 be systematic; promoting 80% does not establish representative or certified PIT data.
 
-## Initial model-comparison sketch
+## Model comparison and first development pilot
 
 The user selected the historical S&P 500 + S&P 400 union. The master now displays
 a metadata-only [four-arm XGBoost/random-forest design](docs/MODEL_COMPARISON.md):
@@ -192,7 +196,21 @@ keeps the shared ten-class probability-to-RET interface, rolling ten-year annual
 fits, monthly predictions and 80% primary/90% sensitivity context policy.
 `configs/model_comparison.proposed.json` records proposed settings and open
 label/validation/budget decisions; `src/dmv2/model_design.py` produces calendar
-plans without estimator dependencies or data reads. No model has been fitted.
+plans without estimator dependencies or data reads. This draft is retained as
+historical planning evidence; it is not the active pilot recipe.
+
+The completed, separately authorized [four-arm classifier pilot](docs/CLASSIFIER_PILOT.md)
+uses 2010–2017 completed outcomes for training and 2018–2019 for validation,
+with one fixed-seed fit each of RF/Paper15, XGBoost/Paper15, RF/expanded and
+XGBoost/expanded. Both feature banks share the same 77,690 supervised training
+rows and 20,755 validation predictions; 20,709 observed labels are scored.
+Preprocessing uses training-only medians and missing indicators. Section 17
+verifies saved comparison reports; **Run All does not start fitting**. Exact
+settings, metrics, verification and repeat commands are in the pilot document.
+Expanded RF had the lowest development log loss (2.2631), followed closely by
+expanded XGBoost (2.2644); both improved on their Paper15 arms. All 690 tests,
+independent probability/score verification and fresh-kernel Run All passed.
+This pilot does not evaluate 2020–2023, score RET or run a backtest.
 
 ## Shared target and RET workers
 
@@ -208,4 +226,5 @@ classes (99.79% of the 140,777 prediction-eligible rows); 292 eligible missing
 outcomes remain visible. All ten classes occur in all 168 months, and all 48
 nominal 2020–2023 RET payoff vectors have complete 120-month histories. Daily
 and feature data are unchanged. Run All reads saved reports and lazy datasets;
-model/preprocessor fits remain separate work.
+model/preprocessor fitting remains a separate explicit action. The first
+development pilot uses the same saved class state and leaves this audit intact.

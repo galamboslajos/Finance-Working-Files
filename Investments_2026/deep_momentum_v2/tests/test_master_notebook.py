@@ -121,6 +121,27 @@ class InteractiveRerunTests(unittest.TestCase):
         labels.assert_not_called()
         self.assertIsNone(state["full_target_run"])
 
+    def test_failed_classifier_pilot_verification_clears_old_results(self):
+        state = {"catalog": Mock(), "classifier_pilot_run": object(),
+                 "classifier_pilot_comparison_df": object()}
+        with patch("dmv2.classifier_pilot.read_classifier_pilot_run", side_effect=ValueError("stale pilot")):
+            with self.assertRaisesRegex(ValueError, "stale pilot"):
+                exec(cell_containing("classifier_pilot_run = read_classifier_pilot_run(catalog)"), state)
+        self.assertIsNone(state["classifier_pilot_run"])
+        self.assertIsNone(state["classifier_pilot_comparison_df"])
+
+    def test_missing_classifier_pilot_never_prepares_inputs_or_fits(self):
+        state = {"catalog": Mock()}
+        with patch("dmv2.classifier_pilot.read_classifier_pilot_run", side_effect=FileNotFoundError), \
+             patch("dmv2.classifier_pilot.run_classifier_pilot") as run, \
+             patch("dmv2.classifier_pilot.load_pilot_data") as load, \
+             patch("dmv2.classifier_pilot.fit_predict_pilot_arm") as fit:
+            exec(cell_containing("classifier_pilot_run = read_classifier_pilot_run(catalog)"), state)
+        run.assert_not_called()
+        load.assert_not_called()
+        fit.assert_not_called()
+        self.assertIsNone(state["classifier_pilot_run"])
+
 
 if __name__ == "__main__":
     unittest.main()

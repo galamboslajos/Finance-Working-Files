@@ -1,6 +1,42 @@
 # Random forest and paper-mechanism baseline: initial design
 
-Status: **model comparison proposed**, 2026-10-15. The shared target, training
+Status: **four-arm development pilot COMPLETE AND VERIFIED**, 2026-10-15. The user has
+authorized RF and XGBoost on both Paper15 and expanded inputs, fitting completed
+2010–2017 outcomes and validating on 2018–2019. The active execution contract is
+[`classifier_pilot.json`](../configs/classifier_pilot.json); see the
+[pilot protocol and results record](CLASSIFIER_PILOT.md). It freezes one fit per
+arm, seed 1729, the primary 80% context panel, training-only preprocessing and
+probability-only metrics. No 90% sensitivity models, early stopping, parameter
+search, outer refit, 2020–2023 outcome evaluation, RET or backtest is included.
+The completed run is `2010-2017__2018-2019-a2cd7669fde3f582`.
+
+The completed pilot retains 86,825 original training rows with 77,690 supervised
+fit rows. Validation retains 21,827 original rows and predicts all 20,755
+signal-time eligible rows; 20,709 have observed classes and 46 remain unlabelled.
+All four fits use the same keys and observed-label scoring mask.
+
+| Arm | Mean monthly log loss ↓ | Mean monthly accuracy ↑ |
+|---|---:|---:|
+| RF / Paper15 | 2.277891 | 12.56% |
+| XGBoost / Paper15 | 2.276638 | 12.69% |
+| RF / expanded | 2.263056 | 13.60% |
+| XGBoost / expanded | 2.264372 | 13.45% |
+| Uniform reference | 2.302585 | 10.00% |
+| Training-prior reference | 2.302585 | 10.03% |
+
+Both expanded arms improve descriptively on their Paper15 versions in this
+validation split. Expanded RF has the lowest observed log loss, with a 0.001316
+lead over expanded XGBoost; this is not a significance or economic-performance
+claim. Training-only preprocessing retained all 15/715 base names, producing
+30/1,430 columns with missing indicators. The four-fit run took 911.08 seconds
+(15m11s), peaked at 5.01 GiB RSS and preserved all 726 recorded source files.
+The independent audit reproduced all six probability reports and every reloaded
+model probability exactly. The 690-test suite and seven later focused verifier
+tests passed; the fresh master completed all 24 code cells without implicit fits
+or builds. See the [complete verification record](CLASSIFIER_PILOT.md) for Brier,
+calibration, artifact checks and remaining source-accounting limits.
+
+The shared target, training
 interface and RET workers are now implemented under the separate
 [target/RET engineering contract](TARGET_CLASSES_RET.md). Its bounded checks do
 not fit a classifier or preprocessor or run a backtest. The separately authorized
@@ -12,11 +48,13 @@ vectors; the preceding 120 signals correctly withhold them for insufficient hist
 The user selected the historical **S&P 500 + S&P 400 union** as the primary
 modelling universe. Existing saved panels already use that engineering union.
 
-The machine-readable draft is
+The earlier machine-readable design snapshot is
 [`model_comparison.proposed.json`](../configs/model_comparison.proposed.json).
 `dmv2.model_design` validates it and produces the experiment matrix, calendar
 schedule and unresolved-decision report without reading market observations.
-The master notebook displays these plans. The draft cannot enable execution.
+The master notebook displays these plans. The draft cannot enable execution and
+does not supply the active pilot's settings; the separately frozen pilot
+configuration above does. Notebook Run All reads saved evidence without fitting.
 
 ## 1. What we compare
 
@@ -29,8 +67,8 @@ The master notebook displays these plans. The draft cannot enable execution.
 
 B versus A isolates the estimator; C versus A isolates added features. D versus
 B and D versus C show the corresponding effects in the expanded forest. Run
-the same primary 80% context panel throughout; repeat C and D with 90% as the
-declared coverage sensitivity. A and B need no duplicate context-threshold run:
+the same primary 80% context panel throughout. A later C/D repeat with 90% is a
+declared sensitivity outside this first four-fit pilot. A and B need no duplicate context-threshold run:
 their paper inputs are identical. Do not choose a threshold from test scores.
 
 "715" describes the candidate feature dictionary, including the 15 paper inputs.
@@ -47,8 +85,8 @@ probabilities to trailing ten-year realized class payoffs. See the
 
 **V2 USER DIRECTION / PROPOSED DESIGN:** our baseline retains that probability
 and payoff mechanism, uses 15 inputs without capitalization, Intrinio/Siblis
-historical S&P membership, rolling ten-year training and a proposed temporal
-inner split. It is a declared adaptation, not an exact reproduction of the
+historical S&P membership, rolling ten-year training and the temporal inner
+split selected for this pilot. It is a declared adaptation, not an exact reproduction of the
 paper's original experiment or published returns. An expanding/random-split
 reference variant would be separately named and budgeted; it is outside the
 initial four-arm matrix.
@@ -73,7 +111,7 @@ For a common dated payoff vector, score each model with:
 
 `RET[i,t] = sum(probability[i,k,t] * historical_class_mean[k,t], k=1..10)`
 
-The proposed payoff window is the previous 120 **completed calendar outcome
+The shared payoff window is the previous 120 **completed calendar outcome
 months**, updated monthly. First compute each month's equal-weight mean of
 actual realized returns within each realized class, then average those monthly
 means with equal month weights. Do not pool stock rows, use predicted buckets,
@@ -102,11 +140,13 @@ The December 2019 signal predicts January 2020 and belongs to the test. Features
 end at the signal; the target begins strictly afterward. These are date-only
 research bounds, not a certified same-close fill or publication-latency model.
 
-**PROPOSED:** within each outer ten-year window, fit on its first eight outcome
+**ACTIVE PILOT / LATER OUTER DESIGN:** the first inner split is fixed to
+2010–2017 fitting and 2018–2019 validation. Within later outer ten-year windows,
+the proposed analogous design fits their first eight outcome
 years and validate on its last two, keeping whole months together. Fit medians,
 schema exclusions and indicators on the inner fitting portion only. After
 settings and boosting-round count are fixed from historical validation, refit
-preprocessing and the estimator on all ten completed training years. XGBoost
+preprocessing and the estimator on all ten completed training years. Any later XGBoost
 early stopping requires a held-out evaluation set and a recorded best-iteration
 policy; see its [official estimator guide](https://xgboost.readthedocs.io/en/stable/python/sklearn_estimator.html).
 The paper's row-random split and RF out-of-bag estimates are not the primary
@@ -134,7 +174,7 @@ financial values remain outside this design.
 
 ## 4. Scope of the first implementation
 
-Start with one explicit development pilot, not an automatic full search. Its
+The user-authorized first implementation is one explicit development pilot. Its
 single fit per arm uses 2010–2017 inner-development outcomes and evaluates only
 2018–2019 validation probabilities. The 2020 fold name identifies the enclosing
 calendar window; the pilot does not refit on all ten years or inspect 2020 test
@@ -144,30 +184,33 @@ does not yet have 120 prior outcome months: evaluate classification probabilitie
 there, and keep RET structural until its complete window is available. Do not
 shorten the payoff history or silently add earlier outcome years.
 
-The forest proposal is one 500-tree classifier per fit, with regularized leaf size
-and a fixed seed; every setting in the draft is a V2 proposal. The paper's
-100-fit XGBoost ensemble is the intended reference mechanism, but version pins,
-early-stopping settings, ensemble variation and compute/trial ceilings must be
-specified before execution. One-fit pilot results would not represent that
-100-fit reference. Pin scikit-learn as well as XGBoost before execution.
-Repeating a deterministic fit with unchanged data/settings
-does not create ensemble diversity. Do not automatically fit 100 forests.
+The frozen forest uses 500 trees, maximum depth 12, minimum leaf size 20,
+square-root feature sampling and bootstrap samples. XGBoost uses 300 boosting
+rounds, depth 3, learning rate 0.05, row/column sampling 0.8 and the remaining
+regularization settings in the active JSON. Both use seed 1729 and one CPU
+thread. Versions are pinned to scikit-learn 1.9.1 and XGBoost 3.4.1, with their
+support dependencies also pinned. These are untuned V2 pilot settings, not
+invented paper-author settings. One pilot fit does not reproduce the paper's
+100-fit probability ensemble. No early stopping or validation evaluation set is
+passed into either estimator.
 
-Next coding sequence:
+The estimator adapters preserve canonical classes 1–10. XGBoost's native 0–9
+encoding is recorded, and its softmax objective is evaluated from native margins
+in float64 before strict probability validation. No probability repair or
+calibration is applied. Paper15 and expanded inputs each receive their own
+training-only preprocessor, shared across the two estimators using that bank.
+Training-only missing/constant exclusions may reduce the 715 candidate names;
+missing indicators are separately recorded in the actual matrix width.
 
-1. The shared workers and full 2010–2023 target/RET coverage audit are complete.
-   The audit finds all ten classes populated in every month and all 48 nominal
-   test payoff vectors available, with original prediction denominators retained.
-   Use the same verified target and payoff states for every estimator arm.
-2. Class alignment, the dated 120-month payoff worker and class-label training
-   adapter are implemented. Next add estimator adapters using those same
-   interfaces and the existing training-only preprocessing.
-3. Measure and record a bounded pilot's rows, memory, runtime and trial budget;
-   pin dependencies and model settings before fitting real data.
-4. Produce matched monthly predictions and diagnostics. Evaluate mean monthly
-   log loss and multiclass Brier score first, plus tail precision, calibration
-   and RET rank association with realized returns. Report observed-label and
-   original-cohort coverage. Use the same evaluation mask across arms.
+Both estimators predict the identical signal-time eligible cohort, including
+the 46 validation rows whose later classes are missing. Score only the same
+20,709 observed labels. Primary log loss averages the 24 monthly means equally;
+Brier sums squared errors over all ten classes, then averages monthly means.
+The declared 1e-15 floor is used only inside log evaluation and never alters
+saved probabilities. Uniform and pooled-training-class-prior references,
+pooled descriptive metrics, fixed-bin calibration and hard-mode class-1/10
+precision with support/abstention complete this probability audit. RET rank
+association and economic performance are outside the pilot.
 
 The 48 nominal outer-test months are dependent observations, not 150,000
 independent experiments. Keep uncertainty and any later resampling time-aware.
