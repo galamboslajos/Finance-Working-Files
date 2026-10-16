@@ -1,4 +1,5 @@
 """Interactive rerun state checks; notebook cells execute with mocked workers."""
+import ast
 import json
 from pathlib import Path
 import unittest
@@ -141,6 +142,62 @@ class InteractiveRerunTests(unittest.TestCase):
         load.assert_not_called()
         fit.assert_not_called()
         self.assertIsNone(state["classifier_pilot_run"])
+
+    def test_failed_bbby_review_clears_old_status_and_propagates_invalid_evidence(self):
+        state = {"ROOT": Path(__file__).resolve().parents[1],
+                 "bbby_identity_review": object(), "bbby_identity_summary": object()}
+        with patch("dmv2.identity_amendment.read_saved_identity_review",
+                   side_effect=ValueError("changed evidence hash")):
+            with self.assertRaisesRegex(ValueError, "changed evidence hash"):
+                exec(cell_containing("bbby_identity_review = read_saved_identity_review("), state)
+        self.assertIsNone(state["bbby_identity_review"])
+        self.assertIsNone(state["bbby_identity_summary"])
+
+    def test_missing_bbby_review_is_passive_and_clears_old_status(self):
+        state = {"ROOT": Path(__file__).resolve().parents[1],
+                 "bbby_identity_review": object(), "bbby_identity_summary": object()}
+        with patch("dmv2.identity_amendment.read_saved_identity_review",
+                   side_effect=FileNotFoundError) as reader, patch("builtins.print"):
+            exec(cell_containing("bbby_identity_review = read_saved_identity_review("), state)
+        reader.assert_called_once_with(
+            state["ROOT"] / "data/derived/identity_amendments/old-bbby-native-conflict-20261016-v1")
+        self.assertIsNone(state["bbby_identity_review"])
+        self.assertIsNone(state["bbby_identity_summary"])
+
+    def test_verified_bbby_review_preserves_active_data_and_runs(self):
+        preserved = {name: object() for name in (
+            "catalog", "daily_df", "monthly_df", "features_df", "full_feature_run",
+            "full_target_run", "classifier_pilot_run", "daily_backtest_run", "action_backtest_run")}
+        summary = {"replacement_native_id_resolved": False, "corrected_features_rebuilt": False,
+                   "models_refitted": False, "affected_training_examples": 96}
+        saved = {"summary": summary, "path": Path("/private/saved-review")}
+        state = {"ROOT": Path(__file__).resolve().parents[1], "json": json, **preserved}
+        with patch("dmv2.identity_amendment.read_saved_identity_review", return_value=saved) as reader, \
+             patch("builtins.print") as output:
+            exec(cell_containing("bbby_identity_review = read_saved_identity_review("), state)
+        reader.assert_called_once()
+        self.assertIs(state["bbby_identity_review"], saved)
+        self.assertIs(state["bbby_identity_summary"], summary)
+        self.assertIn("still unresolved", " ".join(str(c) for c in output.call_args_list))
+        for name, original in preserved.items():
+            with self.subTest(name=name):
+                self.assertIs(state[name], original)
+
+    def test_bbby_review_cell_has_only_passive_reader_and_json_display_calls(self):
+        tree = ast.parse(cell_containing("bbby_identity_review = read_saved_identity_review("))
+        imports = [(node.module, [alias.name for alias in node.names])
+                   for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
+        self.assertEqual(imports, [("dmv2.identity_amendment", ["read_saved_identity_review"])])
+        self.assertFalse(any(isinstance(node, ast.Import) for node in ast.walk(tree)))
+        calls = {ast.unparse(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)}
+        self.assertEqual(calls, {"read_saved_identity_review", "json.dumps", "print"})
+        handlers = [ast.unparse(node.type) for node in ast.walk(tree) if isinstance(node, ast.ExceptHandler)]
+        self.assertEqual(handlers, ["FileNotFoundError"])
+
+    def test_bootstrap_clears_bbby_review_before_loading_settings(self):
+        bootstrap = cell_containing("cwd = Path.cwd().resolve()")
+        self.assertIn("bbby_identity_review = bbby_identity_summary = None", bootstrap)
+        self.assertLess(bootstrap.index("bbby_identity_review ="), bootstrap.index("cwd = Path.cwd()"))
 
 
 if __name__ == "__main__":

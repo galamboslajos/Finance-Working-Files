@@ -228,3 +228,59 @@ nominal 2020–2023 RET payoff vectors have complete 120-month histories. Daily
 and feature data are unchanged. Run All reads saved reports and lazy datasets;
 model/preprocessor fitting remains a separate explicit action. The first
 development pilot uses the same saved class state and leaves this audit intact.
+
+
+The [daily development backtester](docs/DAILY_BACKTEST.md) reuses saved 2018–2019
+probabilities for separate fixed-ten-per-side class 1/10 and 2/9 portfolios,
+50% long / 50% short, with an independent 10% per-asset stop alternative and
+explicit cost sensitivities. RET stays withheld under its 120-month gate.
+Master section18 verifies saved reports only; execution is a separate CLI action.
+No new fitting or 2020–2023 evaluation is included.
+
+The separate [corporate-action rerun](docs/ACTION_BACKTEST.md) retains the same
+saved selections and original daily sources, adding reviewed entitlements and
+independent OHLC overlays. Master section 19 verifies its saved coverage and
+remaining failures. Missing valuations continue to withhold affected performance.
+The [rerun audit](docs/ACTION_BACKTEST_RESULTS.md) records 12 complete proxy paths
+and 52 withheld paths. A known historical BBBY/Overstock mapping conflict also
+affects prior inputs; these results must not be used as a validated strategy comparison.
+
+The [next session checklist](docs/NEXT_SESSION.md) orders the remaining identity/data
+repairs, corrected development rerun, and proposed 2020–2023 rolling evaluation.
+
+The [BBBY identity amendment](docs/BBBY_IDENTITY_AMENDMENT.md) records the verified
+old issuer ISIN and disables the known Overstock native route in a separate
+metadata view. The replacement native ID and matched historical prices remain
+unresolved. All original runs and cohort rows are retained. Master section 20
+verifies the saved correction and dependency audit without reading feature or
+return values, rebuilding panels, fitting models or changing existing pointers.
+The [precise lookup request](docs/BBBY_LOOKUP_REQUEST.md) is prepared for forwarding;
+it has not been sent.
+
+The [October 16 targeted data repair pass](docs/DATA_REPAIRS_20261016.md)
+adds a separate, three-key ACC/K/SO full-OHLC amendment and narrows the remaining
+BBBY, Ensco Rowan and Dean Foods requirements. The eleven available Dean Foods
+bars were already cached; November 18–21 remain missing and November 12 needs
+an explicit halt treatment. Fresh Cloud metadata reads succeeded, with unchanged
+release pins. Original panels, models and backtest results remain untouched.
+See the [updated unsent owner request](docs/REMAINING_BACKTEST_DATA_REQUEST_20261016.md).
+
+The user's subsequent October 16 instruction authorizes a separate
+[data-limited development backtest](docs/DATA_LIMITED_BACKTEST.md) without
+waiting for the owner: quarantine the demonstrated wrong BBBY routes while
+retaining all original membership rows and denominators; rebuild 2010–2019
+features and labels; refit the same four frozen classifiers on 2010–2017; and
+rerun 2018–2019's 24 months. Dean Foods and Rowan remain in valid training data
+and predictions but are excluded from trading before top-ten selection for the
+whole development period. This retrospective restriction can introduce bias;
+the new result is conditional on the documented restricted universe. Missing
+prices and exits are not invented. Original runs and pointers remain unchanged,
+new phases have separate identities, and 2020–2023 evaluation remains outside
+this run. The method document states the contract; completion and results must
+be read from the new saved audits.
+
+
+The additive independent-source 2018–2019 repair and balanced-basket rerun is
+documented in [INDEPENDENT_QUOTE_BACKTEST.md](docs/INDEPENDENT_QUOTE_BACKTEST.md).
+It reuses the four saved 2010–2017 models, with zero new fits, and preserves all
+reference runs. The full-universe identity/terminal-accounting limitations remain.

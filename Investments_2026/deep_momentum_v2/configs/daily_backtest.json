@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-daily-development-2018-2019-fixed10-assetstop10-v1",
+  "status": "FROZEN_BEFORE_FIRST_BACKTEST",
+  "authority": "User requested the 2018–2019 daily backtester, retained RET's 120-month gate, selected 50% long / 50% short with about ten names per direction, and a separate 10% per-asset stop alternative. Ten per side is the concrete V2 implementation. No new model fits or 2020–2023 evaluation.",
+  "start": "2018-01-01",
+  "end": "2019-12-31",
+  "arms": ["rf_paper15", "xgb_paper15", "rf_extended", "xgb_extended"],
+  "baskets": ["class_1_10", "class_2_9"],
+  "primary_score": "RET_withheld_until_complete_120_month_history",
+  "selection": {
+    "top_k_per_direction": 10,
+    "candidates": "corresponding_argmax_class_only",
+    "ranking": "descending_corresponding_class_probability",
+    "mode_ties": "lowest_canonical_class_id",
+    "selection_ties": "ascending_stable_source_security_id",
+    "shortage": "withhold_entire_continuous_path_no_other_class_fallback",
+    "long_weight": 0.5,
+    "short_weight": -0.5,
+    "within_leg": "equal_weight_at_monthly_rebalance",
+    "future_prices_or_labels_select_members": false
+  },
+  "accounting": {
+    "price_basis": "provisional_provider_adjusted_OHLC_proxy_units",
+    "entry_and_rebalance": "next_XNYS_month_first_session_adjusted_open",
+    "valuation": "daily_adjusted_open_and_close",
+    "drift": "fixed_units_between_monthly_rebalances_or_stops",
+    "target_weights_basis": "pre_cost_pre_trade_NAV",
+    "terminal_liquidation": "2019-12-31_adjusted_close",
+    "missing_held_or_selected_price": "retain_ledger_withhold_continuous_NAV_never_resume",
+    "cash_interest_annual_rate": 0.0,
+    "funding_annual_rate": 0.0,
+    "borrow_annual_bps": 0.0,
+    "borrow_availability_assumed": true,
+    "dividends_or_splits_added_again": false
+  },
+  "variants": {
+    "unstopped": {"asset_stop_fraction": null},
+    "asset_stop_10pct": {
+      "asset_stop_fraction": 0.1,
+      "reference": "monthly_rebalance_adjusted_open_including_retained_names",
+      "long_threshold": "reference_times_0.90",
+      "short_threshold": "reference_times_1.10",
+      "overnight_gap": "fill_actual_adjusted_open_beyond_stop",
+      "intraday_crossing": "idealized_threshold_fill_using_adjusted_low_or_high",
+      "costs": "same_cost_per_actual_traded_notional_as_baseline",
+      "reentry": "next_monthly_rebalance_only_no_replacement",
+      "trailing": false,
+      "guaranteed_monthly_portfolio_loss_cap": false
+    }
+  },
+  "trading_cost_bps": [0, 5, 10, 25],
+  "cost_units": "basis_points_per_one_way_absolute_traded_notional_initial_rebalance_stop_and_terminal",
+  "metrics": {
+    "return_series": "daily_close_NAV_with_initial_NAV_one_at_first_open",
+    "annualization_sessions": 252,
+    "risk_free_rate": 0.0,
+    "incomplete_path": "withhold_full_period_performance_show_coverage_and_failure"
+  },
+  "execution": {
+    "backend": "local_verified_two_annual_outcome_caches_and_saved_probabilities",
+    "maximum_candidate_rows": 1000000,
+    "maximum_projected_read_bytes": 134217728,
+    "maximum_peak_rss_bytes": 2147483648,
+    "maximum_wall_seconds": 900,
+    "maximum_output_bytes": 536870912,
+    "model_fitting": false,
+    "raw_source_fallback": false,
+    "financial_2020_plus_read": false,
+    "cloud_mutations": false,
+    "automatic_notebook_backtesting": false
+  },
+  "certification": {
+    "identity_status": "PROVISIONAL_IDENTITY_UNVERIFIED",
+    "knowledge_time_verified": false,
+    "terminal_event_accounting_certified": false,
+    "executable_or_investable_returns_certified": false
+  }
+}
