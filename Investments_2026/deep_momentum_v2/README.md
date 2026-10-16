@@ -284,3 +284,11 @@ The additive independent-source 2018–2019 repair and balanced-basket rerun is
 documented in [INDEPENDENT_QUOTE_BACKTEST.md](docs/INDEPENDENT_QUOTE_BACKTEST.md).
 It reuses the four saved 2010–2017 models, with zero new fits, and preserves all
 reference runs. The full-universe identity/terminal-accounting limitations remain.
+
+The subsequent user-authorized [2020–2023 walk-forward experiment](docs/WALKFORWARD_2020_2023.md)
+uses four annual rolling ten-year fits per model arm and 48 monthly predictions.
+It preserves the same class baskets, balanced up-to-ten-per-side breadth and
+10% per-asset stop alternative. Daily accounting runs continuously across year
+boundaries. The frozen protocol and explicit `scripts/run_walkforward.py` entry
+point are separate from the saved development runs; notebook Run All does not
+start this work. Completion must be established from the new phase audits.

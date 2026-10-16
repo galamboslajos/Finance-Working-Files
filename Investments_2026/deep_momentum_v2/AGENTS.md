@@ -282,3 +282,21 @@ backtest_completed directory and verifies every forecast and selection artifact
 against the preserved 56-complete/eight-withheld parent. VVC includes the verified
 $0.41145 closing dividend once. No new features, labels, fitting, inference or
 quote changes. Final passive reports use completed_reporting.read_completed_run.
+
+
+## Latest user override: annual 2020–2023 walk-forward
+
+The October 16, 2026 instruction authorizes the separate four-fold experiment
+in docs/WALKFORWARD_2020_2023.md and configs/walkforward_2020_2023.json.
+It supersedes the older 2018–2019-only limits for this additive workflow only.
+Use the preceding ten completed outcome years for each annual refit, monthly
+forecasts, the same balanced class baskets and 10% per-asset stop alternative.
+Exactly 16 sequential one-thread estimator fits and eight training-only
+preprocessing states; no searches or performance-driven refits. Keep every
+original source, worker, run and pointer unchanged, retain the fixed BBBY
+quarantine and DF/RDC execution restrictions, and preserve all original cohort
+keys. Read the new protocol before financial decoding. Do not inspect 2024+
+financial values. New quote/action corrections require separately pinned
+independent evidence; no new hindsight exclusions or invented exits. The
+continuous daily ledger has no forced annual liquidation or NAV reset. The
+master reads saved reports only and never starts this workflow implicitly.
