@@ -282,3 +282,71 @@ backtest_completed directory and verifies every forecast and selection artifact
 against the preserved 56-complete/eight-withheld parent. VVC includes the verified
 $0.41145 closing dividend once. No new features, labels, fitting, inference or
 quote changes. Final passive reports use completed_reporting.read_completed_run.
+
+
+## Latest user override: annual 2020–2023 walk-forward
+
+The October 16, 2026 instruction authorizes the separate four-fold experiment
+in docs/WALKFORWARD_2020_2023.md and configs/walkforward_2020_2023.json.
+It supersedes the older 2018–2019-only limits for this additive workflow only.
+Use the preceding ten completed outcome years for each annual refit, monthly
+forecasts, the same balanced class baskets and 10% per-asset stop alternative.
+Exactly 16 sequential one-thread estimator fits and eight training-only
+preprocessing states; no searches or performance-driven refits. Keep every
+original source, worker, run and pointer unchanged, retain the fixed BBBY
+quarantine and DF/RDC execution restrictions, and preserve all original cohort
+keys. Read the new protocol before financial decoding. Do not inspect 2024+
+financial values. New quote/action corrections require separately pinned
+independent evidence; no new hindsight exclusions or invented exits. The
+continuous daily ledger has no forced annual liquidation or NAV reset. The
+master reads saved reports only and never starts this workflow implicitly.
+
+
+## Current saved walk-forward handoff, 2026-10-16
+
+Read docs/WALKFORWARD_EVIDENCE.md before interpreting the saved 2020–2023 run.
+All sixteen fits and eight preprocessing states are finalized; independent
+feature/model checks passed with their documented formula-sampling limits.
+The separate additive V2 daily-accounting run and independent zero-fit audit
+completed all 64 scenarios: 28 complete proxy paths and 36 withheld paths.
+The accounting PASS covers source-based cash/units arithmetic and preservation
+of withheld exposures; it does not fill missing marks. Do not rank strategies
+using only the complete subset.
+
+For a separately authorized accounting-only rerun, use
+scripts/run_walkforward_backtest_v2.py and its explicit parent identity,
+new output, failed-attempt and private registry arguments. It performs zero
+fits. Preserve the failed V1 attempt and every frozen source, original worker,
+configuration, feature/label panel, model, forecast and selection. Do not rerun
+the original V1 backtest or any fitting merely to inspect saved reports.
+
+The single private handover registry is an exact dated, provisional execution
+exception supported by separately pinned evidence and approval. It does not
+promote source identity, merge canonical records or change model inputs or
+selected rows. Every other runtime route conflict remains fail-closed;
+verified merger-converted-lot handling is unchanged. Missing held observations
+retain exposure and withhold affected full-period metrics.
+
+Master section 23 is a passive saved-report reader. It requires the exact three
+completed phase audits and three matching independent verification receipts;
+Run All starts no build, fit, model reload or source-price scan. Keep daily
+feature history, monthly signals/outcomes and daily execution data separate.
+The actual independent accounting script is
+scripts/verify_walkforward_backtest_v2.py; the preserved V1 verifier is historical.
+All three phase audits and matching independent receipts passed. No further fit
+or backtest is needed to display the saved section 23 reports.
+
+
+## Current source-corrected handoff, 2026-10-16
+
+Read CURRENT_RESEARCH_STATUS.md and docs/SOURCE_CORRECTED_WALKFORWARD_20261016.md
+for the completed corrected-source experiment: 16 annual fits, eight train-only
+preprocessing states, 24 complete daily scenarios and 40 withheld scenarios.
+RF expanded / class1/10 / 10% asset stops is the primary focus. Master section24
+reads saved evidence only; no fitting or backtesting is triggered by publication.
+The source-repair phase pinned README.md, SOURCE_QUALITY_STATUS.md and its repair
+report before refitting. Keep those exact historical bytes; their pending-refit
+statements describe that earlier phase. Earlier current-status blocks here and
+in other reference documents describe their own source versions. Never weaken
+hashes, remove unsupported holdings, or rank all models on complete paths only.
+Raw data, source evidence, outputs, fitted models and PDFs remain outside Git.

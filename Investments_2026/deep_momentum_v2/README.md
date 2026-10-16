@@ -1,5 +1,39 @@
 # Deep Momentum V2
 
+## Source correction status, 2026-10-16
+
+**Corrected input views are ready; existing model/backtest results are dated references.**
+The broader source audit confirmed fifteen corrupt OPCH bars and an incorrect
+historical El Paso/Empire route. The affected annual inputs are rebuilt under
+unchanged research rules. Their dependent model fits, forecasts and performance
+must be regenerated before reporting a corrected comparison. See
+[the current repair status](SOURCE_QUALITY_STATUS.md) and
+[the evidence, scope and remaining limits](docs/SOURCE_QUALITY_REPAIR_20261016.md).
+
+## Reference walk-forward status before the source correction, 2026-10-16
+
+The current 2020–2023 evaluation uses the historical S&P 500/400 union,
+annual rolling ten-year training windows and monthly forecasts. All sixteen
+model fits and eight training-only preprocessing states are complete;
+independent feature and model audits passed for all 48 months. The feature
+audit covers 43,655 original rows and retains its stated formula-sampling limits.
+
+The separate additive V2 daily-accounting run and its independent zero-fit
+audit are complete for all 64 declared scenarios over 1,006 sessions. There are
+28 complete proxy paths and 36 paths whose full-period performance is withheld
+because selected historical observations remain unresolved. The accounting
+PASS verifies cash/units arithmetic for complete paths and exposure preservation
+for withheld paths; it does not supply missing marks. Do not rank strategies by
+selecting only the complete subset. Source and provisional identity limitations
+remain explicit in the evidence note.
+
+Master section 23 reads saved reports only after the exact feature, model and
+backtest audits and their three independent verification receipts pass. Run All
+starts no model fitting, rebuilding or source-price scan. Daily feature history
+and execution data remain separate. See the [current evidence and limitations](docs/WALKFORWARD_EVIDENCE.md)
+and [frozen walk-forward protocol](docs/WALKFORWARD_2020_2023.md). Earlier dated sections below
+remain records of their respective development stages.
+
 This is the new U.S. equity research workspace in the existing
 `Finance-Working-Files` Git repository. The existing `../deep_momentum/` folder
 is retained for observation and reference; there is no nested Git repository.
@@ -284,3 +318,11 @@ The additive independent-source 2018–2019 repair and balanced-basket rerun is
 documented in [INDEPENDENT_QUOTE_BACKTEST.md](docs/INDEPENDENT_QUOTE_BACKTEST.md).
 It reuses the four saved 2010–2017 models, with zero new fits, and preserves all
 reference runs. The full-universe identity/terminal-accounting limitations remain.
+
+The subsequent user-authorized [2020–2023 walk-forward experiment](docs/WALKFORWARD_2020_2023.md)
+uses four annual rolling ten-year fits per model arm and 48 monthly predictions.
+It preserves the same class baskets, balanced up-to-ten-per-side breadth and
+10% per-asset stop alternative. Daily accounting runs continuously across year
+boundaries. The frozen protocol and explicit `scripts/run_walkforward.py` entry
+point are separate from the saved development runs; notebook Run All does not
+start this work. Completion must be established from the new phase audits.
