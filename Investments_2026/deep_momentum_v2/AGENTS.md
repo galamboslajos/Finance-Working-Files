@@ -335,3 +335,18 @@ The actual independent accounting script is
 scripts/verify_walkforward_backtest_v2.py; the preserved V1 verifier is historical.
 All three phase audits and matching independent receipts passed. No further fit
 or backtest is needed to display the saved section 23 reports.
+
+
+## Current source-corrected handoff, 2026-10-16
+
+Read CURRENT_RESEARCH_STATUS.md and docs/SOURCE_CORRECTED_WALKFORWARD_20261016.md
+for the completed corrected-source experiment: 16 annual fits, eight train-only
+preprocessing states, 24 complete daily scenarios and 40 withheld scenarios.
+RF expanded / class1/10 / 10% asset stops is the primary focus. Master section24
+reads saved evidence only; no fitting or backtesting is triggered by publication.
+The source-repair phase pinned README.md, SOURCE_QUALITY_STATUS.md and its repair
+report before refitting. Keep those exact historical bytes; their pending-refit
+statements describe that earlier phase. Earlier current-status blocks here and
+in other reference documents describe their own source versions. Never weaken
+hashes, remove unsupported holdings, or rank all models on complete paths only.
+Raw data, source evidence, outputs, fitted models and PDFs remain outside Git.

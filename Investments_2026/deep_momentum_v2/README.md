@@ -1,6 +1,16 @@
 # Deep Momentum V2
 
-## Current walk-forward status, 2026-10-16
+## Source correction status, 2026-10-16
+
+**Corrected input views are ready; existing model/backtest results are dated references.**
+The broader source audit confirmed fifteen corrupt OPCH bars and an incorrect
+historical El Paso/Empire route. The affected annual inputs are rebuilt under
+unchanged research rules. Their dependent model fits, forecasts and performance
+must be regenerated before reporting a corrected comparison. See
+[the current repair status](SOURCE_QUALITY_STATUS.md) and
+[the evidence, scope and remaining limits](docs/SOURCE_QUALITY_REPAIR_20261016.md).
+
+## Reference walk-forward status before the source correction, 2026-10-16
 
 The current 2020–2023 evaluation uses the historical S&P 500/400 union,
 annual rolling ten-year training windows and monthly forecasts. All sixteen
