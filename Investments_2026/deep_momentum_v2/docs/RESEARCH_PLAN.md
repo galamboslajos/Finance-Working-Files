@@ -177,3 +177,9 @@ shortened. The saved audit contains 201,600 month/class grid rows and 1,680
 class-payoff rows, and verifies 475 recorded input files unchanged. Rolling
 ten-year classifier windows and monthly 120-calendar-month payoff updates remain
 separate and unchanged.
+
+
+The separately authorized [daily development stage](DAILY_BACKTEST.md) uses
+saved 2018–2019 probabilities, fixed-ten class 1/10 and 2/9 baskets,50% / 50%
+capital and an independent 10% per-asset stop alternative. RET stays gated;
+no earlier payoff extension, new fit or 2020–2023 evaluation is included.

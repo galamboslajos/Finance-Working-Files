@@ -170,3 +170,115 @@ ignored outputs. `scripts/verify_classifier_pilot.py` independently reconciles
 source populations, training-only medians/matrices, scores and saved-model
 inference without refitting. Preserve separate daily/monthly/feature data and
 the provisional identity, source knowledge-time and terminal-event limitations.
+
+
+For the separately authorized 2018–2019 daily development backtest, read
+`docs/DAILY_BACKTEST.md` and frozen `configs/daily_backtest.json`. Use new
+`backtest_loading.py`, `backtest_selection.py`, `backtest_accounting.py` and
+`daily_backtest.py`; preserve all pinned pilot/feature/target workers and recipes.
+User selected ten longs / ten shorts within each mode class pair (1/10 and 2/9
+separately), 50% / 50% equal weighting, and a separate 10% per-asset stop variant.
+RET's 120-month gate remains intact and RET is withheld in 2018–2019. Reuse saved
+probabilities only; no new fitting, earlier payoff extension or 2020–2023 financial
+evaluation. Daily adjusted-price accounting is a provisional proxy. Missing held
+valuations retain positions and withhold continuous full-period performance.
+Section 18 verifies saved small reports only; Run All never starts a backtest.
+
+For the additive corporate-action/bar-repair rerun, read docs/ACTION_BACKTEST.md,
+docs/CORPORATE_ACTION_EVIDENCE.md and configs/action_backtest.json. Preserve the
+original backtest workers, pointer and eight selected/rebalance artifacts byte
+for byte. Use the separate action workers and independently pinned reviewed
+quote overlays. Recognize verified signed raw-share entitlements for existing
+holdings; retain retired new orders as unfilled cash slots. Missing successor,
+halt or held-price evidence still withholds the affected continuous path; do
+not drop stocks, invent payouts or rank models on complete paths alone. Section
+19 verifies saved reports only. This rerun is restricted to 2018–2019, with no
+new fit or 2020–2023 evaluation. Partial remote source projections may transiently
+decode mixed Arrow blocks; excluded values must never reach returned tables,
+Python conversion or analysis, and the limitation must remain explicit.
+
+The 2018–2019 action audit found a specific old-BBBY → historical Overstock
+native-route conflict. Read docs/ACTION_BACKTEST_RESULTS.md before interpreting
+saved pilot/backtest performance. The provisional waiver does not certify this
+known conflict. Keep frozen artifacts as evidence; a correction needs a separate
+versioned mapping and affected feature/target/model rebuild, without silently
+changing the current selections or evaluating later years. This is a specific
+data repair, not a requirement to reopen full identity certification for all work.
+
+The additive `identity_amendment.py` and `identity_impact.py` implement the
+October 16 review; read docs/BBBY_IDENTITY_AMENDMENT.md before any dependent new
+build. The saved amendment retains all original rows and source review flags,
+invalidates the demonstrated wrong route, and explicitly leaves its replacement
+unresolved. Use the reviewed amendment in a new, separately versioned corrected
+workflow; never silently reuse the old native route or treat blocked exposure as
+repaired price history. Original feature/request eligibility is audit-only in
+the amended view and must be recomputed after actual data repair. The current
+reference workers/configs/pointers remain frozen. `require_corrected_price_route`
+blocks a corrected rebuild while replacement evidence is absent. Section 20 of
+the master verifies saved metadata/hash receipts only; no panel decoding, fit,
+backtest or 2020–2023 financial evaluation is authorized by this review. This
+specific unresolved route does not suspend unrelated provisional development.
+
+Read docs/DATA_REPAIRS_20261016.md before consuming the separately reviewed
+`bracket_ohlc_repairs.py` amendment. It replaces only the already-rejected
+ACC/K/SO August 12, 2019 raw/adjusted OHLC fields using pinned SIP bars and
+preceding valid adjustment units, checked against a following control. It does
+not widen the old close-match policy, repair volume, mutate source files,
+rebuild features or authorize new performance results. Keep its separate ledger
+and provisional unit/source limitations. The corresponding private package is
+data/derived/data_repairs/2018-2019-resolution-20261016-v1. Existing old overlays
+may be applied first; their original audit fields must survive the new amendment.
+Dean Foods' eleven observed November/December bars were already cached. Missing
+November 18–21 OTC bars must not be filled by an unapproved halt convention;
+November 12 is a separate documented suspension. No alternative halt valuation
+or OTC execution treatment has been implemented. Preserve all existing run and
+selection pointers and the outstanding BBBY rebuild guard.
+
+## Latest user override: immediate data-limited reconstruction
+
+On October 16, 2026, the user directed a practical solution without waiting for
+Sadig, explicitly allowing a documented exclusion. Read
+`docs/DATA_LIMITED_BACKTEST.md` and frozen `configs/data_limited_fallback.json`.
+This new authority permits the separate data-limited path to quarantine both
+known wrong BBBY routes, retain all original membership rows/denominators, leave
+their unavailable features/labels missing, rebuild 2010–2019 inputs, fit exactly
+four frozen 2010–2017 classifiers and backtest the 24 months of 2018–2019.
+It supersedes requiring a verified replacement native route before this
+specifically labelled fallback can proceed; `require_corrected_price_route`
+still applies to a claim of fully repaired identity/history.
+
+Dean Foods and Rowan remain in valid historical features/targets and model
+prediction ledgers, but are excluded from trading at every 2018–2019 signal
+before top-ten selection, under the fixed retrospective trading restriction.
+Do not delete old holdings/losses, fabricate missing quotes/exit prices, or add
+new performance-driven exclusions. Retrospective coverage restrictions can
+introduce selection bias and must remain explicit in all result claims.
+Use new private outputs and independent feature/model/backtest phase identities;
+preserve every original source/run/pointer. Run exactly four sequential frozen
+fits and 64 predefined scenarios, with no searches, no notebook-triggered
+compute, no cloud mutations and no 2020+ financial evaluation. Any additional
+unexplained held-price gap retains exposure and withholds the affected complete
+path, rather than creating an assumed exit or silently dropping a stock.
+
+
+## Latest additive independent-source repair
+
+Read docs/INDEPENDENT_QUOTE_BACKTEST.md and configs/independent_backtest.json.
+The user authorized independent quote repairs and completion of 2018–2019.
+Rebuild only the affected 2018/2019 validation panels, reuse the exact prior four
+2010–2017 fits and training-only preprocessing, and perform zero new fits.
+Use independent_rebuild.py, validation_reprediction.py, independent_backtest.py,
+balanced_baskets.py and sni_action.py; preserve all older workers/runs/pointers.
+The declared basket adapts contemporaneously to N=min(10,nlong,nshort), equal
+names on both sides at 50%/50%; zero-sided months withhold. No new exclusions,
+future-price eligibility filters, fabricated quotes or 2020+ evaluation. Add the
+verified SNI cash+DISCK entitlement to the original eight actions. Passive
+notebook reports initially use independent_reporting.read_independent_run.
+
+The terminal-event completion in configs/independent_backtest_completion.json
+adds VVC and TSS to the unchanged nine-action ledger. Read the completion section
+of docs/INDEPENDENT_QUOTE_BACKTEST.md. completed_backtest.py writes a separate
+backtest_completed directory and verifies every forecast and selection artifact
+against the preserved 56-complete/eight-withheld parent. VVC includes the verified
+$0.41145 closing dividend once. No new features, labels, fitting, inference or
+quote changes. Final passive reports use completed_reporting.read_completed_run.

@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "protocol_id": "dmv2-daily-actions-2018-2019-fixed10-assetstop10-v1",
+  "status": "FROZEN_BEFORE_ACTION_RERUN",
+  "authority": "User requested corporate-action accounting, evidence-based correction of the three original OHLC failures, and the same 2018-2019 backtest selections, retaining every stock and leaving 2020-2023 untouched.",
+  "start": "2018-01-01",
+  "end": "2019-12-31",
+  "original_protocol_sha256": "sha256:6545b81b4d658e3676dbe59c7afe4cbdf7878eff7853554c9bbf0af89a7b76ca",
+  "arms": [
+    "rf_paper15",
+    "xgb_paper15",
+    "rf_extended",
+    "xgb_extended"
+  ],
+  "baskets": [
+    "class_1_10",
+    "class_2_9"
+  ],
+  "selection": "byte_identical_original_saved_selected_original_ledger_and_rebalance_artifacts",
+  "original_selected_artifact_count": 8,
+  "original_rebalance_artifact_count": 8,
+  "required_names_per_side": 10,
+  "long_weight": 0.5,
+  "short_weight": -0.5,
+  "retired_order": "retain_original_intended_slot_unfilled_cash_no_replacement_no_reweighting",
+  "RET": "unchanged_120_month_gate_withheld_all_24_signals",
+  "variants": {
+    "unstopped": {
+      "asset_stop_fraction": null
+    },
+    "asset_stop_10pct": {
+      "asset_stop_fraction": 0.1
+    }
+  },
+  "trading_cost_bps": [
+    0,
+    5,
+    10,
+    25
+  ],
+  "cash_interest_annual_rate": 0.0,
+  "funding_annual_rate": 0.0,
+  "borrow_annual_bps": 0.0,
+  "corporate_actions": {
+    "ledger": "exact_eight_reviewed_events",
+    "entitlement": "signed_raw_predecessor_shares_at_dated_effective_open",
+    "raw_share_basis": "paired_adjusted_close_over_raw_close_previous_session",
+    "successor_unit_basis": "paired_adjusted_open_over_raw_open_effective_session",
+    "cash_settlement": "face_value_economic_receivable_or_liability_zero_funding_not_physical_settlement_claim",
+    "successor_hold": "original_source_lot_until_scheduled_rebalance_stop_or_terminal",
+    "fractional_shares": "theoretical_fractional_units_retained_no_cash_in_lieu_invented",
+    "stops": "equivalent_original_package_threshold_net_cash_and_scaled_successor_units",
+    "unquoted_successor_policy": "withhold_affected_paths",
+    "unquoted_RDC_instrument_key": "unquoted_successor:CUSIP:G3166L100",
+    "missing_held_valuation": "retain_unvalued_exposure_withhold_continuous_full_period_metrics",
+    "mandatory_conversion_market_cost": 0.0,
+    "ordinary_dividends_and_splits_added_again": false
+  },
+  "ohlc_repairs": {
+    "policy_id": "dmv2-reviewed-raw-ohlc-close05-relative005-rounding0002-v1",
+    "maximum_raw_close_absolute_difference": 0.05,
+    "maximum_raw_close_relative_difference": 0.005,
+    "maximum_original_adjusted_rounding_residual": 0.0002,
+    "mandatory_original_keys": [
+      [
+        "sec_g0wpMy",
+        "2019-01-18"
+      ],
+      [
+        "sec_ge8Rby",
+        "2019-08-12"
+      ],
+      [
+        "sec_gVBv5g",
+        "2018-08-02"
+      ]
+    ],
+    "source": "reviewed_actual_published_Alpaca_SIP_raw_daily_projection",
+    "original_source_bytes_changed": false,
+    "close_conflict": "withhold_require_separate_source_and_unit_evidence_never_relax_from_portfolio_results"
+  },
+  "execution": {
+    "backend": "local_pinned_original_selections_two_annual_caches_reviewed_action_and_quote_evidence",
+    "maximum_candidate_rows": 1000000,
+    "maximum_projected_read_bytes": 134217728,
+    "maximum_peak_rss_bytes": 2147483648,
+    "maximum_wall_seconds": 900,
+    "maximum_output_bytes": 536870912,
+    "model_fitting": false,
+    "reselection": false,
+    "financial_2020_plus_read": false,
+    "cloud_mutations": false,
+    "automatic_notebook_backtesting": false,
+    "overwrite_original_backtest_pointer": false
+  },
+  "reporting": {
+    "all_scenarios": 64,
+    "complete_paths_only_model_leaderboard": false,
+    "failed_path_metrics": "null_full_period_return_sharpe_drawdown_turnover_costs_with_coverage_and_first_failure",
+    "cost_turnover_basis": "net_same_provider_same_execution_market_orders_not_gross_lot_transfers",
+    "historical_identity_certified": false,
+    "knowledge_time_certified": false,
+    "complete_economic_accounting_certified": false,
+    "investability_certified": false
+  },
+  "additional_reviewed_sources": {
+    "maximum_manifests": 1,
+    "optional_manifest": "reviewed_pcg_inputs.json",
+    "scope": "PCG_existing_rejected_bars_only_same_original_native_security",
+    "independent_product_source_allowed": true,
+    "allowed_native_id": "sec_zvNmKz",
+    "allowed_source_ids": [
+      "siblis_isin_63c3568c7e26715653ca",
+      "siblis_isin_context_0669800d0e3c0bb6a884"
+    ]
+  },
+  "append_only_bars": {
+    "policy_id": "dmv2-missing-four-actual-alpaca-raw-bracketed-unit-transport-v1",
+    "scope": "exact_four_FRT_FIVE_WCG_keys",
+    "raw_prices": "actual_reviewed_published_raw_OHLC",
+    "unit_basis": "preceding_accepted_pair_confirmed_by_following_same_source_overlap_control",
+    "ordinary_actions": "zero_dividend_and_unit_split_bracket_evidence_constant_pair_basis",
+    "future_membership_or_quotes_select_stocks": false
+  }
+}

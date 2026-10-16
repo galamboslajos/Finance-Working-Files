@@ -204,3 +204,19 @@ feature panels and their separate daily artifacts are preserved, and the audit
 does not fit preprocessing, either model or a backtest. Successful cache hashes,
 labels or payoff arithmetic would not certify identities, knowledge time,
 missing terminal-event cash flows or executable economic returns.
+
+
+## Daily development accounting, 2026-10-15
+
+The [2018–2019 daily backtester](DAILY_BACKTEST.md) is implemented and its fixed
+64-scenario run completed using saved four-arm probabilities and two daily
+outcome caches. Every basket has exactly ten longs and ten shorts, 50% / 50%,
+with separate unstopped and 10% per-asset stop variants. All 64 continuous paths
+encounter missing/rejected held quotes; full-period performance is withheld.
+The first failures cover five missing quotes and three incomplete/anomalous
+OHLC provider/date cases, retained in private ledgers. No holding is dropped or
+replaced using future coverage. RET remains withheld in all 24 months; no new
+model fit or 2020–2023 financial evaluation occurred. Run time 34.47 s, peak RSS
+663.52 MiB, 19 pinned inputs unchanged; 755 tests passed. Section 18 of the master
+verifies saved reports only. Economic data/event review is the next dependency
+for a complete performance comparison.

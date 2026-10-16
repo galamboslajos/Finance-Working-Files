@@ -360,3 +360,17 @@ is December 31, 2019 for January 2020. This resolves empirical structural
 class/payoff coverage under the provisional policy, while terminal cash flows
 and knowledge-time certification remain open. That target audit fitted no model
 or preprocessor.
+
+
+## Daily development portfolio decision,2026-10-15
+
+USER DIRECTION: [daily development backtesting](DAILY_BACKTEST.md) is now
+authorized for saved 2018–2019 probabilities, leaving 2020–2023 unevaluated.
+The user selected 50% long / 50% short, about ten names per direction, and a
+separate 10% stop per asset. The concrete protocol fixes ten per side within
+mode-class 1/10 or separately2/9, ranked by corresponding class probability.
+These are V2 breadth/capital adaptations. RET remains the intended primary
+score but is withheld for this development period under the unchanged 120-month
+gate. Daily adjusted-OHLC proxy fills, costs, drift, stop and fail-closed coverage
+rules are recorded separately in `configs/daily_backtest.json`. Original model
+fits, identity policy, feature/target recipes and daily inputs remain unchanged.

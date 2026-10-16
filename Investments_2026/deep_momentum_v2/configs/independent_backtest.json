@@ -1,0 +1,292 @@
+{
+  "authority": "User requested independent-source repairs and complete2018\u20132019 backtest on2026-10-16; explicitly selected balanced up-to10per-side rule before rerun results.",
+  "backtest": {
+    "RET": "unchanged_120_month_gate_withheld",
+    "arms": [
+      "rf_paper15",
+      "xgb_paper15",
+      "rf_extended",
+      "xgb_extended"
+    ],
+    "basket_breadth": {
+      "candidate_information": "signal_time_forecasts_and_fixed_execution_restrictions_only",
+      "equal_side_name_counts": true,
+      "long_total_weight": 0.5,
+      "names_per_side": "min(10,eligible_mode_long_count,eligible_mode_short_count)",
+      "not_historical_paper_method": true,
+      "policy": "balanced_available_capped_10",
+      "rank_and_ties": "unchanged_class_probability_descending_then_source_id_ascending",
+      "short_total_weight": -0.5,
+      "zero_candidate_side": "withhold_full_path"
+    },
+    "baskets": [
+      "class_1_10",
+      "class_2_9"
+    ],
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "end": "2019-12-31",
+    "events": "original_eight_unchanged_plus_verified_SNI_cash_and_DISCK_conversion",
+    "fabricated_quotes_payouts_or_stops": false,
+    "long_weight": 0.5,
+    "remaining_unexplained_held_quote_gaps": "retain_exposure_withhold_full_period_metrics",
+    "short_weight": -0.5,
+    "start": "2018-01-01",
+    "top_k_per_side": 10,
+    "variants": {
+      "asset_stop_10pct": 0.1,
+      "unstopped": null
+    }
+  },
+  "context_policy": "available_cohort_80pct",
+  "execution": {
+    "automatic_notebook_build_or_fit": false,
+    "backend": "local_verified_saved_annual_caches_only",
+    "backtest_maximum_peak_rss_bytes": 2147483648,
+    "backtest_maximum_wall_seconds": 900,
+    "cloud_mutations": false,
+    "feature_maximum_peak_rss_bytes": 4294967296,
+    "feature_maximum_projected_read_bytes": 4294967296,
+    "feature_maximum_wall_seconds": 7200,
+    "financial_2020_plus_analysis": false,
+    "maximum_new_model_fits": 0,
+    "maximum_new_preprocessor_fits": 0,
+    "maximum_output_bytes": 6442450944,
+    "model_maximum_peak_rss_bytes": 8589934592,
+    "model_maximum_total_fits": 0,
+    "model_maximum_wall_seconds": 5400,
+    "model_threads": 1,
+    "original_run_pointers_changed": false,
+    "parameter_search": false,
+    "workers": 1
+  },
+  "execution_restrictions": {
+    "native_ids": {
+      "sec_gjP4xM": "Dean Foods: unresolved suspension/OTC daily execution coverage",
+      "sec_zmYNnz": "Rowan: unresolved correctly identified successor quotes"
+    },
+    "old_positions_or_realized_losses_deleted": false,
+    "period": "all_2018_2019_signals_before_selection",
+    "post_fit_additional_hindsight_exclusions": false,
+    "prediction_rows_and_probabilities_retained": true,
+    "selection": "balanced_min_10_available_mode_candidates_per_side_after_fixed_restriction",
+    "valid_historical_training_rows_retained": true
+  },
+  "feature_outcome_years": [
+    2018,
+    2019
+  ],
+  "identity_amendment": "data/derived/identity_amendments/old-bbby-native-conflict-20261016-v1",
+  "identity_policy": "provisional_unique_resolved_link",
+  "interpretation": {
+    "comparison_with_original": "joint_change_in_corrected_inputs_and_declared_trading_restrictions_not_an_isolated_estimator_effect",
+    "coverage_conditioned_development_result": true,
+    "full_historical_universe_performance_claim": false,
+    "identity_and_economic_accounting_certified": false,
+    "knowledge_time_certified": false,
+    "retrospective_data_quality_screen_discovered_2026": true,
+    "selection_and_survivorship_bias_removed": false
+  },
+  "missing_route_fallback": {
+    "approved": true,
+    "effect": "known_wrong_old_BBBY_routes_ineligible_features_and_labels_all_original_rows_retained",
+    "fully_corrected_price_mapping_claim": false,
+    "invalid_native_id": "sec_ydbQnj",
+    "original_membership_and_denominators_preserved": true,
+    "replacement_native_id": null,
+    "shared_normalization_context_and_classes_recomputed": true,
+    "source_security_ids": [
+      "siblis_ticker_company_00326c7d9ad13903e5e3",
+      "siblis_isin_c297a5f81a23c9f90503"
+    ],
+    "target_imputation": false
+  },
+  "model_recipe": {
+    "arms": [
+      {
+        "arm_id": "rf_paper15",
+        "estimator": "rf",
+        "feature_set": "paper15"
+      },
+      {
+        "arm_id": "xgb_paper15",
+        "estimator": "xgb",
+        "feature_set": "paper15"
+      },
+      {
+        "arm_id": "rf_extended",
+        "estimator": "rf",
+        "feature_set": "expanded"
+      },
+      {
+        "arm_id": "xgb_extended",
+        "estimator": "xgb",
+        "feature_set": "expanded"
+      }
+    ],
+    "authority": "User requested the first RF/XGBoost baseline pilot and selected all four Paper15/expanded-feature arms; resumed after pausing for another job.",
+    "class_prior_weighting": "pooled_supervised_training_stock_month_counts",
+    "context_policy": "available_cohort_80pct",
+    "estimators": {
+      "rf": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "max_samples": null,
+        "min_samples_leaf": 20,
+        "min_samples_split": 2,
+        "n_estimators": 500,
+        "n_jobs": 1,
+        "oob_score": false,
+        "random_state": 1729,
+        "warm_start": false
+      },
+      "xgb": {
+        "colsample_bytree": 0.8,
+        "device": "cpu",
+        "early_stopping_rounds": null,
+        "eval_metric": "mlogloss",
+        "gamma": 0.0,
+        "learning_rate": 0.05,
+        "max_bin": 256,
+        "max_depth": 3,
+        "min_child_weight": 20,
+        "n_estimators": 300,
+        "n_jobs": 1,
+        "num_class": 10,
+        "objective": "multi:softprob",
+        "random_state": 1729,
+        "reg_alpha": 0.0,
+        "reg_lambda": 10.0,
+        "subsample": 0.8,
+        "tree_method": "hist",
+        "verbosity": 0
+      }
+    },
+    "evaluation_population": "same_observed_target_mask_for_all_arms",
+    "execution": {
+      "RET_evaluation": false,
+      "automatic_notebook_fitting": false,
+      "backend": "local_verified_saved_panels",
+      "backtesting": false,
+      "cloud_mutations": false,
+      "early_stopping": false,
+      "estimator_threads": 1,
+      "fits_per_arm": 1,
+      "maximum_output_bytes": 2147483648,
+      "maximum_peak_rss_bytes": 8589934592,
+      "maximum_projected_read_bytes": 1073741824,
+      "maximum_total_fits": 4,
+      "maximum_wall_seconds": 5400,
+      "outer_refit": false,
+      "outer_test_evaluation": false,
+      "parameter_search": false,
+      "source_fallback": false,
+      "workers": 1
+    },
+    "feature_panel_role": "primary",
+    "identity_policy": "provisional_unique_resolved_link",
+    "interpretation": "One fixed-seed temporal development pilot per arm, using observed-return classes under provisional identity/return accounting. This is neither the paper's 100-fit ensemble nor a 2020-2023 outer-test or portfolio-performance result. No settings are selected from pilot validation results.",
+    "metrics": {
+      "brier": "sum_squared_errors_over_ten_classes_then_equal_month_mean",
+      "calibration_fitted": false,
+      "floor_applies_only_to_log_evaluation_not_saved_probabilities": true,
+      "log_loss_true_class_probability_floor": 1e-15,
+      "mode_ties": "lowest_canonical_class_id",
+      "primary": "equal_month_mean_log_loss",
+      "secondary": [
+        "pooled_log_loss",
+        "pooled_brier",
+        "equal_month_accuracy",
+        "toplabel_calibration_10_fixed_bins",
+        "classwise_calibration_10_fixed_bins",
+        "mode_class_1_and_10_precision_with_support"
+      ]
+    },
+    "packages": {
+      "cloudpickle": "3.1.2",
+      "joblib": "1.6.0",
+      "narwhals": "2.27.1",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "threadpoolctl": "3.7.0",
+      "xgboost": "3.4.1"
+    },
+    "prediction_population": "paper_prediction_eligible_independent_of_future_labels",
+    "preprocessing_fit_period": "2010-2017_only",
+    "preprocessing_policy": "train_partition_median_missing_indicator_v1",
+    "preprocessor_shared_between_estimators_with_same_feature_set": true,
+    "probability_construction": {
+      "canonical_classes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "matrix_dtype": "float32_after_finite_range_guard",
+      "repair_clipping_or_renormalization": false,
+      "rf": "native_predict_proba_float64",
+      "xgb": "native_output_margins_then_objective_softmax_float64"
+    },
+    "protocol_id": "dmv2-classifier-pilot-2010-2017-validate-2018-2019-v1",
+    "references": [
+      "uniform",
+      "train_prior"
+    ],
+    "schema_version": 1,
+    "status": "FROZEN_BEFORE_FIRST_FIT",
+    "supervised_fit_population": "paper_prediction_eligible_and_target_available",
+    "train_label_observed_through": "2017-12-31",
+    "train_outcome_end": "2017-12-31",
+    "train_outcome_start": "2010-01-01",
+    "universe": "combined",
+    "validation_label_observed_through": "2019-12-31",
+    "validation_outcome_end": "2019-12-31",
+    "validation_outcome_start": "2018-01-01"
+  },
+  "model_recipe_source": {
+    "path": "configs/classifier_pilot.json",
+    "sha256": "sha256:6fb4c41060f34c211565b93dbd7d05822074bd21a879db1fbee9d2f275d8422d"
+  },
+  "nominal_rolling_design_preserved": "ten_year_train_one_year_test_2020_2023_not_executed_here",
+  "protocol_id": "dmv2-independent-quote-repair-2018-2019-v1",
+  "quote_amendments": "prior12unchanged_plus_upfront_independent_review_all69quality_flagged_rows_and34interior_missing_keys",
+  "research_status": "DATA_LIMITED_RESTRICTED_UNIVERSE",
+  "schema_version": 1,
+  "sni_evidence_directory": "data/derived/data_repairs/independent-2018-2019-20261016-v1/sni",
+  "status": "FROZEN_BEFORE_INDEPENDENT_REPAIR_RESULTS",
+  "training_outcome_years": [
+    2010,
+    2017
+  ],
+  "universe": "historical_sp500_sp400_union",
+  "validation_outcome_years": [
+    2018,
+    2019
+  ],
+  "validation_reprediction": {
+    "approved": true,
+    "financial_outcome_years": [
+      2018,
+      2019
+    ],
+    "fitted_parent_build_identity_sha256": "sha256:50aa6e09f11b687c36cd3cf52ed8eb51fdde591fb2391cd58162d02edbb29b10",
+    "fitted_parent_directory": "outputs/data_limited_backtest/2010-2019-50aa6e09f11b687c",
+    "new_fits": 0,
+    "preprocessing": "unchanged_training_only_medians_schema_and_missingness_indicators",
+    "regenerate_validation_features_targets_and_forecasts": true
+  }
+}

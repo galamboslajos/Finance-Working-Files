@@ -320,3 +320,15 @@ samples. All **690 tests** and the independent full pilot verifier passed; the
 four reloaded models reproduced every probability exactly. Private receipts and
 the executed notebook live under ignored `outputs/model_pilot/verification/`;
 the versioned notebook remains output-free.
+
+
+## Daily development backtest reports
+
+Section 18 calls `dmv2.daily_backtest.read_daily_backtest(catalog)` to verify saved
+2018–2019 portfolio reports. It never starts the engine, loads models or prepares
+matrices. It clears saved state before each check and preserves separate daily,
+monthly and feature views. The two baskets select ten per side within mode
+classes 1/10 and 2/9, with 50% long / 50% short. A separate 10% per-asset stop variant
+and 0/5/10/25 bp trading-cost assumptions are displayed. RET remains withheld for
+all 24 signals. Full-period performance is null for incomplete daily paths.
+See [the bounded protocol](DAILY_BACKTEST.md);2020–2023 evaluation is excluded.
