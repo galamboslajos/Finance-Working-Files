@@ -1,6 +1,30 @@
 # Data and reference status
 
-## Active classifier pilot, 2026-10-15
+## Current walk-forward status, 2026-10-16
+
+The current 2020–2023 evaluation uses the historical S&P 500/400 union,
+annual rolling ten-year training windows and monthly forecasts. All sixteen
+model fits and eight training-only preprocessing states are complete;
+independent feature and model audits passed for all 48 months. The feature
+audit covers 43,655 original rows and retains its stated formula-sampling limits.
+
+The separate additive V2 daily-accounting run and its independent zero-fit
+audit are complete for all 64 declared scenarios over 1,006 sessions. There are
+28 complete proxy paths and 36 paths whose full-period performance is withheld
+because selected historical observations remain unresolved. The accounting
+PASS verifies cash/units arithmetic for complete paths and exposure preservation
+for withheld paths; it does not supply missing marks. Do not rank strategies by
+selecting only the complete subset. Source and provisional identity limitations
+remain explicit in the evidence note.
+
+Master section 23 reads saved reports only after the exact feature, model and
+backtest audits and their three independent verification receipts pass. Run All
+starts no model fitting, rebuilding or source-price scan. Daily feature history
+and execution data remain separate. See the [current evidence and limitations](WALKFORWARD_EVIDENCE.md)
+and [frozen walk-forward protocol](WALKFORWARD_2020_2023.md). Earlier dated sections below
+remain records of their respective development stages.
+
+## Historical classifier pilot, 2026-10-15
 
 **COMPLETE AND VERIFIED:** the user authorized four probability-model arms: RF/XGBoost
 on Paper15 and the expanded candidate feature bank, with 2010–2017 fitting and

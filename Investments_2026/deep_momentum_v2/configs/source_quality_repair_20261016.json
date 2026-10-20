@@ -1,0 +1,12 @@
+{
+  "schema": "dmv2-source-quality-repair-reference/v1",
+  "policy_id": "dmv2-confirmed-el-paso-opch-repairs-v1",
+  "context_policy": "available_cohort_80pct",
+  "handoff": {
+    "path": "outputs/source_quality/confirmed-repairs-20261016-v1/handoff.json",
+    "size_bytes": 106476,
+    "sha256": "ddd66187bc64344fa6228eb247e8dd7eb9bf005bbed53b9b0f3b460b28a7e410"
+  },
+  "financial_2024_plus_analysis": false,
+  "automatic_fit_or_backtest": false
+}

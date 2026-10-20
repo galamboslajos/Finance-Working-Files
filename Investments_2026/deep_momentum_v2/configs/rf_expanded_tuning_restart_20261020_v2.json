@@ -1,0 +1,118 @@
+{
+  "schema": "dmv2-rf-expanded-tuning-execution-amendment/v1",
+  "amendment_id": "dmv2-rf-expanded-tuning-explicit-restart-20261020-v2",
+  "protocol_id": "dmv2-rf-expanded-temporal-tuning-20261020-v1",
+  "protocol_path": "configs/rf_expanded_tuning_restart_budget_20261020_v2.json",
+  "protocol_sha256": "a53e4302199b335422ccec42bd86a4f48aee4ab39b4010b411be81d4edd89a39",
+  "date": "2026-10-20",
+  "user_authorization": "User explicitly closed apps and requested: check the RAM again and restart the RF tuning if we have enough memory; keep the stopped attempt and pause/resume checkpoints.",
+  "execution_authorized": true,
+  "authority": {
+    "fitting_authorized": true,
+    "preprocessing_fitting_authorized": true,
+    "new_financial_reads_authorized": true,
+    "prediction_authorized": true,
+    "backtest_authorized": false,
+    "financial_2024_plus_authorized": false,
+    "cloud_reads_compute_or_mutations_authorized": false,
+    "existing_run_or_pointer_mutations_authorized": false
+  },
+  "statistical_protocol_changed": false,
+  "resource_ceiling_changed": false,
+  "resource_launch_policy": {
+    "minimum_available_memory_before_launch_bytes": 7516192768,
+    "require_macos_pressure_dispatch_value": 1,
+    "stop_on_macos_pressure_not_normal": true
+  },
+  "resource_launch_evidence": {
+    "original_12GiB_gate_preserved_in_historical_design": true,
+    "rationale": "The user queried the32GiB memory assessment. A read-only check showed normal macOS pressure and zero current swap; the prior four-arm pilot measured5.01GiB peak RSS. Before any new fit, replace the conservative12GiB gate with7GiB plus continuous real pressure monitoring. All upper resource limits and statistical rules remain unchanged.",
+    "prior_measured_pilot_peak_rss_bytes": 5382127616,
+    "pressure_sysctl": "kern.memorystatus_vm_pressure_level",
+    "pressure_value_semantics": "userspace_dispatch_mask:1normal,2warning,4critical;not_internal_kernel_enum",
+    "unknown_or_failed_pressure_query": "fail_closed_no_fit_launch_or_stop_current_worker",
+    "source_for_pressure_semantics": "https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_memorystatus_notify.c",
+    "source_for_dispatch_constants": "https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/event_private.h"
+  },
+  "resume_completed_checkpoints": true,
+  "pause": {
+    "mode": "finish_current_child_phase_save_verified_checkpoint_exit_release_RAM",
+    "no_new_fit_after_pause_request": true,
+    "operating_system_suspend_used": false,
+    "resume": "explicit_command_verify_identity_source_code_runtime_and_checkpoint_hashes_skip_completed_work",
+    "active_compute_seconds_accumulated_across_sessions": true,
+    "paused_hours_count_toward_active_compute_budget": false,
+    "WAITING_FOR_MEMORY_or_DISK_is_resumable_without_a_failed_fit": true
+  },
+  "immediate_interrupt_retry_authorized": false,
+  "failed_or_interrupted_fit": "preserve_attempt_count_it_against_100_initiated_fit_ceiling_stop_without_automatic_retry;any_retry_needs_an_explicit_later_amendment",
+  "fresh_preprocessor_fit_ceiling": 16,
+  "initiated_estimator_fit_ceiling": 100,
+  "automatic_retries": 0,
+  "future_backtest": "separate_execution_scope_and_budget_required;preserve_all_frozen_backtest_rules",
+  "verification_scope": {
+    "new_estimator_fits": 0,
+    "independent_saved_probability_loss_and_selection_recalculation": true,
+    "independent_prepared_training_matrix_median_flag_and_imputation_reconciliation": "float32_quantization_aware_with_exact_training_keys_masks_and_completed_target_cutoffs",
+    "dropped_feature_evidence": "pinned_training_only_schema_summary_and_frozen_preprocessing_implementation",
+    "full_independent_source_float64_preprocessing_reconstruction": false,
+    "all_715_feature_formula_certification": false,
+    "maximum_active_wall_seconds": 3600
+  },
+  "authorized_explicit_restart": true,
+  "prior_stopped_attempt": {
+    "run_root": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932",
+    "status": "STOPPED_BUDGET",
+    "estimator_fits_initiated": 0,
+    "preparation_phases_initiated": 1,
+    "completed_preparation_checkpoints": 0,
+    "active_seconds": 34.83786662500643,
+    "charged_active_seconds_ceiling": 35,
+    "reserved_source_bytes": 391450896,
+    "output_bytes": 1142498,
+    "event_head_sha256": "sha256:2140840ed9f09ff21f85344b4564619c56afe1b18b63cd1b98c2a1a9b6a6afeb",
+    "pins": [
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/build_identity.json",
+        "size_bytes": 58273,
+        "sha256": "d7b23d4dfeca1ed9aa68b255a941e166e0825113b6b83b7a5e511cc9935875e6"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/ledger.json",
+        "size_bytes": 31715,
+        "sha256": "d166c09e08289fd87e8f872698416ec6fa5279a3fba0a68088133a23422c97f4"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/authorization.json",
+        "size_bytes": 862,
+        "sha256": "b61f77d77fd0c87143c8ceb4401791649a13d45b1f68d40fb7429a7fe2786059"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/resource_checkpoint.json",
+        "size_bytes": 534,
+        "sha256": "43bdf983b9f924677674575203933f8ac70172e553429cffdf6041a3d7bab986"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/events/000010.json",
+        "size_bytes": 34131,
+        "sha256": "366b3b16c052952945ec6e356cc6f18e45e0344ccefd7ae8c539c8b8b2b71736"
+      }
+    ],
+    "old_amendment_pin": {
+      "path": "configs/rf_expanded_tuning_execution_20261020.json",
+      "size_bytes": 3798,
+      "sha256": "dd0b45e97ed708ea1f37640ccd2ec4d0949c63c5d3deebfb35482368f9430cec"
+    }
+  },
+  "completed_checkpoint_reuse": "none_available_in_parent; future_successful_checkpoints_remain_resumable",
+  "lifetime_preparation_phase_initiations_authorized": 17,
+  "lifetime_completed_preprocessing_states": 16,
+  "lifetime_estimator_fit_ceiling": 100,
+  "remaining_budget_reductions": {
+    "total_preprocessing_fit_prediction_scoring_wall_seconds": 35,
+    "total_projected_compressed_source_read_stop_bytes": 391450896,
+    "new_output_stop_bytes": 1142498
+  },
+  "current_attempt_limits_reduced_to_carry_prior_use": true,
+  "original_cumulative_time_read_output_limits_preserved": true
+}

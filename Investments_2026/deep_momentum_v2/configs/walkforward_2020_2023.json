@@ -1,0 +1,427 @@
+{
+  "accounting": {
+    "annual_fit_forced_liquidation": false,
+    "borrow_annual_bps": 0,
+    "continuous_2020_2023_ledger": true,
+    "funding_annual_bps": 0,
+    "new_postselection_hindsight_exclusions": false,
+    "terminal_session": "2023-12-29",
+    "unresolved_held_quote": "retain_exposure_withhold_full_period_metrics"
+  },
+  "authority": "User authorized merging the completed development repairs and executing2020\u20132023walk-forward backtesting with annual rolling10-year retraining, monthly forecasts and unchanged baskets/stops on2026-10-16.",
+  "backtest": {
+    "RET": "not_evaluated_in_this_class_basket_experiment",
+    "arms": [
+      "rf_paper15",
+      "xgb_paper15",
+      "rf_extended",
+      "xgb_extended"
+    ],
+    "basket_breadth": {
+      "candidate_information": "signal_time_forecasts_and_fixed_execution_restrictions_only",
+      "equal_side_name_counts": true,
+      "long_total_weight": 0.5,
+      "names_per_side": "min(10,eligible_mode_long_count,eligible_mode_short_count)",
+      "not_historical_paper_method": true,
+      "policy": "balanced_available_capped_10",
+      "rank_and_ties": "unchanged_class_probability_descending_then_source_id_ascending",
+      "short_total_weight": -0.5,
+      "zero_candidate_side": "withhold_full_path"
+    },
+    "baskets": [
+      "class_1_10",
+      "class_2_9"
+    ],
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "end": "2023-12-31",
+    "events": "verified_in_period_corporate_actions_plus_preperiod_retirement_registry",
+    "fabricated_quotes_payouts_or_stops": false,
+    "long_weight": 0.5,
+    "remaining_unexplained_held_quote_gaps": "retain_exposure_withhold_full_period_metrics",
+    "short_weight": -0.5,
+    "start": "2020-01-01",
+    "top_k_per_side": 10,
+    "variants": {
+      "asset_stop_10pct": 0.1,
+      "unstopped": null
+    }
+  },
+  "context_policy": "available_cohort_80pct",
+  "corrected_validation_build_identity_sha256": "sha256:eb3cd1e297166a2b842f666d2c54d9226b6a31f283b1e21c6667d8361b19f7d9",
+  "corrected_validation_directory": "outputs/independent_backtest/2018-2019-eb3cd1e297166a2b",
+  "execution": {
+    "automatic_notebook_build_or_fit": false,
+    "backend": "local_verified_saved_annual_caches_only",
+    "backtest_maximum_peak_rss_bytes": 2147483648,
+    "backtest_maximum_wall_seconds": 900,
+    "cloud_mutations": false,
+    "early_stopping": false,
+    "feature_maximum_peak_rss_bytes": 4294967296,
+    "feature_maximum_projected_read_bytes": 4294967296,
+    "feature_maximum_wall_seconds": 7200,
+    "financial_2020_2023_analysis_authorized": true,
+    "financial_2024_plus_analysis": false,
+    "maximum_new_model_fits": 16,
+    "maximum_new_preprocessor_fits": 8,
+    "maximum_output_bytes": 12884901888,
+    "model_aggregate_maximum_wall_seconds": 14400,
+    "model_fits_per_fold": 4,
+    "model_maximum_peak_rss_bytes": 8589934592,
+    "model_maximum_projected_read_bytes": 1073741824,
+    "model_maximum_total_fits": 16,
+    "model_maximum_wall_seconds_per_fold": 5400,
+    "model_threads": 1,
+    "original_run_pointers_changed": false,
+    "parameter_search": false,
+    "probability_calibration": false,
+    "verification_maximum_peak_rss_bytes": 8589934592,
+    "verification_maximum_wall_seconds": 1800,
+    "verification_model_fits": 0,
+    "workers": 1
+  },
+  "execution_restrictions": {
+    "native_ids": {
+      "sec_gjP4xM": "Dean Foods: unresolved suspension/OTC daily execution coverage",
+      "sec_zmYNnz": "Rowan: unresolved correctly identified successor quotes"
+    },
+    "old_positions_or_realized_losses_deleted": false,
+    "period": "all_2020_2023_signals_before_selection",
+    "post_fit_additional_hindsight_exclusions": false,
+    "prediction_rows_and_probabilities_retained": true,
+    "selection": "balanced_min_10_available_mode_candidates_per_side_after_fixed_restriction",
+    "valid_historical_training_rows_retained": true
+  },
+  "feature_outcome_years": [
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "folds": [
+    {
+      "label_observed_through": "last_XNYS_session_on_or_before_training_year_end",
+      "prediction_outcome_end": "2020-12-31",
+      "prediction_outcome_start": "2020-01-01",
+      "test_year": 2020,
+      "train_outcome_end": "2019-12-31",
+      "train_outcome_start": "2010-01-01"
+    },
+    {
+      "label_observed_through": "last_XNYS_session_on_or_before_training_year_end",
+      "prediction_outcome_end": "2021-12-31",
+      "prediction_outcome_start": "2021-01-01",
+      "test_year": 2021,
+      "train_outcome_end": "2020-12-31",
+      "train_outcome_start": "2011-01-01"
+    },
+    {
+      "label_observed_through": "last_XNYS_session_on_or_before_training_year_end",
+      "prediction_outcome_end": "2022-12-31",
+      "prediction_outcome_start": "2022-01-01",
+      "test_year": 2022,
+      "train_outcome_end": "2021-12-31",
+      "train_outcome_start": "2012-01-01"
+    },
+    {
+      "label_observed_through": "last_XNYS_session_on_or_before_training_year_end",
+      "prediction_outcome_end": "2023-12-31",
+      "prediction_outcome_start": "2023-01-01",
+      "test_year": 2023,
+      "train_outcome_end": "2022-12-31",
+      "train_outcome_start": "2013-01-01"
+    }
+  ],
+  "historical_retirement_registry": {
+    "audit_sha256": "c8d05ed09d31cb750d85f5c4de5caa377639076e34670efd645dba0ec55a6c57",
+    "build_identity_sha256": "d9aa403dd50b2e3fa13c75dfdfabc09c918ade0256de45be0cfaed6e6a94f7bc",
+    "directory": "outputs/independent_backtest/2018-2019-eb3cd1e297166a2b/backtest_completed"
+  },
+  "identity_amendment": "data/derived/identity_amendments/old-bbby-native-conflict-20261016-v1",
+  "identity_policy": "provisional_unique_resolved_link",
+  "independent_quote_acquisition": {
+    "frozen_before_first_2020_2023_financial_read": true,
+    "plan": {
+      "acceptance_policy": {
+        "accepted_existing_target_replacement": false,
+        "append_control_close_maximum_absolute_difference": 0.05,
+        "append_control_close_maximum_relative_difference": 0.005,
+        "append_volume_factor_split_dividend": "unknown, left missing",
+        "existing_target_states": [
+          "provider_ohlc_anomaly",
+          "provider_incomplete_ohlc"
+        ],
+        "following_control_action_requirement": "explicit zero dividend and unit split",
+        "paired_unit_maximum_residual": 0.0002,
+        "preceding_dividend": "already included in valid paired units; recorded",
+        "replacement_controls_full_raw_ohlc_exact": true,
+        "target_existing_action_requirement": "explicit zero dividend and unit split",
+        "unit_multiplier": "preceding accepted adjusted close / raw close; following only validates all paired OHLC",
+        "unsupported_missing_controls_or_OTC": "refuse unchanged; do not synthesize or interpolate"
+      },
+      "eligibility_changes": false,
+      "historical_knowledge_time_certified": false,
+      "identity_policy": "Original dated Siblis source-to-native mapping remains provisional; exact same-source raw SIP query symbol must match frozen original membership labels or explicitly recorded provider-master fallback when labels unavailable; no ticker-only replacement identity",
+      "implementation": "Separate additive2020\u20132023 quote worker and persistent composed bundle; old worker code and overlays remain unchanged",
+      "limits": {
+        "cloud_compute": false,
+        "cloud_writes": false,
+        "maximum_attempts": 1,
+        "maximum_http_range_bytes": 67108864,
+        "maximum_local_evidence_bytes": 16777216,
+        "maximum_projected_compressed_bytes": 67108864,
+        "maximum_request_retries": 0,
+        "maximum_selected_source_records": 1024,
+        "maximum_single_range_bytes": 16777216
+      },
+      "ordinary_source_files_changed": false,
+      "performance_or_model_selection_inputs": false,
+      "protected_scope": {
+        "mixed_Arrow_row_group_numeric_decode_possible": true,
+        "no_2024_plus_financial_values_returned_or_converted_to_python": true,
+        "only_frozen_exact_source_keys_returned_or_used": true,
+        "raw_response_bodies_authentication": false,
+        "whole_source_table_hash_reread": false
+      },
+      "protocol_id": "dmv2-independent-sip-quote-repair-2020-2023-v1",
+      "publication_manifest_canonical_sha256": "67119e4939e031cbe2c4aad752b8f99a7a72e9bc1ca43595e3c1efc5b40d7f03",
+      "publication_manifest_generation": 1786102788412943,
+      "publication_manifest_uri": "gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/equity_us/sp_composite1500_market_daily/v1/_releases/professional-reference-20260807-r1/MANIFEST.json",
+      "read_order": "Source footer and full exact identity/date/request metadata before selected OHLC chunks; same cached-source date/identity checks before target/control fields",
+      "refusals_preserved": true,
+      "request": {
+        "native_ids": 36,
+        "path": "request.json",
+        "sha256": "1b08b397581463f6250a5d84fcac5e6ca4070ed183625ea4109f218c828101d8",
+        "size_bytes": 93872,
+        "source_date_keys": 308,
+        "targets": 143
+      },
+      "schema": "dmv2-walkforward-independent-quotes-acquisition-plan/v1",
+      "scope": "All143metadata-preflight targets before new forecasts and model fits",
+      "source_dates": {
+        "hard_maximum": "2023-12-31",
+        "maximum": "2023-10-17",
+        "minimum": "2020-01-09"
+      },
+      "source_object": {
+        "generation": 1783344954247444,
+        "reference_mode": "referenced",
+        "relative_path": "tables/daily_bars/part-00000.parquet",
+        "sha256": "sha256:4a4919d48128d5c573ddbca64649d8cc78783f7bbb818219a3ad5f34728e38a0",
+        "size_bytes": 187908505,
+        "uri": "gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/equity_us/sp_composite1500_market_daily/v1/tables/daily_bars/part-00000.parquet"
+      }
+    },
+    "plan_sha256": "d1b73db7b7ff56a0eb1b03ea17755a961ad89e90697295b7036f7f837149b148"
+  },
+  "independent_quote_review": {
+    "accepted": 16,
+    "model_or_performance_values_used_for_admission": false,
+    "package": "data/derived/data_repairs/walkforward-2020-2023-20261016-v1",
+    "refused_unchanged": 127,
+    "targets": 143
+  },
+  "interpretation": {
+    "author_100_fit_ensemble": false,
+    "full_historical_universe_survivorship_certified": false,
+    "knowledge_time_certified": false,
+    "market_cap_omitted_by_user": true,
+    "outer_evaluation": "sequential_walkforward_with_future_years_entering_training_only_after_they_complete",
+    "retrospective_DF_RDC_restrictions_fixed_before_this_evaluation": true
+  },
+  "missing_route_fallback": {
+    "approved": true,
+    "effect": "known_wrong_old_BBBY_routes_ineligible_features_and_labels_all_original_rows_retained",
+    "fully_corrected_price_mapping_claim": false,
+    "invalid_native_id": "sec_ydbQnj",
+    "original_membership_and_denominators_preserved": true,
+    "replacement_native_id": null,
+    "shared_normalization_context_and_classes_recomputed": true,
+    "source_security_ids": [
+      "siblis_ticker_company_00326c7d9ad13903e5e3",
+      "siblis_isin_c297a5f81a23c9f90503"
+    ],
+    "target_imputation": false
+  },
+  "model_recipe": {
+    "arms": [
+      {
+        "arm_id": "rf_paper15",
+        "estimator": "rf",
+        "feature_set": "paper15"
+      },
+      {
+        "arm_id": "xgb_paper15",
+        "estimator": "xgb",
+        "feature_set": "paper15"
+      },
+      {
+        "arm_id": "rf_extended",
+        "estimator": "rf",
+        "feature_set": "expanded"
+      },
+      {
+        "arm_id": "xgb_extended",
+        "estimator": "xgb",
+        "feature_set": "expanded"
+      }
+    ],
+    "authority": "User requested the first RF/XGBoost baseline pilot and selected all four Paper15/expanded-feature arms; resumed after pausing for another job.",
+    "class_prior_weighting": "pooled_supervised_training_stock_month_counts",
+    "context_policy": "available_cohort_80pct",
+    "estimators": {
+      "rf": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "max_samples": null,
+        "min_samples_leaf": 20,
+        "min_samples_split": 2,
+        "n_estimators": 500,
+        "n_jobs": 1,
+        "oob_score": false,
+        "random_state": 1729,
+        "warm_start": false
+      },
+      "xgb": {
+        "colsample_bytree": 0.8,
+        "device": "cpu",
+        "early_stopping_rounds": null,
+        "eval_metric": "mlogloss",
+        "gamma": 0.0,
+        "learning_rate": 0.05,
+        "max_bin": 256,
+        "max_depth": 3,
+        "min_child_weight": 20,
+        "n_estimators": 300,
+        "n_jobs": 1,
+        "num_class": 10,
+        "objective": "multi:softprob",
+        "random_state": 1729,
+        "reg_alpha": 0.0,
+        "reg_lambda": 10.0,
+        "subsample": 0.8,
+        "tree_method": "hist",
+        "verbosity": 0
+      }
+    },
+    "evaluation_population": "same_observed_target_mask_for_all_arms",
+    "execution": {
+      "RET_evaluation": false,
+      "automatic_notebook_fitting": false,
+      "backend": "local_verified_saved_panels",
+      "backtesting": false,
+      "cloud_mutations": false,
+      "early_stopping": false,
+      "estimator_threads": 1,
+      "fits_per_arm": 1,
+      "maximum_output_bytes": 2147483648,
+      "maximum_peak_rss_bytes": 8589934592,
+      "maximum_projected_read_bytes": 1073741824,
+      "maximum_total_fits": 4,
+      "maximum_wall_seconds": 5400,
+      "outer_refit": false,
+      "outer_test_evaluation": false,
+      "parameter_search": false,
+      "source_fallback": false,
+      "workers": 1
+    },
+    "feature_panel_role": "primary",
+    "identity_policy": "provisional_unique_resolved_link",
+    "interpretation": "One fixed-seed temporal development pilot per arm, using observed-return classes under provisional identity/return accounting. This is neither the paper's 100-fit ensemble nor a 2020-2023 outer-test or portfolio-performance result. No settings are selected from pilot validation results.",
+    "metrics": {
+      "brier": "sum_squared_errors_over_ten_classes_then_equal_month_mean",
+      "calibration_fitted": false,
+      "floor_applies_only_to_log_evaluation_not_saved_probabilities": true,
+      "log_loss_true_class_probability_floor": 1e-15,
+      "mode_ties": "lowest_canonical_class_id",
+      "primary": "equal_month_mean_log_loss",
+      "secondary": [
+        "pooled_log_loss",
+        "pooled_brier",
+        "equal_month_accuracy",
+        "toplabel_calibration_10_fixed_bins",
+        "classwise_calibration_10_fixed_bins",
+        "mode_class_1_and_10_precision_with_support"
+      ]
+    },
+    "packages": {
+      "cloudpickle": "3.1.2",
+      "joblib": "1.6.0",
+      "narwhals": "2.27.1",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "threadpoolctl": "3.7.0",
+      "xgboost": "3.4.1"
+    },
+    "prediction_population": "paper_prediction_eligible_independent_of_future_labels",
+    "preprocessing_fit_period": "2010-2017_only",
+    "preprocessing_policy": "train_partition_median_missing_indicator_v1",
+    "preprocessor_shared_between_estimators_with_same_feature_set": true,
+    "probability_construction": {
+      "canonical_classes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "matrix_dtype": "float32_after_finite_range_guard",
+      "repair_clipping_or_renormalization": false,
+      "rf": "native_predict_proba_float64",
+      "xgb": "native_output_margins_then_objective_softmax_float64"
+    },
+    "protocol_id": "dmv2-classifier-pilot-2010-2017-validate-2018-2019-v1",
+    "references": [
+      "uniform",
+      "train_prior"
+    ],
+    "schema_version": 1,
+    "status": "FROZEN_BEFORE_FIRST_FIT",
+    "supervised_fit_population": "paper_prediction_eligible_and_target_available",
+    "train_label_observed_through": "2017-12-31",
+    "train_outcome_end": "2017-12-31",
+    "train_outcome_start": "2010-01-01",
+    "universe": "combined",
+    "validation_label_observed_through": "2019-12-31",
+    "validation_outcome_end": "2019-12-31",
+    "validation_outcome_start": "2018-01-01"
+  },
+  "model_recipe_scope": "Estimator/package/preprocessing/probability/metric template only; every actual date and fit budget is replaced by the explicit walk-forward fold contract.",
+  "model_recipe_source": {
+    "path": "configs/classifier_pilot.json",
+    "sha256": "sha256:6fb4c41060f34c211565b93dbd7d05822074bd21a879db1fbee9d2f275d8422d"
+  },
+  "parent_training_build_identity_sha256": "sha256:50aa6e09f11b687c36cd3cf52ed8eb51fdde591fb2391cd58162d02edbb29b10",
+  "parent_training_directory": "outputs/data_limited_backtest/2010-2019-50aa6e09f11b687c",
+  "protocol_id": "dmv2-walkforward-2020-2023-v1",
+  "quote_acquisition_freeze_scope": "Exact acquisition and acceptance plan frozen separately before source/control financial projections; completed quote bundle bound before the feature build and all estimator fits.",
+  "quote_cache": "data/derived/data_repairs/walkforward-2020-2023-20261016-v1/compiled_quotes.pkl",
+  "quote_cache_fingerprint": "sha256:06b996e34982af3e2ab10fc28bcccac8152eb75f104fcacf0afd57a5ba20ebc6",
+  "quote_cache_sha256": "20156627057424389032f259f2e04850ed4f704325879929a9ebf4c757a93be7",
+  "quote_policy": "Propagate the existing reviewed2018/19overlay into later warmup; inspect all new-period quality/missing-key candidates before performance. Additional corrections must use separately pinned real independent observations and preserve all old source files.",
+  "research_status": "DATA_LIMITED_RESTRICTED_UNIVERSE",
+  "schema_version": 1,
+  "sensitivity_policy": "available_cohort_90pct_preserved_not_refitted",
+  "status": "FROZEN_BEFORE_FIRST_WALKFORWARD_FEATURE_BUILD_OR_FIT",
+  "test_years": [
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "universe": "historical_sp500_sp400_union"
+}
