@@ -350,3 +350,33 @@ statements describe that earlier phase. Earlier current-status blocks here and
 in other reference documents describe their own source versions. Never weaken
 hashes, remove unsupported holdings, or rank all models on complete paths only.
 Raw data, source evidence, outputs, fitted models and PDFs remain outside Git.
+
+
+## Completed RF tuning and daily replay, 2026-10-20
+
+CURRENT_RESEARCH_STATUS.md is the current entry point. Read
+`docs/RF_EXPANDED_TUNING_RESULTS_20261020.md` and
+`docs/RF_EXPANDED_TUNED_BACKTEST_RESULTS_20261020.md` before interpreting the new
+results. The immutable design-only protocol, later execution authority and
+restart amendment describe separate historical stages. The user-authorized
+search completed 96 inner fits, four annual refits and sixteen training-only
+preprocessing states. Annual selection uses only three chronological validation
+years / 36 equally weighted monthly log losses. No portfolio score chooses RF
+settings. The independent tuning receipt is PASS_COMPLETE with its documented
+float32/schema limitations.
+
+The separate additive zero-fit replay completed sixteen scenarios: eight
+complete class 1/10 paths and eight withheld class 2/9 paths. Use
+`scripts/verify_rf_tuned_backtest_v2.py` and
+`scripts/watch_rf_tuned_backtest_v2.py` for the reviewed verification-only
+correction; preserve their V1 predecessors and the failed verification evidence.
+Only the side column's Arrow string storage width differs in four selection
+files; exact semantic frame equality, all raw pins and independent accounting
+remain required. Never loosen value comparisons to resolve a failed assertion.
+
+Keep the original corrected models/backtests as comparators, RF expanded with
+10% per-asset stops as primary, the fixed basket/cost/execution rules, withheld
+exposures, stopped attempt and pause/resume checkpoints. The master remains
+passive; a fresh clone lacks private datasets and run evidence. No new fitting,
+resume or replay is needed to read these summaries. Already examined 2020–2023
+results remain development evidence; protected 2024+ values stay unread.

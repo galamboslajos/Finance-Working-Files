@@ -1,0 +1,705 @@
+{
+  "schema": "dmv2-rf-expanded-temporal-tuning-protocol/v1",
+  "protocol_id": "dmv2-rf-expanded-temporal-tuning-20261020-v1",
+  "frozen_on": "2026-10-20",
+  "status": "DERIVED_REMAINING_EXECUTION_BUDGET_NO_STATISTICAL_CHANGE",
+  "authority": {
+    "user_direction": "Freeze a small RF-expanded tuning protocol and compute budget; time-ordered inner validation; log-loss selection; unchanged backtest rules; do not start fitting.",
+    "fitting_authorized_now": false,
+    "preprocessing_fitting_authorized_now": false,
+    "prediction_or_backtest_authorized_now": false,
+    "new_financial_reads_authorized_now": false,
+    "requires_explicit_later_execution_direction": true,
+    "automatic_notebook_execution": false
+  },
+  "scope": {
+    "estimator": "RandomForestClassifier",
+    "feature_set": "expanded",
+    "fixed_candidate_predictor_count": 715,
+    "paper15_formulas_unchanged": true,
+    "context_policy": "available_cohort_80pct",
+    "universe": "historical_sp500_sp400_union",
+    "identity_policy": "provisional_unique_resolved_link",
+    "supervised_outcome_year_minimum": 2010,
+    "outer_outcome_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "protected_financial_year_minimum": 2024,
+    "frequency": "monthly_predictions_annual_refit",
+    "market_cap_used": false,
+    "other_estimator_fits": 0,
+    "paper15_only_fits": 0,
+    "context_90pct_fits": 0,
+    "source_feature_target_or_daily_rebuilds": 0,
+    "new_quote_sources_or_cloud_actions": false,
+    "RET_added": false
+  },
+  "reference": {
+    "source_corrected_run": "outputs/walkforward_source_corrected/2020-2023-20261016-v1",
+    "source_corrected_build_identity_sha256": "sha256:559ba2f7fbe187f192b40af2ab8fbe0a4fd70a1b843e2cbd0503f7e35729fcae",
+    "reuse_only_reviewed_corrected_annual_input_map": true,
+    "existing_runs_workers_configs_and_pointers_immutable": true,
+    "pins": [
+      {
+        "path": "configs/walkforward_2020_2023.json",
+        "size_bytes": 17923,
+        "sha256": "3e37a9f616d3c27ed83682c0087ca15db117bc272409b474fa5ea0ecbabc5d11"
+      },
+      {
+        "path": "configs/classifier_pilot.json",
+        "size_bytes": 4507,
+        "sha256": "6fb4c41060f34c211565b93dbd7d05822074bd21a879db1fbee9d2f275d8422d"
+      },
+      {
+        "path": "configs/normalization_protocol.json",
+        "size_bytes": 6290,
+        "sha256": "bea9f951589561f7142fb4514f20939b5c85d517b3d4296e3555e5c4355578d6"
+      },
+      {
+        "path": "configs/target_ret_protocol.json",
+        "size_bytes": 3380,
+        "sha256": "99cdc5d45f9170f62a76c6c2c667b6aa3bbb0d23c970e7acd397ed0e41398595"
+      },
+      {
+        "path": "configs/context_panel_roles.json",
+        "size_bytes": 1392,
+        "sha256": "7302800141d2051d91ae4e6d4ff17b3acb787d81018088f877e081d55e5005ad"
+      },
+      {
+        "path": "configs/source_quality_repair_20261016.json",
+        "size_bytes": 448,
+        "sha256": "5142c988eef6efd717f19f3ec5e7b856f0e74cdcb01f816544b5ebb8744b6360"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/build_identity.json",
+        "size_bytes": 43045,
+        "sha256": "3a1aa8d8c13955409d7bb2d886398268ff8b69537c77d0a8bba2e71e3521b428"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/completion.json",
+        "size_bytes": 3973,
+        "sha256": "4200ede325b18085e47d5fd47ae35b2fc7b9abae6c379e36dc9ad5abbba95f2d"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/models/audit.json",
+        "size_bytes": 2822,
+        "sha256": "34376c95eea0ca9997153181e12d2120e8c3e2fe521dd2abbd20517abc96f64b"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/verification/features.json",
+        "size_bytes": 9919,
+        "sha256": "8685d4394f1c9d834f5d797377f07dd8332dedc0d3c56ee8353046ac7a106c12"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/verification/models.json",
+        "size_bytes": 30711,
+        "sha256": "8e77f8f981dbca5b32d1659a97a37ec5bfe589610bfb5bb671502027a8133eed"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/backtest_source_corrected/audit.json",
+        "size_bytes": 191272,
+        "sha256": "776edb0c00b91f4543826fa56f017ba474206d24e52e7e4c71156a60018214d3"
+      },
+      {
+        "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/verification/backtest.json",
+        "size_bytes": 34569,
+        "sha256": "3acc111b93ece957bad8f628364a4661873d32bb853172172d10b5446a4ecfa4"
+      },
+      {
+        "path": "outputs/source_quality/confirmed-repairs-20261016-v1/corrected_annual_sources.json",
+        "size_bytes": 5474,
+        "sha256": "1d433696ef40159707abd7e6a238e2a0dfe753013c92c16fed3dbe83b399058e"
+      },
+      {
+        "path": "outputs/source_quality/confirmed-repairs-20261016-v1/handoff.json",
+        "size_bytes": 106476,
+        "sha256": "ddd66187bc64344fa6228eb247e8dd7eb9bf005bbed53b9b0f3b460b28a7e410"
+      },
+      {
+        "path": "configs/rf_expanded_tuning_20261020.json",
+        "size_bytes": 24538,
+        "sha256": "9f723a77de95ba62f87b5283be9994c77d21b9368fe1f721fec53bffc8e68df1"
+      },
+      {
+        "path": "configs/rf_expanded_tuning_execution_20261020.json",
+        "size_bytes": 3798,
+        "sha256": "dd0b45e97ed708ea1f37640ccd2ec4d0949c63c5d3deebfb35482368f9430cec"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/build_identity.json",
+        "size_bytes": 58273,
+        "sha256": "d7b23d4dfeca1ed9aa68b255a941e166e0825113b6b83b7a5e511cc9935875e6"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/ledger.json",
+        "size_bytes": 31715,
+        "sha256": "d166c09e08289fd87e8f872698416ec6fa5279a3fba0a68088133a23422c97f4"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/authorization.json",
+        "size_bytes": 862,
+        "sha256": "b61f77d77fd0c87143c8ceb4401791649a13d45b1f68d40fb7429a7fe2786059"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/resource_checkpoint.json",
+        "size_bytes": 534,
+        "sha256": "43bdf983b9f924677674575203933f8ac70172e553429cffdf6041a3d7bab986"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/events/000010.json",
+        "size_bytes": 34131,
+        "sha256": "366b3b16c052952945ec6e356cc6f18e45e0344ccefd7ae8c539c8b8b2b71736"
+      }
+    ],
+    "private_budget_evidence": {
+      "path": "outputs/rf_tuning_protocol/dmv2-rf-expanded-temporal-tuning-20261020-v1/budget_evidence.json",
+      "size_bytes": 7345,
+      "sha256": "b75b0da473f639dbbcf3200f1eea51c88a5963aa57dc85f37a8a1efdfb99a7cb"
+    }
+  },
+  "chronology": {
+    "outer_train_years": 10,
+    "inner_validation_years_per_outer": 3,
+    "inner_train_years": [
+      7,
+      8,
+      9
+    ],
+    "folds": [
+      {
+        "outer_outcome_year": 2020,
+        "train_outcome_start": "2010-01-01",
+        "train_outcome_end": "2019-12-31",
+        "train_outcome_years": 10,
+        "outer_prediction_months": 12,
+        "inner_splits": [
+          {
+            "split_id": "2020_validate_2017",
+            "train_outcome_start": "2010-01-01",
+            "train_outcome_end": "2016-12-31",
+            "train_outcome_years": 7,
+            "validation_outcome_start": "2017-01-01",
+            "validation_outcome_end": "2017-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2020_validate_2018",
+            "train_outcome_start": "2010-01-01",
+            "train_outcome_end": "2017-12-31",
+            "train_outcome_years": 8,
+            "validation_outcome_start": "2018-01-01",
+            "validation_outcome_end": "2018-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2020_validate_2019",
+            "train_outcome_start": "2010-01-01",
+            "train_outcome_end": "2018-12-31",
+            "train_outcome_years": 9,
+            "validation_outcome_start": "2019-01-01",
+            "validation_outcome_end": "2019-12-31",
+            "validation_months": 12
+          }
+        ]
+      },
+      {
+        "outer_outcome_year": 2021,
+        "train_outcome_start": "2011-01-01",
+        "train_outcome_end": "2020-12-31",
+        "train_outcome_years": 10,
+        "outer_prediction_months": 12,
+        "inner_splits": [
+          {
+            "split_id": "2021_validate_2018",
+            "train_outcome_start": "2011-01-01",
+            "train_outcome_end": "2017-12-31",
+            "train_outcome_years": 7,
+            "validation_outcome_start": "2018-01-01",
+            "validation_outcome_end": "2018-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2021_validate_2019",
+            "train_outcome_start": "2011-01-01",
+            "train_outcome_end": "2018-12-31",
+            "train_outcome_years": 8,
+            "validation_outcome_start": "2019-01-01",
+            "validation_outcome_end": "2019-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2021_validate_2020",
+            "train_outcome_start": "2011-01-01",
+            "train_outcome_end": "2019-12-31",
+            "train_outcome_years": 9,
+            "validation_outcome_start": "2020-01-01",
+            "validation_outcome_end": "2020-12-31",
+            "validation_months": 12
+          }
+        ]
+      },
+      {
+        "outer_outcome_year": 2022,
+        "train_outcome_start": "2012-01-01",
+        "train_outcome_end": "2021-12-31",
+        "train_outcome_years": 10,
+        "outer_prediction_months": 12,
+        "inner_splits": [
+          {
+            "split_id": "2022_validate_2019",
+            "train_outcome_start": "2012-01-01",
+            "train_outcome_end": "2018-12-31",
+            "train_outcome_years": 7,
+            "validation_outcome_start": "2019-01-01",
+            "validation_outcome_end": "2019-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2022_validate_2020",
+            "train_outcome_start": "2012-01-01",
+            "train_outcome_end": "2019-12-31",
+            "train_outcome_years": 8,
+            "validation_outcome_start": "2020-01-01",
+            "validation_outcome_end": "2020-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2022_validate_2021",
+            "train_outcome_start": "2012-01-01",
+            "train_outcome_end": "2020-12-31",
+            "train_outcome_years": 9,
+            "validation_outcome_start": "2021-01-01",
+            "validation_outcome_end": "2021-12-31",
+            "validation_months": 12
+          }
+        ]
+      },
+      {
+        "outer_outcome_year": 2023,
+        "train_outcome_start": "2013-01-01",
+        "train_outcome_end": "2022-12-31",
+        "train_outcome_years": 10,
+        "outer_prediction_months": 12,
+        "inner_splits": [
+          {
+            "split_id": "2023_validate_2020",
+            "train_outcome_start": "2013-01-01",
+            "train_outcome_end": "2019-12-31",
+            "train_outcome_years": 7,
+            "validation_outcome_start": "2020-01-01",
+            "validation_outcome_end": "2020-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2023_validate_2021",
+            "train_outcome_start": "2013-01-01",
+            "train_outcome_end": "2020-12-31",
+            "train_outcome_years": 8,
+            "validation_outcome_start": "2021-01-01",
+            "validation_outcome_end": "2021-12-31",
+            "validation_months": 12
+          },
+          {
+            "split_id": "2023_validate_2022",
+            "train_outcome_start": "2013-01-01",
+            "train_outcome_end": "2021-12-31",
+            "train_outcome_years": 9,
+            "validation_outcome_start": "2022-01-01",
+            "validation_outcome_end": "2022-12-31",
+            "validation_months": 12
+          }
+        ]
+      }
+    ],
+    "time_group": "complete_outcome_month_cross_section",
+    "random_row_splits": false,
+    "label_observation_cutoff": "last_XNYS_session_on_or_before_training_calendar_year_end",
+    "feature_cutoff": "preceding_XNYS_month_end_close",
+    "train_max_outcome_end_le_min_validation_signal_date": true,
+    "train_max_outcome_end_lt_min_validation_outcome_start": true,
+    "cross_boundary_target_intervals": "purge_and_audit_before_fitting",
+    "additional_calendar_month_embargo": 0,
+    "boundary_convention": "after_close_fit_for_next_session_open; completed_December_target_may_share_December_close_with_January_signal",
+    "outer_financial_values_decoded_before_winner_sealed": false,
+    "later_completed_outer_years_may_enter_later_windows": true,
+    "global_full_period_financial_preload": false
+  },
+  "cohorts_and_preprocessing": {
+    "training_mask": "same_signal_time_Paper15_eligible_rows_with_observed_valid_completed_target_classes",
+    "prediction_mask": "all_signal_time_Paper15_eligible_rows_independent_of_future_labels",
+    "scoring_mask": "same_observed_target_mask_and_same_keys_for_every_candidate_in_a_split",
+    "preserve_original_membership_rows_review_flags_and_denominators": true,
+    "require_all_ten_classes_in_each_training_split": true,
+    "each_validation_month_requires_at_least_one_observed_label": true,
+    "missing_labels_retained_not_imputed": true,
+    "added_feature_missingness_may_remove_prediction_rows": false,
+    "policy": "train_partition_median_missing_indicator_v1",
+    "fresh_preprocessor_per_inner_or_outer_training_partition": true,
+    "shared_across_eight_candidates_within_split": true,
+    "train_only_drop_rules": [
+      "all_missing",
+      "constant_finite_values"
+    ],
+    "imputation": "training_finite_median_for_each_retained_predictor",
+    "missing_indicators": "one_per_retained_predictor_even_if_training_had_no_missing_values",
+    "matrix_width": "two_times_retained_predictors_not_forced_to_1430",
+    "train_matrix_dtype": "float32_finite",
+    "probability_dtype": "float64",
+    "additional_scaling_winsorization_or_feature_selection": false,
+    "outer_or_full_history_fitted_preprocessing_reused_in_inner_split": false,
+    "signal_local_past_only_cross_sectional_normalization_unchanged": true
+  },
+  "rf": {
+    "fixed_parameters": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_samples": null,
+      "min_samples_split": 2,
+      "n_estimators": 500,
+      "n_jobs": 4,
+      "oob_score": false,
+      "random_state": 1729,
+      "warm_start": false,
+      "min_weight_fraction_leaf": 0.0,
+      "max_leaf_nodes": null,
+      "min_impurity_decrease": 0.0,
+      "monotonic_cst": null,
+      "verbose": 0
+    },
+    "candidates": [
+      {
+        "candidate_id": "rf_d08_l020_frac005",
+        "max_depth": 8,
+        "min_samples_leaf": 20,
+        "max_features": 0.05,
+        "reference_statistical_parameters": false
+      },
+      {
+        "candidate_id": "rf_d08_l020_sqrt",
+        "max_depth": 8,
+        "min_samples_leaf": 20,
+        "max_features": "sqrt",
+        "reference_statistical_parameters": false
+      },
+      {
+        "candidate_id": "rf_d08_l100_frac005",
+        "max_depth": 8,
+        "min_samples_leaf": 100,
+        "max_features": 0.05,
+        "reference_statistical_parameters": false
+      },
+      {
+        "candidate_id": "rf_d08_l100_sqrt",
+        "max_depth": 8,
+        "min_samples_leaf": 100,
+        "max_features": "sqrt",
+        "reference_statistical_parameters": false
+      },
+      {
+        "candidate_id": "rf_d12_l020_frac005",
+        "max_depth": 12,
+        "min_samples_leaf": 20,
+        "max_features": 0.05,
+        "reference_statistical_parameters": false
+      },
+      {
+        "candidate_id": "rf_d12_l020_sqrt",
+        "max_depth": 12,
+        "min_samples_leaf": 20,
+        "max_features": "sqrt",
+        "reference_statistical_parameters": true
+      },
+      {
+        "candidate_id": "rf_d12_l100_frac005",
+        "max_depth": 12,
+        "min_samples_leaf": 100,
+        "max_features": 0.05,
+        "reference_statistical_parameters": false
+      },
+      {
+        "candidate_id": "rf_d12_l100_sqrt",
+        "max_depth": 12,
+        "min_samples_leaf": 100,
+        "max_features": "sqrt",
+        "reference_statistical_parameters": false
+      }
+    ],
+    "candidate_fit_order_within_split": [
+      "rf_d12_l020_sqrt",
+      "rf_d08_l020_frac005",
+      "rf_d08_l020_sqrt",
+      "rf_d08_l100_frac005",
+      "rf_d08_l100_sqrt",
+      "rf_d12_l020_frac005",
+      "rf_d12_l100_frac005",
+      "rf_d12_l100_sqrt"
+    ],
+    "outer_processing_order": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "inner_processing_order": "validation_year_ascending",
+    "independent_seed_repeats": 1,
+    "sample_weight": null,
+    "early_stopping_calibration_oob_or_probability_blending": false,
+    "probability_class_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "probability_map_and_sum_checks": "reuse_frozen_pilot_probability_contract_no_clipping_or_renormalization",
+    "mode_ties": "lowest_canonical_class_id",
+    "inference_threads": 1,
+    "feature_fraction_applies_to": "all_prepared_columns_including_missing_indicators",
+    "feature_subset_count": "sqrt: max(1,int(sqrt(p))); 0.05: max(1,int(0.05*p))",
+    "feature_subset_note": "nominal_split_subset; library_may_inspect_more_to_find_a_valid_partition"
+  },
+  "selection": {
+    "winner_scope": "separate_candidate_per_outer_year",
+    "primary_metric": "equal_month_mean_log_loss",
+    "direction": "minimize",
+    "expected_scored_months_per_candidate_per_outer": 36,
+    "monthly_loss": "mean_over_identical_observed_stock_labels_of_minus_ln(max(p_true,1e-15))",
+    "candidate_score": "arithmetic_mean_of_36_monthly_losses_equal_weight",
+    "true_probability_evaluation_floor": 1e-15,
+    "floor_changes_saved_probabilities": false,
+    "class_or_sample_weighting": false,
+    "numerical_tie_absolute_tolerance": 1e-08,
+    "tie_set": "all_candidates_with_score_le_minimum_plus_tolerance",
+    "tie_break_order": [
+      "reference_candidate_if_in_tie_set",
+      "smaller_max_depth",
+      "larger_min_samples_leaf",
+      "smaller_sum_nominal_split_feature_counts_over_three_inner_schemas",
+      "candidate_id_ascending"
+    ],
+    "require_complete_candidate_grid_and_all_three_validation_years": true,
+    "minimum_improvement_for_non_tie_winner": 0.0,
+    "baseline_must_be_beaten_for_trial_to_complete": false,
+    "secondary_descriptive_metrics": [
+      "pooled_log_loss",
+      "equal_month_brier_sum10",
+      "equal_month_accuracy",
+      "class_1_2_9_10_precision_recall_support",
+      "fixed_10_bin_calibration",
+      "prediction_and_label_coverage",
+      "all_eight_candidates_fold_losses"
+    ],
+    "secondary_metrics_can_select_candidate": false,
+    "PnL_drawdown_sharpe_stop_exits_or_outer_scores_can_select_candidate": false,
+    "outer_refit": "winner_retrained_once_on_full_prior_ten_completed_outcome_years_with_fresh_train_only_preprocessing",
+    "freeze_winner_and_input_key_hashes_before_outer_prediction": true,
+    "failure": "stop_experiment_preserve_attempt_no_partial_grid_winner_no_automatic_retry_or_fallback"
+  },
+  "planned_fit_counts": {
+    "candidates": 8,
+    "inner_splits_per_outer": 3,
+    "outer_years": 4,
+    "inner_estimator_fits": 96,
+    "selected_outer_refits": 4,
+    "maximum_estimator_fits": 100,
+    "inner_preprocessor_fits": 12,
+    "outer_preprocessor_fits": 4,
+    "maximum_preprocessor_fits": 16,
+    "trees_per_fit": 500,
+    "maximum_trees": 50000,
+    "fits_performed_for_this_freeze": 0,
+    "preprocessor_fits_performed_for_this_freeze": 0
+  },
+  "local_budget": {
+    "hardware_verified": {
+      "ram_bytes": 34359738368,
+      "physical_cpu_count": 10,
+      "logical_cpu_count": 10,
+      "verification": "local_sysctl_hw.memsize_hw.physicalcpu_hw.logicalcpu",
+      "date": "2026-10-20"
+    },
+    "concurrent_fit_processes": 1,
+    "rf_tree_threads": 4,
+    "joblib_backend": "threading",
+    "numeric_thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "concurrent_candidates_outer_folds_or_verifiers": false,
+    "process_tree_rss_warning_bytes": 17179869184,
+    "process_tree_rss_stop_bytes": 21474836480,
+    "minimum_available_memory_before_launch_bytes": 12884901888,
+    "minimum_free_disk_before_launch_bytes": 32212254720,
+    "model_wall_seconds_per_fit": 1200,
+    "total_preprocessing_fit_prediction_scoring_wall_seconds": 57565,
+    "separate_zero_fit_verification_wall_seconds": 3600,
+    "new_output_stop_bytes": 21473693982,
+    "total_projected_compressed_source_read_stop_bytes": 8198483696,
+    "monitor_poll_seconds": 1,
+    "rss_accounting": "sum_current_RSS_of_supervisor_worker_and_all_descendants_no_peak_RSS_reuse",
+    "monitor_caveat": "sampling_can_overshoot;stop_on_observed_limit;no_unimplemented_OS_hard_cap_claim",
+    "available_memory_metric": "macOS_vm_stat_header_page_bytes_times_sum_Pages_free_Pages_inactive_Pages_speculative;do_not_add_overlapping_purgeable_or_file_backed_counts;conservative_proxy_not_guaranteed_reclaimability",
+    "source_read_accounting": "sum_projected_compressed_column_chunks_per_actual_source_decode;count_repeat_reads;exclude_mmap_matrix_IO",
+    "new_output_accounting": "all_files_under_new_private_attempt_root_including_failed_fits_and_matrices",
+    "budget_exhaustion_or_failed_fit": "stop_whole_experiment_no_partial_grid_selection_no_auto_retry_no_silent_row_or_feature_truncation",
+    "automatic_retries": 0,
+    "automatic_grid_expansion": false,
+    "no_guaranteed_runtime_estimate": true,
+    "backtest_compute_included": false,
+    "prior_8GiB_or_streaming_verifier_caps_changed": false
+  },
+  "unchanged_backtest": {
+    "reference_configuration_pin": {
+      "path": "configs/walkforward_2020_2023.json",
+      "size_bytes": 17923,
+      "sha256": "3e37a9f616d3c27ed83682c0087ca15db117bc272409b474fa5ea0ecbabc5d11"
+    },
+    "primary": "rf_extended/class_1_10/asset_stop_10pct/net_10bps",
+    "comparators": "saved_source_corrected_four_arm_results_with_withheld_paths_visible_no_new_comparator_fits",
+    "baskets": [
+      "class_1_10",
+      "class_2_9"
+    ],
+    "long_class_by_basket": [
+      1,
+      2
+    ],
+    "short_class_by_basket": [
+      10,
+      9
+    ],
+    "selection": "mode_class_then_own_class_probability_descending_source_id_ascending",
+    "side_count": "min(10,eligible_long_mode_count,eligible_short_mode_count)",
+    "initial_long_weight": 0.5,
+    "initial_short_weight": -0.5,
+    "weights_within_each_side": "equal_at_monthly_rebalance",
+    "execution": "next_XNYS_session_open",
+    "variants": {
+      "unstopped": null,
+      "asset_stop_10pct": 0.1
+    },
+    "stop": "fixed_monthly_asset_entry_level_not_trailing;gap_at_open_fill_else_idealized_intraday_OHLC_threshold",
+    "stop_cash": "remain_cash_no_replacement_or_exposure_reset_until_next_monthly_rebalance",
+    "cost_bps_one_way_notional": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "borrow_annual_bps": 0,
+    "funding_annual_bps": 0,
+    "continuous_NAV_no_forced_annual_liquidation": true,
+    "corporate_actions_quote_overlays_and_PENN_handover": "same_pinned_corrected_backtest_evidence_and_workers",
+    "BBBY_wrong_route_quarantine_and_DF_RDC_execution_restrictions": "unchanged",
+    "unresolved_held_quote": "retain_exposure_withhold_full_path_metrics",
+    "new_performance_driven_exclusions_or_synthetic_quotes": false
+  },
+  "implementation_gate": {
+    "executor_present": false,
+    "master_notebook_changed": false,
+    "required_before_execution": [
+      "explicit_later_user_execution_direction",
+      "new_additive_runner_independent_review_and_synthetic_chronology_selection_budget_tests",
+      "verify_all_pins_and_past_only_read_plan_before_financial_decoding",
+      "freeze_executor_hashes_runtime_and_full_effective_estimator_parameters",
+      "persist_target_intervals_masks_key_hashes_split_schemas_and_source_projection_plans",
+      "supervised_fit_counter_persisted_before_each_fit_and_resource_watchdog",
+      "fresh_non_overwriting_private_attempt_root"
+    ],
+    "future_verification": [
+      "independent_same_key_monthly_log_loss_recalculation_and_tie_selection",
+      "inner_train_only_schema_medians_flags_and_completed_label_cutoffs",
+      "all_candidate_fit_counters_probabilities_and_budget_receipts",
+      "saved_selected_models_reproduce_saved_probabilities_without_refitting",
+      "source_and_original_run_preservation_hashes"
+    ],
+    "backtest_rerun_requires_separate_explicit_execution_scope_and_budget": true
+  },
+  "interpretation": {
+    "method": "V2_temporal_RF_tuning_adaptation_not_author_100_fit_probability_ensemble",
+    "outer_2020_2023_already_examined": true,
+    "later_tuned_outer_comparison": "development_walkforward_not_new_untouched_test",
+    "no_financial_2024_plus_access": true,
+    "log_loss_improvement_guarantees_portfolio_improvement": false,
+    "identity_knowledge_time_full_survivorship_or_investability_certified": false,
+    "old_withheld_comparators_block_protocol_freeze": false
+  },
+  "runtime_snapshot_for_future_matching": {
+    "python": "3.14.6",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "exchange-calendars": "4.13.2"
+  },
+  "primary_technical_sources": [
+    "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html",
+    "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.log_loss.html"
+  ],
+  "execution_variant_id": "dmv2-rf-expanded-tuning-remaining-budget-20261020-v2",
+  "derived_from_design_pin": {
+    "path": "configs/rf_expanded_tuning_20261020.json",
+    "size_bytes": 24538,
+    "sha256": "9f723a77de95ba62f87b5283be9994c77d21b9368fe1f721fec53bffc8e68df1"
+  },
+  "explicit_restart_parent": {
+    "run_root": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932",
+    "status": "STOPPED_BUDGET",
+    "estimator_fits_initiated": 0,
+    "preparation_phases_initiated": 1,
+    "completed_preparation_checkpoints": 0,
+    "active_seconds": 34.83786662500643,
+    "charged_active_seconds_ceiling": 35,
+    "reserved_source_bytes": 391450896,
+    "output_bytes": 1142498,
+    "event_head_sha256": "sha256:2140840ed9f09ff21f85344b4564619c56afe1b18b63cd1b98c2a1a9b6a6afeb",
+    "pins": [
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/build_identity.json",
+        "size_bytes": 58273,
+        "sha256": "d7b23d4dfeca1ed9aa68b255a941e166e0825113b6b83b7a5e511cc9935875e6"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/ledger.json",
+        "size_bytes": 31715,
+        "sha256": "d166c09e08289fd87e8f872698416ec6fa5279a3fba0a68088133a23422c97f4"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/authorization.json",
+        "size_bytes": 862,
+        "sha256": "b61f77d77fd0c87143c8ceb4401791649a13d45b1f68d40fb7429a7fe2786059"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/resource_checkpoint.json",
+        "size_bytes": 534,
+        "sha256": "43bdf983b9f924677674575203933f8ac70172e553429cffdf6041a3d7bab986"
+      },
+      {
+        "path": "outputs/rf_expanded_tuning/20261020T090703447545Z-58984518c932/events/000010.json",
+        "size_bytes": 34131,
+        "sha256": "366b3b16c052952945ec6e356cc6f18e45e0344ccefd7ae8c539c8b8b2b71736"
+      }
+    ],
+    "old_amendment_pin": {
+      "path": "configs/rf_expanded_tuning_execution_20261020.json",
+      "size_bytes": 3798,
+      "sha256": "dd0b45e97ed708ea1f37640ccd2ec4d0949c63c5d3deebfb35482368f9430cec"
+    }
+  }
+}

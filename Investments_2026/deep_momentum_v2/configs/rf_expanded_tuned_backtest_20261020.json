@@ -1,0 +1,98 @@
+{
+  "arm": "rf_extended_tuned",
+  "authority": "On 20 October 2026, the user requested the backtest after completed RF temporal tuning and independent verification. Run only the sixteen tuned RF expanded class-basket scenarios under the existing portfolio rules, with zero additional fits, inference calls or data rebuilds.",
+  "base_configuration_pin": {
+    "path": "configs/walkforward_2020_2023.json",
+    "sha256": "3e37a9f616d3c27ed83682c0087ca15db117bc272409b474fa5ea0ecbabc5d11",
+    "size_bytes": 17923
+  },
+  "cloud_operations": false,
+  "comparators": "Reuse the saved corrected four-arm reports after independent verification of the new replay. Do not refit or replay comparator models.",
+  "coverage_gate": "Save both baskets and their maximum-horizon coverage gaps before computing performance. Review those gaps, then use the explicit fail-closed withheld-path mode without changing selections or replacing stocks.",
+  "date": "2026-10-20",
+  "execution_authorized": true,
+  "financial_2024_plus_authorized": false,
+  "historical_period": "2020\u20132023 has already been examined. These results are a development comparison, not an untouched test.",
+  "new_estimator_fits": 0,
+  "new_inference_calls": 0,
+  "new_preprocessor_fits": 0,
+  "preservation": "Preserve every original source, configuration, worker, model, forecast, old run, stopped attempt, checkpoint and pointer. Write only to a fresh private directory under outputs/rf_expanded_tuned_backtest.",
+  "protocol_id": "dmv2-rf-expanded-tuned-backtest-20261020-v1",
+  "resource_amendment": "Freeze a separate replay and verification allowance of 4 GiB process-tree RSS, with a warning at 3 GiB, before new financial decoding. This adds operational headroom to the earlier 2 GiB planning proposal. The Mac has 32 GiB physical RAM; this allowance does not reserve it.",
+  "resource_limits": {
+    "backtest_wall_seconds": 900,
+    "cumulative_compressed_read_bytes": 536870912,
+    "minimum_available_memory_bytes": 7516192768,
+    "normal_pressure_dispatch": 1,
+    "numeric_threads": 1,
+    "output_bytes": 268435456,
+    "preflight_wall_seconds": 300,
+    "rss_stop_bytes": 4294967296,
+    "rss_warning_bytes": 3221225472,
+    "verification_wall_seconds": 1800,
+    "workers": 1
+  },
+  "scenarios": 16,
+  "schema": "dmv2-rf-tuned-backtest-execution/v1",
+  "source_model_verification_pin": {
+    "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/verification/models.json",
+    "sha256": "8e77f8f981dbca5b32d1659a97a37ec5bfe589610bfb5bb671502027a8133eed",
+    "size_bytes": 30711
+  },
+  "source_reference_audit_pin": {
+    "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/backtest_source_corrected/audit.json",
+    "sha256": "776edb0c00b91f4543826fa56f017ba474206d24e52e7e4c71156a60018214d3",
+    "size_bytes": 191272
+  },
+  "source_reference_backtest": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/backtest_source_corrected",
+  "source_reference_phase_pin": {
+    "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/backtest_source_corrected/build_identity.json",
+    "sha256": "bab96c5a4734bf539d68642fcab2d441c7d65a73ef57ec70786f1e7da0800805",
+    "size_bytes": 261762
+  },
+  "source_reference_root": "outputs/walkforward_source_corrected/2020-2023-20261016-v1",
+  "source_reference_root_identity_sha256": "sha256:559ba2f7fbe187f192b40af2ab8fbe0a4fd70a1b843e2cbd0503f7e35729fcae",
+  "source_reference_verification_pin": {
+    "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/verification/backtest.json",
+    "sha256": "3acc111b93ece957bad8f628364a4661873d32bb853172172d10b5446a4ecfa4",
+    "size_bytes": 34569
+  },
+  "status": "FROZEN_EXECUTION_AUTHORIZED",
+  "tuning_identity_pin": {
+    "path": "outputs/rf_expanded_tuning/20261020T092321879709Z-792c5bb9b38e/build_identity.json",
+    "sha256": "92f8acd8336a5f5e913730ad00d530f2f4c8661db2fee823d11fcc08ab948f9a",
+    "size_bytes": 60364
+  },
+  "tuning_ledger_pin": {
+    "path": "outputs/rf_expanded_tuning/20261020T092321879709Z-792c5bb9b38e/ledger.json",
+    "sha256": "05d13612a6b35acd371b0f857ef6f6c7cb3c30987ab7dd0a527dd3371009c77a",
+    "size_bytes": 157816
+  },
+  "tuning_verification_pin": {
+    "path": "outputs/rf_expanded_tuning/20261020T092321879709Z-792c5bb9b38e/independent_verification_20261020.json",
+    "sha256": "5fb3b47621fb18b9a22b074e3c66972df9bd1868f9582098343e441f21d9081f",
+    "size_bytes": 12438
+  },
+  "unchanged_rules": {
+    "RET": "not_evaluated",
+    "annual_liquidation": false,
+    "asset_stop_fraction": 0.1,
+    "class_pairs": [
+      "class_1_10",
+      "class_2_9"
+    ],
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "execution": "Rebalance monthly at the next trading session open. Use fixed entry-relative 10% per-asset stops, gap-open fills and the existing idealized intraday OHLC threshold fill.",
+    "initial_long_weight": 0.5,
+    "initial_short_weight": -0.5,
+    "missing_held_price": "Retain the exposure and withhold performance for the affected continuous path.",
+    "names_per_side": "min(10,eligible_mode_long_count,eligible_mode_short_count)",
+    "new_postselection_exclusions": false,
+    "stop_cash": "Keep stopped capital in cash until the next monthly rebalance; do not replace positions or reset exposure."
+  }
+}

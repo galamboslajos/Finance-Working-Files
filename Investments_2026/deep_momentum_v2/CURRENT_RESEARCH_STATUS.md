@@ -1,4 +1,59 @@
-# Current Deep Momentum V2 handoff — 16 October 2026
+# Current Deep Momentum V2 handoff — 20 October 2026
+
+The RF-expanded temporal tuning and its separate daily backtest are complete
+and independently verified. Start with [the tuning completion and prediction
+diagnostics](docs/RF_EXPANDED_TUNING_RESULTS_20261020.md) and
+[the verified daily results](docs/RF_EXPANDED_TUNED_BACKTEST_RESULTS_20261020.md).
+The dated source-corrected baseline handoff below remains reference evidence.
+
+The search completed 96 inner fits and four selected annual ten-year refits,
+using training-only preprocessing and three chronological validation years per
+outer year. Annual settings were selected only by 36-month mean log loss.
+All original cohorts, targets, source corrections, monthly prediction timing and
+basket/stop/accounting rules remain unchanged. The first memory-stopped attempt
+and all pause/resume checkpoints are preserved; no automatic retry is added.
+
+For 2 January 2020–29 December 2023 (48 months, 1,006 sessions), class 1/10,
+10% per-asset stops and 10 bp one-way costs:
+
+| Model | Total net return | CAGR | Annualized volatility | Sharpe | Maximum drawdown |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| RF / Paper15 | Withheld | — | — | — | — |
+| XGBoost / Paper15 | +23.45% | 5.42% | 21.86% | 0.35 | −31.18% |
+| RF / expanded original | +18.82% | 4.41% | 20.82% | 0.31 | −35.14% |
+| XGBoost / expanded | +3.41% | 0.84% | 18.64% | 0.14 | −31.82% |
+| **RF / expanded tuned** | **+42.78%** | **9.33%** | **20.69%** | **0.53** | **−35.14%** |
+
+RF expanded with stops remains the primary focus. Its tuned return is +55.11%
+gross. The unchanged 2020 forecasts explain the unchanged maximum drawdown.
+Aggregate monthly prediction log loss is 2.268171 versus 2.268053 for the
+original RF; accuracy is 13.11% versus 13.36%. Better portfolio performance
+is not evidence of better probability forecasts or a new untouched test.
+
+The additive replay completed sixteen scenarios: eight class 1/10 complete
+proxy paths and eight class 2/9 paths with full-period metrics withheld for
+missing held observations. Exposure remains present. The original comparison
+still has 24 complete / 40 withheld scenarios, so a complete four-model economic
+ranking is unavailable. Borrow/funding remain zero; intraday stop fills are
+idealized; source identity, knowledge time and survivorship remain provisional.
+No protected 2024+ financial values were read.
+
+The [V2 verification correction](docs/RF_TUNED_BACKTEST_VERIFICATION_CORRECTION_20261020.md)
+addresses a physical Arrow string-width re-encoding in selection files. Exact
+values, row order, nulls and accounting were independently checked. The first
+failed verifier, both raw hashes, original replay and all old runs stay preserved;
+no fitting or replay was repeated to resolve that assertion.
+
+Git contains source, protocols, tests and aggregate summaries. Datasets,
+credentials, models, matrices, ledgers and verification receipts stay private.
+The historical README and repair-phase notes remain hash-pinned evidence;
+this file is the current entry point. Notebook section24 displays the original
+source-corrected baseline, while the new tuned results are documented in the
+links above. Publication starts no financial computation.
+
+---
+
+# Source-corrected baseline handoff — 16 October 2026
 
 The corrected 2020–2023 walk-forward is complete and independently checked.
 This is the starting point for the next research round. The original runs are
