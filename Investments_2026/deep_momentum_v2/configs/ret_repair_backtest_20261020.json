@@ -1,0 +1,65 @@
+{
+  "allow_withheld_paths": true,
+  "arm_ids": [
+    "rf_paper15",
+    "xgb_paper15",
+    "rf_extended",
+    "xgb_extended",
+    "rf_extended_tuned"
+  ],
+  "authority": "User2026-10-20: fixquote gapsandfinishRETbacktest; explainnames/dates. Newexecution-only repairwithunchangedscores,selection,tradingrules; preservetheoriginalreference.",
+  "cloud_operations": false,
+  "execution_authorized": true,
+  "financial_2024_plus_authorized": false,
+  "independent_equations_pin": {
+    "path": "scripts/verify_walkforward_backtest_v2.py",
+    "sha256": "16c3651289258bed24a83d500f6b8589fac3bcb4d358e516fe981acec527a794",
+    "size_bytes": 91872
+  },
+  "new_estimator_fits": 0,
+  "new_inference_calls": 0,
+  "new_preprocessor_fits": 0,
+  "parent_audit_pin": {
+    "path": "outputs/ret_backtest/2020-2023-20261020-v1/audit.json",
+    "sha256": "32175ec0fee9108412fb0b7e3b13fb7ec39dbd5c5e356d680b3b4b9adad1ecd3",
+    "size_bytes": 534
+  },
+  "parent_identity_pin": {
+    "path": "outputs/ret_backtest/2020-2023-20261020-v1/build_identity.json",
+    "sha256": "4c5fba9f96339052083ba057eb363136001fa458afe86c11e28a492aaaadf3f7",
+    "size_bytes": 167595
+  },
+  "parent_verification_pin": {
+    "path": "outputs/ret_backtest/2020-2023-20261020-v1/verification/ret_backtest.json",
+    "sha256": "be73bbac727f36d090ec34367bebbd3d09d5dc92ba49fe1c35319bd00207f49c",
+    "size_bytes": 261542
+  },
+  "parent_verifier_pin": {
+    "path": "scripts/verify_ret_backtest.py",
+    "sha256": "cd315f90848349b3f64045923e5410ee1adea92bec0eaafcd72f974f03c7c89e",
+    "size_bytes": 71939
+  },
+  "repair_manifest_pin": {
+    "path": "data/derived/ret_repairs/20261020-v1/repair_manifest.json",
+    "sha256": "7474b3c62a19d636bcfaea05d27553315721cb0fd65ce1301ac572440ba8b9fb",
+    "size_bytes": 43533
+  },
+  "resource_limits": {
+    "backtest_wall_seconds": 1200,
+    "cumulative_compressed_read_bytes": 1073741824,
+    "minimum_available_memory_bytes": 7516192768,
+    "normal_pressure_dispatch": 1,
+    "numeric_threads": 1,
+    "output_bytes": 536870912,
+    "preflight_wall_seconds": 900,
+    "prepare_wall_seconds": 300,
+    "rss_stop_bytes": 4294967296,
+    "rss_warning_bytes": 3221225472,
+    "verification_wall_seconds": 3600,
+    "workers": 1
+  },
+  "scenarios": 40,
+  "schema": "dmv2-ret-repair-execution/v1",
+  "scores_and_selections_unchanged": true,
+  "status": "FROZEN_EXECUTION_AUTHORIZED"
+}

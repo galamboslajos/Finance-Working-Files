@@ -1,0 +1,128 @@
+{
+  "budget": {
+    "automatic_retries": 0,
+    "conditional_numeric_max_projected_bytes": 268435456,
+    "conditional_numeric_max_rss_bytes": 4294967296,
+    "each_stage_max_wall_seconds": 600,
+    "hash_reads_accounted_separately_from_financial_projection": true,
+    "metadata_max_projected_bytes": 134217728,
+    "metadata_max_rss_bytes": 2147483648,
+    "new_output_max_bytes": 536870912,
+    "no_partial_success_on_contract_failure": true,
+    "numeric_threads": 1,
+    "stages_sequential_for_research_decoding": true
+  },
+  "frozen_at_utc": "2026-10-21T11:19:06.756398+00:00",
+  "limitations": [
+    "Full-cohort saved-metadata audit is not proof every historical OHLCV value or security identity is correct.",
+    "Documented legal-event registry overlaps are candidate impacts, not automatic delisting labels.",
+    "Execution quote repair alone does not establish full OHLCV feature readiness.",
+    "An isolated payoff diagnostic using frozen cohorts does not validate corrected models or a complete corrected pipeline."
+  ],
+  "prohibited": [
+    "fitting or preprocessing fitting",
+    "model inference",
+    "new backtest or performance selection",
+    "alternate path-risk labels or target objective",
+    "canonical route promotion or broad RCM remap",
+    "new cloud reads or mutations",
+    "2024+ financial decoding",
+    "synthetic month-end prices or target imputation"
+  ],
+  "project_root": "/Users/lajosgalambos/Desktop/Finance-Working-Files/Investments_2026/deep_momentum_v2",
+  "protocol_id": "learning-input-impact-20261021-v1",
+  "schema": "dmv2-learning-input-impact-protocol/v1",
+  "scope": {
+    "conditional_numeric_case": "RCM November 2021 only, same-security reviewed native quotes; reproduce original observed-return midrank classes first, unchanged cohort and formula",
+    "conditional_numeric_dependency": "Changed November true-class means may enter only completed trailing-120-month RET windows from December 2021. December 2021 anchor restoration alone cannot invent missing December endpoint.",
+    "economic_action_labels": "Cash/stock/ADS merger entitlements require a separately reviewed economic-return accounting policy; never put settlement/successor prices into predecessor adj_close",
+    "identity_policy": "retain provisional unique resolved link policy and all exclusions/flags",
+    "metadata_outcome_months": 168,
+    "metadata_outcome_years": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "protected_financial_year_minimum": 2024,
+    "static_feature_dependencies": "RCM Nov1-Dec1 2021 and DISCA Apr4-8 2022; exact per-feature lags, cross-sectional spillovers, fields and route readiness. Potential dependencies are not measured feature changes.",
+    "training_fold_dependencies": "date-only map to frozen annual and nested tuning train/validation intervals; no claim a fit changes without a changed input",
+    "universe": "all original historical S&P500+S&P400 membership rows from corrected annual chain pinned by original RET root"
+  },
+  "source_authority_pins": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "10b0211473ee4273b094c9da4619ba7baf26d7b32bd2071496ae1467bf4d129d",
+      "size_bytes": 23906
+    },
+    {
+      "path": ".agents/skills/han-qin-deep-momentum/SKILL.md",
+      "sha256": "d6a59d17e3b07f2d3de5cba886d1431ed8f0575b6e767c61407943f1cdb7c0a9",
+      "size_bytes": 4777
+    },
+    {
+      "path": "configs/target_ret_protocol.json",
+      "sha256": "99cdc5d45f9170f62a76c6c2c667b6aa3bbb0d23c970e7acd397ed0e41398595",
+      "size_bytes": 3380
+    },
+    {
+      "path": "configs/normalization_protocol.json",
+      "sha256": "bea9f951589561f7142fb4514f20939b5c85d517b3d4296e3555e5c4355578d6",
+      "size_bytes": 6290
+    },
+    {
+      "path": "configs/rf_expanded_tuning_20261020.json",
+      "sha256": "9f723a77de95ba62f87b5283be9994c77d21b9368fe1f721fec53bffc8e68df1",
+      "size_bytes": 24538
+    },
+    {
+      "path": "outputs/ret_backtest/2020-2023-20261020-v1/build_identity.json",
+      "sha256": "4c5fba9f96339052083ba057eb363136001fa458afe86c11e28a492aaaadf3f7",
+      "size_bytes": 167595
+    },
+    {
+      "path": "outputs/ret_backtest/2020-2023-20261020-v1/verification/ret_backtest.json",
+      "sha256": "be73bbac727f36d090ec34367bebbd3d09d5dc92ba49fe1c35319bd00207f49c",
+      "size_bytes": 261542
+    },
+    {
+      "path": "outputs/ret_repair_backtest/2020-2023-20261020-v1/build_identity.json",
+      "sha256": "e60aa9236322403cb140057912e3fd1e13f60932c8d9c529881f7e09a8553cfa",
+      "size_bytes": 561147
+    },
+    {
+      "path": "outputs/ret_repair_backtest/2020-2023-20261020-v1/preflight/build_identity.json",
+      "sha256": "13efba7afa0aa35e80b887076051bee5330fc7bab31e3e5b2acefd2bb85b9e90",
+      "size_bytes": 457754
+    },
+    {
+      "path": "outputs/ret_repair_backtest/2020-2023-20261020-v1/verification/ret_repair_backtest.json",
+      "sha256": "8253c45415a9766172c6955b58906c6d5762e53853e50ab50048996259ebf3a0",
+      "size_bytes": 176259
+    },
+    {
+      "path": "data/derived/ret_repairs/20261020-v1/repair_manifest.json",
+      "sha256": "7474b3c62a19d636bcfaea05d27553315721cb0fd65ce1301ac572440ba8b9fb",
+      "size_bytes": 43533
+    }
+  ],
+  "status": "FROZEN_AUDIT_ONLY",
+  "unchanged": {
+    "all_prior_runs": true,
+    "daily_execution_inputs_and_backtest_rules": true,
+    "models_predictions_tuning_candidates_and_winners": true,
+    "production_feature_panel": true,
+    "production_labels_classes_and_RET_payoffs": true
+  },
+  "user_authority": "Continue the planned audits before altering labels."
+}

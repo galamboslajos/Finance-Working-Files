@@ -1,0 +1,87 @@
+{
+  "adjustment_semantics": "Use published adjusted OHLC/volume as the existing provisional proxy; no multiplication by source factor and no dividend addition. Exact economic/knowledge-time adjustment history remains uncertified.",
+  "candidate_native_id": "sec_zq1J05",
+  "certification_flags": {
+    "independent_provider_returned_ISIN_verified": false,
+    "knowledge_time_verified": false,
+    "raw_provider_response_verified": false,
+    "survivorship_bias_free_certified": false,
+    "temporal_identity_verified": false
+  },
+  "evidence_pins": [
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/protocol.json",
+      "sha256": "bdf744f02a63383196dd39394a4bee374c27d43d1d7fed7ff8d3601fc1793ddf",
+      "size_bytes": 4469
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/core/result-v1/receipt.json",
+      "sha256": "6a4fe0688ccf57bf2940be7a154f494cb7158f052bd5f403761d867f88a72669",
+      "size_bytes": 1433
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/core/result-v1/summary.json",
+      "sha256": "ec04c8a648129af152d857b70ea27a1fbdff10a3768a156b6b5f7f1a2298515d",
+      "size_bytes": 4512
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/bk_output_review-v1/independent_QA.json",
+      "sha256": "f5a67c4319a3069f079950db1d12ad22fb406a84f750592b183d754fa6c3b5aa",
+      "size_bytes": 168940
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/identity/primary_evidence.json",
+      "sha256": "b6c2500c10a23234111b7ee2bf7d7c89558029d5fae9667b112e8a8a4a98a2ce",
+      "size_bytes": 5740
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/identity/provisional_identity_recommendation.json",
+      "sha256": "8d2129a37395211301a5987f8954a670f725e82021d875ca48486eb21b94c8a0",
+      "size_bytes": 3426
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/collision_metadata_result.json",
+      "sha256": "7369824549e5a1e7bbe257b541e8f57bb38118e93b0b41b6ae4b7d640fdc7e98",
+      "size_bytes": 1704
+    }
+  ],
+  "first_forecast_signal": "2009-12-31",
+  "first_outcome_month": "2010-01",
+  "interval_is_provisional_inference_not_certified_ISIN_history": true,
+  "known_bad_OHLC_dates_preserved": [
+    "2007-07-02",
+    "2007-07-10",
+    "2007-08-17",
+    "2007-10-19"
+  ],
+  "known_bad_dates_outside_predetermined_required_window": true,
+  "no_features_labels_RET_models_or_backtests_built": true,
+  "observed_issuer_ISIN_document_date": "2013-03-12",
+  "original_native_id": "sec_gA3NYQ",
+  "original_route_retained_as_evidence": true,
+  "original_unified_id": "equity_us_a2ca9feacdef53087ce87b15",
+  "prerequisites_before_any_shadow_consumption": [
+    "Bind reviewed source, code, calendar, identity and field-output hashes in a new frozen consumer recipe.",
+    "Rebuild each original dated membership cohort before price joins; preserve every original source row, denominator and producer review flag.",
+    "Recompute exact same-date native collisions against all original members and applicable context populations before admitting the amended route.",
+    "Use independent XNYS sessions and exact existing warmup. Retain all provider-only and known bad dates in audit metadata; never substitute stale prices.",
+    "Rebuild affected cross-sectional feature statistics and observed-outcome classes/RET inputs consistently in shadow outputs; do not splice a replacement row into old model matrices.",
+    "Measure masks/value/schema/fold changes before authorizing inference or fits. Preserve every old run and objective/basket/stop rule."
+  ],
+  "production_promoted": false,
+  "proposed_postmerger_instrument_interval_half_open": [
+    "2007-07-02",
+    "2023-12-30"
+  ],
+  "recorded_at_utc": "2026-10-21T12:16:02.255891+00:00",
+  "required_XNYS_sessions": 4025,
+  "required_financial_window_inclusive": [
+    "2008-01-04",
+    "2023-12-29"
+  ],
+  "required_window_all_raw_adjusted_OHLCV_finite_positive_and_OHLC_brackets_valid": true,
+  "schema": "dmv2-BK-conditional-shadow-route-proposal/v1",
+  "source_security_id": "siblis_ticker_company_1c21a7b293fd137c59c9",
+  "status": "CONDITIONAL_REQUIRED_WINDOW_CANDIDATE_NOT_INSTALLED",
+  "warmup_sessions": 503
+}

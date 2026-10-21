@@ -1,0 +1,326 @@
+{
+  "empirical_execution_authorized_by_publication": false,
+  "files": [
+    {
+      "file": "control.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "f411c08ccd4227e5fe79885b59216e5b723bf4b4297fa97225561e0a33ba8412",
+      "size_bytes": 3798
+    },
+    {
+      "file": "supervise.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "008b5a33180bb1aa23e6f1aec29d21234e157e9c03489cfe047b82f76426e0f6",
+      "size_bytes": 9004
+    },
+    {
+      "file": "model_worker.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "1006a1ea658027f258bbc061bad0ad77ec443acfb93ff3c04c617704b05e0bfe",
+      "size_bytes": 42029
+    },
+    {
+      "file": "verify_models.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "a510a7ad6640f7ae36f2c0408deb0d0c3d5a95b4d46109fababe492b4e9c3756",
+      "size_bytes": 68066
+    },
+    {
+      "file": "run_model_pipeline.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "b22a84448611777aa710ca0dd04703264b78bed2ec30a2143f47ee9d806e5f6f",
+      "size_bytes": 20031
+    },
+    {
+      "file": "freeze_model_inputs.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "17b369ba7570a36e3359d98fc3a9f12840bd485051d62a3083f50c3d02e05f69",
+      "size_bytes": 5293
+    },
+    {
+      "file": "freeze_model_protocol.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "90573a19605cd1cd4103be65d458bb1095221a21fee5b977da7312bcc40ad3fa",
+      "size_bytes": 3370
+    },
+    {
+      "file": "terminal_guard_v2.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "9d8611d891016780e4b7dadfc5ab5a6d4afa88ae6e79556b2f79d8d73fed819c",
+      "size_bytes": 14960
+    },
+    {
+      "file": "learning_repairs.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "675d51f1e8c4ac28ac822ddbcf1547bda70529274b7b54a44c85ebd7d6ae03de",
+      "size_bytes": 10091
+    },
+    {
+      "file": "verify_learning_repairs.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "1cf5c722d2ccc347fc1f556366566e89b3b5fda02d5e6924376d4bc16b56e99b",
+      "size_bytes": 15359
+    },
+    {
+      "file": "finalize_learning_repairs.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "7626be2c516c557955ed3092581d7eff82ade58daef9f24754a18c5daa6a632f",
+      "size_bytes": 7860
+    },
+    {
+      "file": "backtest_integration.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "c36ae75eb6348e9f6e55114425a068e8d344ce5b7e47af62720b2444eb4cda71",
+      "size_bytes": 28459
+    },
+    {
+      "file": "backtest_runner.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "cf22a4ae385f79e41d675d62759a5227b7d6bd974ee2956b488e45207d7808e0",
+      "size_bytes": 21725
+    },
+    {
+      "file": "backtest_make_control.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "a6ff5cf0b5a9d21fa87c65d0a6673463dfcc554af960ed7ef85df2b1029ef822",
+      "size_bytes": 4721
+    },
+    {
+      "file": "backtest_make_protocol.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "db9bbb08d019d533e474aff1141a961c90f7bd861429e1fd145f5109873164c3",
+      "size_bytes": 2556
+    },
+    {
+      "file": "backtest_verification_math_v2.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "60c6e30176fe58930e8680a6a06504e80a2835c495422f95caf3b6e18bf43cb1",
+      "size_bytes": 19032
+    },
+    {
+      "file": "verify_backtest_v5.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "6fccbc68d858800100d0c359f8544b899b718e3ecb21ca2bdcba923181771a19",
+      "size_bytes": 51989
+    },
+    {
+      "file": "report_models.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "00712c2b81809a8bbf4bbb367da07ca094cd51ca94300b199ed4b94d66207e2c",
+      "size_bytes": 23945
+    },
+    {
+      "file": "report_backtest_v5.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "b9cac7cacad4fe743fc38b375ac34d9e7c7332c0909b07a310652a794e826fed",
+      "size_bytes": 30063
+    },
+    {
+      "file": "root_final_handoff_v1.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "2eddc4c6bb38178a154f5fc3e5858af4810ed879b6ea9077aa3be346f114ef7f",
+      "size_bytes": 13145
+    },
+    {
+      "file": "build_install_scope.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "f14b1f4f6c699949f39605477629f0271ed9df6f73c1dfff5be8d908734e24e9",
+      "size_bytes": 11852
+    },
+    {
+      "file": "install_corrected_refit.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "32a49412e3200eeec81b2e9f0a324bc6c51a7a1b0799b5ce3a0094a5e6c7bfee",
+      "size_bytes": 19297
+    },
+    {
+      "file": "progress_status.py",
+      "role": "executed_worker_or_operational_helper",
+      "sha256": "4d9987afba4b35c2ac2a7fd1c21d758f4e9b87669ce4771c706535c45a788367",
+      "size_bytes": 5073
+    },
+    {
+      "file": "verify_backtest_v4.py",
+      "role": "frozen_reference_for_regression_test_only",
+      "sha256": "36232054a9e615c8de11bc661cd70b52b7da052b99c49c6f963140baa94b44ce",
+      "size_bytes": 50015
+    },
+    {
+      "file": "test_control.py",
+      "role": "fabricated_test",
+      "sha256": "c452377754cc6dc667f9b7217cc8379f010e192c0dca86987d98f054bacccf27",
+      "size_bytes": 7574
+    },
+    {
+      "file": "test_model_worker.py",
+      "role": "fabricated_test",
+      "sha256": "8a1f74319996c77d98a7f808eda37aef17dc2625c3de8de74b5b3d13ca5b34f0",
+      "size_bytes": 12853
+    },
+    {
+      "file": "test_verify_models.py",
+      "role": "fabricated_test",
+      "sha256": "c54c8748d917025b11999d3d42ac0a73cc554b000dca84643ff5a7546704581c",
+      "size_bytes": 7302
+    },
+    {
+      "file": "test_run_model_pipeline.py",
+      "role": "fabricated_test",
+      "sha256": "80abbeee97214bb5df4376e8554f47207963a9733ea437d6aa72b7e7f8058b5f",
+      "size_bytes": 13033
+    },
+    {
+      "file": "backtest_test_integration.py",
+      "role": "fabricated_test",
+      "sha256": "58f971da924b4f90773ac00eaa6e6b7522d8a2b5b00528727d6876a995fbeccb",
+      "size_bytes": 3859
+    },
+    {
+      "file": "backtest_test_metadata_runtime.py",
+      "role": "fabricated_test",
+      "sha256": "8ed89053bc8e986ab5cf54d9767ff73eb570f3f901742dd1642b15b3f9801ed3",
+      "size_bytes": 2444
+    },
+    {
+      "file": "backtest_test_planning_budget.py",
+      "role": "fabricated_test",
+      "sha256": "e4598052bdf0f01acec0df38617f31a1d52c9f120b02aa1103e0a61145b02fc2",
+      "size_bytes": 6157
+    },
+    {
+      "file": "backtest_test_make_control.py",
+      "role": "fabricated_test",
+      "sha256": "bf5bb86f20f80693fc748242c35ecfe3e2a2262585cae602b51aa62f06566f5b",
+      "size_bytes": 3027
+    },
+    {
+      "file": "test_verify_backtest_v5.py",
+      "role": "fabricated_test",
+      "sha256": "b206ab2449bf8707d33974acf8fa365edbb98530c2d66294ba5b0addda03cff1",
+      "size_bytes": 30771
+    },
+    {
+      "file": "test_report_models.py",
+      "role": "fabricated_test",
+      "sha256": "67452da3d7ad410956ae261a2a9369ce1c6f9fbab79421d0642411302b450f03",
+      "size_bytes": 6595
+    },
+    {
+      "file": "test_report_backtest_v5.py",
+      "role": "fabricated_test",
+      "sha256": "c5b96ccbe6218e3125d54426afb62f64a8abd0faabe64cd2ba1296af4db80da8",
+      "size_bytes": 12258
+    },
+    {
+      "file": "test_build_install_scope.py",
+      "role": "fabricated_test",
+      "sha256": "72f27d37c3c2494ea1a43157ebe0ea927bc983e452218f8589368681e924158e",
+      "size_bytes": 9177
+    },
+    {
+      "file": "test_install_corrected_refit.py",
+      "role": "fabricated_test",
+      "sha256": "0c38f4a7473e6018c08a326964460c9b54eb00127646896499b33c4aa9b49eb2",
+      "size_bytes": 12508
+    },
+    {
+      "file": "test_terminal_guard_v2.py",
+      "role": "fabricated_test",
+      "sha256": "57c15dd18179f883991743ebcadf6afde616769422cf95e297d0c04bc4e6773f",
+      "size_bytes": 6732
+    },
+    {
+      "file": "test_progress_status.py",
+      "role": "fabricated_test",
+      "sha256": "ce40f1a3c9cae2567726b5c348ddcf115d2f922c700f83235b047d26c085568e",
+      "size_bytes": 3214
+    },
+    {
+      "file": "test_learning_repairs.py",
+      "role": "fabricated_test",
+      "sha256": "8f7ff42ed140467309c8d81ec6c59ba3c142ed231d1337d5a81e82cec2bff41c",
+      "size_bytes": 5571
+    },
+    {
+      "file": "test_verify_learning_repairs.py",
+      "role": "fabricated_test",
+      "sha256": "fa27ef6b6c3af7c719037f67571f63c568601197c269f1380166f243058c47d0",
+      "size_bytes": 3673
+    },
+    {
+      "file": "test_finalize_learning_repairs.py",
+      "role": "fabricated_test",
+      "sha256": "878d48d6f8e10639f1f8b2f3df55f1cc0695c0a3918f4c6e6e4fe890aa60125c",
+      "size_bytes": 3292
+    },
+    {
+      "file": "RUNTIME_ENTRYPOINTS_20261021.md",
+      "role": "method_and_provenance_document",
+      "sha256": "42aa098df0fe3ec91884662982525116668b5a23733f39ac3d75180409ad3451",
+      "size_bytes": 3724
+    },
+    {
+      "file": "DATA_FLOW_20261021.md",
+      "role": "method_and_provenance_document",
+      "sha256": "56f5c966f58df0117120c80a89e2f4cf4b46e08f08d53b44fb1e5241a0bad8f6",
+      "size_bytes": 3129
+    },
+    {
+      "file": "MONTHLY_ENDPOINT_LABEL_POLICY.md",
+      "role": "method_and_provenance_document",
+      "sha256": "b8ebae6a0044cbe570b358e0266c7d16d9393f8e771319eaa8340bdedef4d0b1",
+      "size_bytes": 4869
+    },
+    {
+      "file": "RECOVERY_INPUT_DECISIONS.md",
+      "role": "method_and_provenance_document",
+      "sha256": "60cd688572d9cfb6e86e11ecc22fc84fdc6ae95093a0d9786ce562c4755e5d77",
+      "size_bytes": 4102
+    },
+    {
+      "file": "ARCHIVE_INSTALL_INTERFACE.md",
+      "role": "method_and_provenance_document",
+      "sha256": "cbc9b8a6a91e4077d1c43ae03d0b2f895cb74164e6d3fe776f798bddb5ec9e57",
+      "size_bytes": 4317
+    },
+    {
+      "file": "README.md",
+      "role": "new_public_source_bundle_readme",
+      "sha256": "f147dcc5a14d3897934a5e481beedc9082e4ae7c23557ea0c308826dbc17f86d",
+      "size_bytes": 6158
+    },
+    {
+      "file": "run_offline_synthetic_tests.py",
+      "role": "new_test_only_portable_selection_and_safety_guard",
+      "sha256": "5a747f1990dca02857105b56b39c33e1e1564e7b1fde0b010cfb55b0e121afd1",
+      "size_bytes": 4304
+    },
+    {
+      "file": "SELECTED_HORIZON_GAPS_20261021.md",
+      "role": "original_aggregate_diagnostic_note",
+      "sha256": "4b80c9c13d7fc56879a5589a2b894ed4094fd9f0cab7cc059dfec979563ba669",
+      "size_bytes": 3609
+    },
+    {
+      "file": "ACTUAL_FAILURE_DIAGNOSTICS_20261021.md",
+      "role": "original_aggregate_diagnostic_note",
+      "sha256": "27dcaf7f179455733263d36b668955bf13253e7e87aa629aaf5cc361ab51ab10",
+      "size_bytes": 2755
+    }
+  ],
+  "offline_test_recipe": "python -B run_offline_synthetic_tests.py .",
+  "private_archive_included": false,
+  "required_companion_repo_additions": [
+    "src/dmv2/ret_selection.py",
+    "src/dmv2/ret_backtest.py",
+    "src/dmv2/ret_repair_backtest.py",
+    "src/dmv2/bk_xom_shadow_sources.py",
+    "src/dmv2/bk_xom_shadow_impact.py",
+    "scripts/verify_ret_backtest.py",
+    "scripts/verify_ret_repair_backtest.py",
+    "scripts/run_ret_backtest.py",
+    "scripts/run_ret_repair_backtest.py"
+  ],
+  "schema": "dmv2-original-code-publication-inventory/v1",
+  "scope": "Original executed source/test/method files; no empirical inputs, models or private receipts"
+}

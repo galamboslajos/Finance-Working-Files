@@ -1,0 +1,90 @@
+{
+  "SIP_rows_must_not_be_relabelled_as_Independently_verified_Intrinio_native_history": true,
+  "base_OHLC_volume_and_date_checks_passed": true,
+  "dividends_splits_and_provider_quality_fields_unavailable": true,
+  "earlier_warmup_not_filled": true,
+  "evidence_pins": [
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/xom/financial-result-v1/receipt.json",
+      "sha256": "754d8884ce5fbe4f1b19f17d37532197fc83998e158a80e1dc5aa7eadf86b341",
+      "size_bytes": 3892
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/xom/financial_result_review.json",
+      "sha256": "61d437092b9da6d388136bfdb348e2d8c1caf176e8f9c6aa8b86d3c2c3f83595",
+      "size_bytes": 3544
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/identity/xom_output_review-v1/result.json",
+      "sha256": "17d1747574951ea5e01da68e7142cbfd732d90e7a65ee68ced19691f68d3c782",
+      "size_bytes": 56579
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/xom_precision_plan.json",
+      "sha256": "315b4ce45fabbdcb273d62e39745470d5bee9921fd0da4df48acfb39ad410aac",
+      "size_bytes": 1602
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/xom_precision-v1/summary.json",
+      "sha256": "c2d36d79d5ed457017d80b2a22c088e3261ff72711f77a7912ca27bc0e612fa1",
+      "size_bytes": 1114
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/xom_identity/xom_identity_note_v2.json",
+      "sha256": "44f0987317aa043e4388d032c7cdca97dae6494ac417073c0b544b3fc93f6ea1",
+      "size_bytes": 7270
+    },
+    {
+      "path": "/private/tmp/dmv2-candidate-validation-20261021/xom_identity/provider_precision_research.json",
+      "sha256": "417d7976f821705a454cd813c9f4950b6fd2a85f9c6e4c363c42f53ecc818f3c",
+      "size_bytes": 4678
+    }
+  ],
+  "frozen_common_scale_2bp_warning_dates": 69,
+  "frozen_common_scale_2bp_warning_flags_cleared": false,
+  "knowledge_time_identity_or_economic_total_return_certified": false,
+  "maximum_observed_common_scale_residual_bp": 3.524928892508772,
+  "missing_original_2010_2015_history_retained": true,
+  "no_features_labels_RET_models_or_backtests_built": true,
+  "observed_XNYS_sessions": 2012,
+  "observed_raw_all_rows": 4024,
+  "observed_window_inclusive": [
+    "2016-01-04",
+    "2023-12-29"
+  ],
+  "original_intrinio_native_retained_as_evidence": "sec_z5YpGE",
+  "original_unified_id": "equity_us_bf463bc8d3ea387578b7bafc",
+  "post_hoc_cent_envelope_compatible_warning_dates": 69,
+  "post_hoc_interpretation": "Observed all-adjusted OHLC lie on a cent grid and a common price factor is possible within plus/minus half a cent. This is compatibility under an assumption, not a verified provider rounding rule or cause.",
+  "prerequisites_before_shadow_consumption": [
+    "A new frozen shadow consumer recipe must explicitly retain the 69 warnings and state its precision handling; do not overwrite the original 2-bp audit result.",
+    "Keep the typed SIP provider/source key and price units separate from the original Intrinio native lineage; no silent provider splice.",
+    "Build historical membership before price joins, preserve all original denominators/flags and recompute same-date route conflicts.",
+    "Use only exact independent XNYS dates in the observed interval, preserve missing pre-2016 history and exact feature warmup; no stale/synthetic fills.",
+    "Use published all-adjusted OHLCV only as the existing provisional proxy; do not add dividends or apply an inferred factor again.",
+    "Rebuild affected cross-sectional features, observed-outcome classes and RET coherently in new outputs; measure actual dependency changes before new inference or fitting."
+  ],
+  "production_promoted": false,
+  "proposed_price_route": {
+    "adjustment_for_proposed_learning_proxy": "all",
+    "object": {
+      "declared_rows": 7470764,
+      "generation": 1783344954247444,
+      "reference_mode": "referenced",
+      "relative_path": "tables/daily_bars/part-00000.parquet",
+      "sha256": "sha256:4a4919d48128d5c573ddbca64649d8cc78783f7bbb818219a3ad5f34728e38a0",
+      "size_bytes": 187908505,
+      "uri": "gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/equity_us/sp_composite1500_market_daily/v1/tables/daily_bars/part-00000.parquet"
+    },
+    "product": "sp_composite1500_market_daily/v1",
+    "provider": "Alpaca/SIP",
+    "raw_retained_for_QA": true,
+    "source_key": "siblis_isin_b284bb7497616f5afba0",
+    "source_key_type": "security_id"
+  },
+  "recorded_at_utc": "2026-10-21T12:29:46.055463+00:00",
+  "schema": "dmv2-XOM-conditional-shadow-source-proposal/v1",
+  "source_prices_changed_or_filled": false,
+  "source_security_id": "siblis_isin_b284bb7497616f5afba0",
+  "status": "PARTIAL_HISTORY_CANDIDATE_WITH_PRESERVED_PRECISION_WARNINGS_NOT_INSTALLED"
+}
