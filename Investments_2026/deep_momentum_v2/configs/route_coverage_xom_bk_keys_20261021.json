@@ -1,0 +1,106 @@
+{
+  "additional_candidate_key_inventory": {
+    "native_security_id": "sec_zq1J05",
+    "role": "unpromoted ordinary-share candidate; no replacement or historical admission decision",
+    "ticker_label": "BK"
+  },
+  "allowed_fields": "Explicit frozen allowlist of security/query/source IDs, aliases, provider names/tickers/FIGIs/CIK/type/exchange/currency, acquisition counts/status/provenance, table/field schemas and exact date keys. Current inventories are retrieval-time diagnostics only.",
+  "amendment_reason": "Stage1 identified one additional unpromoted BK ordinary-share candidate. Three exact native-ID/date-key source shards plus six metadata objects require nine distinct data files. The128MiB,20Mrow,100kmetadataoutput,2GiB,600second bounds and financial/mapping/rebuild prohibitions stay unchanged.",
+  "authority": "Continue the audited roadmap after user acknowledgement; investigate XOM/BK route and coverage without changing production.",
+  "budget": {
+    "arrow_and_numeric_threads": 1,
+    "automatic_retries": 0,
+    "hash_integrity_reads_separate_from_projected_metadata": true,
+    "max_candidate_rows": 20000000,
+    "max_data_files": 9,
+    "max_footer_files": 128,
+    "max_output_bytes": 134217728,
+    "max_projected_column_bytes": 134217728,
+    "max_returned_metadata_rows": 100000,
+    "max_rss_bytes": 2147483648,
+    "max_wall_seconds": 600
+  },
+  "cases": [
+    {
+      "native_security_id": "sec_z5YpGE",
+      "source_security_id": "siblis_isin_b284bb7497616f5afba0",
+      "ticker_label": "XOM"
+    },
+    {
+      "native_security_id": "sec_gA3NYQ",
+      "source_security_id": "siblis_ticker_company_1c21a7b293fd137c59c9",
+      "ticker_label": "BK"
+    }
+  ],
+  "claim_limits": [
+    "Source alias agreement is not independent provider confirmation.",
+    "Empty acquisition records do not prove absent market history or incorrect identity.",
+    "No same-name/ticker candidate is a promoted replacement.",
+    "A successful metadata check is not full historical identity or survivorship certification.",
+    "Keep original cohort and provisional flags unchanged."
+  ],
+  "forbidden": [
+    "OHLCV or return/feature/class/probability values",
+    "financial values through metadata keys or filters",
+    "financial min/max footer statistics",
+    "2024+ financial decoding",
+    "new source acquisition or cloud calls before separate explicit read plan",
+    "canonical identity promotion or ticker-heuristic replacement",
+    "source/run/recipe/pointer overwrites",
+    "feature/target/preprocessing/model/backtest rebuilds or inference",
+    "use of eventual quote availability for historical cohort admission"
+  ],
+  "frozen_at_utc": "2026-10-21T11:40:10.323010+00:00",
+  "parent_protocol_pin": {
+    "path": "/private/tmp/dmv2-route-coverage-20261021/protocol.json",
+    "sha256": "c85b6fc81b4cb1863b2832664d869659955aabce5c62fbb61e707093e2c77d23",
+    "size_bytes": 4124
+  },
+  "protocol_id": "xom-bk-route-coverage-20261021-keys-v2",
+  "questions": [
+    "Were the exact routes requested in every original corrected annual source?",
+    "What do the published bridge, lookup evidence, provider master and acquisition records establish?",
+    "Are alternate native route candidates supported by identity metadata independently of source aliases?",
+    "Does the source metadata or exact date-key inventory show a local loading omission or an upstream empty capture?"
+  ],
+  "root": "/Users/lajosgalambos/Desktop/Finance-Working-Files/Investments_2026/deep_momentum_v2",
+  "schema": "dmv2-route-coverage-metadata-protocol/v1",
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "10b0211473ee4273b094c9da4619ba7baf26d7b32bd2071496ae1467bf4d129d",
+      "size_bytes": 23906
+    },
+    {
+      "path": "configs/data_sources.local.json",
+      "sha256": "fd04590f73ee58233508d649603b09be499ee84090f2ad8341329a954a05e6a8",
+      "size_bytes": 1094
+    },
+    {
+      "path": "docs/IDENTITY_AUDIT.md",
+      "sha256": "20c817f4de966a9fa27543b86116633007c90370fb4c138cc35110dbd54f476b",
+      "size_bytes": 13481
+    },
+    {
+      "path": "docs/PROVISIONAL_IDENTITY_POLICY.md",
+      "sha256": "775a2394ea98dabf15931d8563e95abe01b0826596d9c27e0e35502d98293eb0",
+      "size_bytes": 7302
+    },
+    {
+      "path": "docs/DATA_FOUNDATIONS.md",
+      "sha256": "c1a489b589fc0f106435b23838f42119971c09871e97a43546441f10aa3550a3",
+      "size_bytes": 9902
+    },
+    {
+      "path": "outputs/learning_input_impact/20261021-v1/metadata/gap_queue_findings.json",
+      "sha256": "9a83f94edef7fd8bb19ba62b62456116fbd37acb8da37c88f2a93c0f8bcd202c",
+      "size_bytes": 17170
+    },
+    {
+      "path": "outputs/ret_backtest/2020-2023-20261020-v1/build_identity.json",
+      "sha256": "4c5fba9f96339052083ba057eb363136001fa458afe86c11e28a492aaaadf3f7",
+      "size_bytes": 167595
+    }
+  ],
+  "status": "FROZEN_METADATA_ONLY"
+}

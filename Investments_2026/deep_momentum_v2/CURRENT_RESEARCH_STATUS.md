@@ -1,3 +1,88 @@
+# Current Deep Momentum V2 handoff — 21 October 2026
+
+The corrected-input five-arm refit and daily replay are complete. Start with the
+[latest handoff](docs/CORRECTED_REFIT_AND_RET_BACKTEST_20261021.md),
+[full portfolio comparison](docs/CORRECTED_BACKTEST_COMPARISON_20261021.md),
+[model diagnostics](docs/CORRECTED_MODEL_DIAGNOSTICS_20261021.md) and
+[executed source / offline test guide](scripts/corrected_refit_20261021/README.md).
+
+Twenty annual estimator fits and eight shared training-only preprocessing states
+cover 2020–2023 using the preceding ten completed outcome years, with monthly
+predictions. Four baseline RF/XGBoost × Paper15/expanded arms are accompanied by
+RF expanded using the previously selected annual CV settings. Those parameters
+were reused; this is not a new tuning search. The historical S&P 500/400 union,
+80% primary context, 715 expanded predictors, endpoint target and trading rules
+remain fixed. Daily feature history and daily execution inputs remain separate
+from monthly features/targets.
+
+For **2 January 2020–29 December 2023: 48 months and 1,006 sessions**, RET with
+10% per-asset stops and 10bp per one-way traded notional:
+
+| Model | Gross four-year return | Net four-year return | Net CAGR | Net Sharpe | Net max DD |
+|---|---:|---:|---:|---:|---:|
+| RF · Paper15 | Withheld | Withheld | — | — | — |
+| XGBoost · Paper15 | +39.41% | +27.16% | +6.20% | 0.39 | −25.56% |
+| **RF · expanded baseline** | **+0.18%** | **−8.35%** | **−2.16%** | **−0.02** | **−31.01%** |
+| XGBoost · expanded | Withheld | Withheld | — | — | — |
+| RF · expanded, prior CV settings | +26.69% | +15.87% | +3.76% | 0.29 | −22.71% |
+
+RET ranks the entire class-probability vector against the shared causal 120-month
+class payoff states. Class1/10 and class2/9 remain separate alternatives; their
+results, unstopped comparators, all four cost assumptions and annual slices are
+in the full comparison. These are continuous four-year returns. Sharpe uses
+daily returns and a zero cash rate; CAGR uses252 sessions/year. Borrow/funding
+costs remain zero and daily-OHLC stop fills are idealized.
+
+Independent checks account for all120 paths: **56 complete /64 withheld**.
+Actual first failures are44 missing-quote paths,16 source-quality-flag paths and
+four selected-provider/held-source collision paths. Every selected exposure and
+failed path remains present; full-period and annual-prefix performance is null.
+The [exact first-failure note](scripts/corrected_refit_20261021/ACTUAL_FAILURE_DIAGNOSTICS_20261021.md)
+and [maximum-horizon gap list](scripts/corrected_refit_20261021/SELECTED_HORIZON_GAPS_20261021.md)
+separate the causes. A complete subset cannot establish a complete model ranking.
+
+The [BK/XOM shadow input rebuild](docs/BK_XOM_SHADOW_REBUILD_20261021.md) was
+reused byte-for-byte, including48 corrected causal RET states. RCM/DISCA learning
+candidates failed frozen volume controls and admitted no learning bars. Their
+previously checked execution-only quotes remain separately pinned. The
+[endpoint policy](scripts/corrected_refit_20261021/MONTHLY_ENDPOINT_LABEL_POLICY.md)
+keeps29 registered-event overlap targets missing; no cash/stock payout is invented
+as a predecessor close. [Input decisions](scripts/corrected_refit_20261021/RECOVERY_INPUT_DECISIONS.md)
+and the [data flow](scripts/corrected_refit_20261021/DATA_FLOW_20261021.md) explain
+the boundary between monthly labels, RET estimates and next-open/stop-managed
+realized payoffs. Identity, source vintage, terminal returns, knowledge time and
+survivorship remain conditional. This already reviewed period is development
+evidence; no2024+ financial evaluation is included.
+
+The final independent backtest checker is verifierV5. A physical Arrow-null
+successor identifier is kept as None by reading only four registered diagnostic
+projections directly as Arrow records after the same fingerprint check. Strict
+NaN rejection and all selection/accounting equations remain unchanged. Earlier
+failed checker attempts and all prior runs are preserved. The
+[source entrypoint record](scripts/corrected_refit_20261021/RUNTIME_ENTRYPOINTS_20261021.md)
+distinguishes the versions and targeted regression tests.
+
+Next, establish dated quote/action entitlements and the selected/held identity
+handover for the withheld paths, then replay the same saved selections in a new
+execution-data version. Audit any learning/label/RET impact before changing
+labels; another refit follows only if those inputs actually change.
+
+Git contains original source, protocols, tests and aggregate research summaries.
+Raw/provider data, credentials, source evidence bundles, models, matrices,
+probabilities, numerical receipts and daily ledgers remain private. The verified
+local package is `outputs/corrected_refit/2020-2023-20261021-v1/`; its installed
+catalog/relocation map locate every artifact. A fresh clone has no private run
+or automatic model/backtest execution. The notebook's existing section24 remains
+a reader for its older frozen baseline; publication does not promote a new
+notebook or active-run pointer. The historical README and source-quality notes
+retain their pinned bytes. Use this file as the current entry point.
+
+The older handoffs below are historical input/run versions. Their class-basket
+results must not be confused with the RET comparison above or treated as a
+paired causal estimate of the latest repairs.
+
+---
+
 # Current Deep Momentum V2 handoff — 20 October 2026
 
 The RF-expanded temporal tuning and its separate daily backtest are complete

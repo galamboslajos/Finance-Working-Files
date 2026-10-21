@@ -1,0 +1,116 @@
+{
+  "allow_withheld_paths": true,
+  "arm_ids": [
+    "rf_paper15",
+    "xgb_paper15",
+    "rf_extended",
+    "xgb_extended",
+    "rf_extended_tuned"
+  ],
+  "authority": "User directed prioritizing the originally intended RET strategy before alternative labels. Add probability-to-payoff RET selection and its bounded daily comparison using existing verified corrected forecasts; preserve all previous research and keep current labels, models and trading mechanics unchanged.",
+  "certification": {
+    "development_evidence_2020_2023_already_examined": true,
+    "execution_attainability_certified": false,
+    "knowledge_time_certified": false,
+    "survivorship_certified": false
+  },
+  "cloud_operations": false,
+  "comparison": "Preserved source-corrected original four-arm and tuned RF class-basket saved results; compare selection changes, stopped/unstopped daily results and withheld coverage. RET is a new selection experiment, not an alternative label or a paper-exact replication.",
+  "date": "2026-10-20",
+  "execution": {
+    "annual_liquidation": false,
+    "asset_stop_choices": [
+      null,
+      0.1
+    ],
+    "borrow_and_funding_bps": 0,
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "long_weight": 0.5,
+    "missing_held_marks": "retain_exposure_withhold_full_path",
+    "months": 48,
+    "outcome_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "same_original_actions_retirements_PENN_exception": true,
+    "sessions": 1006,
+    "short_weight": -0.5,
+    "stop_cash": "cash_until_next_monthly_rebalance_no_replacement",
+    "weights": "equal_within_side_at_monthly_next_open"
+  },
+  "execution_authorized": true,
+  "financial_2024_plus_authorized": false,
+  "new_estimator_fits": 0,
+  "new_inference_calls": 0,
+  "new_preprocessor_fits": 0,
+  "payoffs": {
+    "completed_calendar_months": 120,
+    "incomplete_grid": "withhold_entire_vector",
+    "monthly_class_means": "equal_weight_observed_true_class_returns",
+    "old_full_target_RET_states_reused": false,
+    "policy": "realized_class_equal_month_120_v1",
+    "sources": "exact_corrected_targets_used_by_saved_models",
+    "time_weighting": "equal_months",
+    "union_outcomes": [
+      "2010-01",
+      "2023-11"
+    ]
+  },
+  "protocol_id": "dmv2-ret-selection-backtest-20261020-v1",
+  "resource_limits": {
+    "backtest_wall_seconds": 1200,
+    "cumulative_compressed_read_bytes": 1073741824,
+    "minimum_available_memory_bytes": 7516192768,
+    "normal_pressure_dispatch": 1,
+    "numeric_threads": 1,
+    "output_bytes": 536870912,
+    "preflight_wall_seconds": 900,
+    "prepare_wall_seconds": 300,
+    "rss_stop_bytes": 4294967296,
+    "rss_warning_bytes": 3221225472,
+    "verification_wall_seconds": 3600,
+    "workers": 1
+  },
+  "scenarios": 40,
+  "schema": "dmv2-ret-backtest-execution/v1",
+  "selection": {
+    "all_equal_scores": "retain_existing_stable_id_tie_policy_report_zero_spread",
+    "basket": "ret",
+    "long_ties": "RET_desc_source_id_asc",
+    "names_per_side": "min(10,floor(trade_eligible_count/2))",
+    "no_future_price_or_label_availability_filter": true,
+    "paper_breadth_difference": "User selected ten per side; paper uses top/bottom ten percent.",
+    "ranking": "all_trade_eligible_predictions_by_full_probability_weighted_payoff_NO_mode_class_filter",
+    "short_ties": "RET_asc_source_id_asc_excluding_reserved_longs",
+    "sign_gate": false,
+    "trade_restrictions": "unchanged_DF_RDC"
+  },
+  "source_corrected_identity_pin": {
+    "path": "outputs/walkforward_source_corrected/2020-2023-20261016-v1/build_identity.json",
+    "sha256": "3a1aa8d8c13955409d7bb2d886398268ff8b69537c77d0a8bba2e71e3521b428",
+    "size_bytes": 43045
+  },
+  "status": "FROZEN_EXECUTION_AUTHORIZED",
+  "tuned_backtest_audit_pin": {
+    "path": "outputs/rf_expanded_tuned_backtest/2020-2023-20261020-v1/audit.json",
+    "sha256": "18b75a55f31e225a9a955eac610378004731d632d6b1a4d615ee1ccb7dcfe06f",
+    "size_bytes": 552
+  },
+  "tuned_backtest_identity_pin": {
+    "path": "outputs/rf_expanded_tuned_backtest/2020-2023-20261020-v1/build_identity.json",
+    "sha256": "e7ad15ccb5a3b30e78d3e4bf959fb5d6267bb292190998ba6ebfa328f5f6bbad",
+    "size_bytes": 134614
+  },
+  "tuned_backtest_verification_pin": {
+    "path": "outputs/rf_expanded_tuned_backtest/2020-2023-20261020-v1/verification/backtest_20261020_v2.json",
+    "sha256": "e880c13b1f06e9b66bb5d02ef56aead585e3414bdedeb146c1c25af779c291e9",
+    "size_bytes": 15924
+  }
+}

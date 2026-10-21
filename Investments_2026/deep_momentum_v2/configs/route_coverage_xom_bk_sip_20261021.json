@@ -1,0 +1,106 @@
+{
+  "account": "info@galamboscapital.com",
+  "bounds": {
+    "automatic_retries": 0,
+    "candidate_metadata_rows": 101074,
+    "converted_rows_per_object": 1000,
+    "cumulative_converted_metadata_rows_upper": 91334,
+    "cumulative_data_files_with_previous": 11,
+    "cumulative_footer_files_with_previous": 113,
+    "data_objects": 2,
+    "describe_response_bytes_per_object": 65536,
+    "download_bytes": 372564,
+    "max_rss_bytes": 2147483648,
+    "max_wall_seconds": 600,
+    "numeric_threads": 1,
+    "projected_metadata_bytes": 1048576
+  },
+  "forbidden": [
+    "All OHLCV/returns/features/classes/probabilities",
+    "raw-price JSON or daily-price-object downloads",
+    "any cloud mutation or credential changes",
+    "financial2024+ values",
+    "canonical route promotion or cohort/label/model/backtest changes"
+  ],
+  "frozen_at_utc": "2026-10-21T11:47:17.249502+00:00",
+  "gcloud_configuration": "deep-momentum-research",
+  "limits": [
+    "Query inventory is retrieval-time evidence, not historical identity or exact quote-quality coverage.",
+    "Declared source starts2016;2010\u20132015 XOM remains unresolved.",
+    "Source aliases do not provide independent returned-provider ISIN confirmation."
+  ],
+  "objects": [
+    {
+      "allowed_columns": [
+        "raw_membership_ticker",
+        "query_symbol",
+        "status",
+        "membership_row_count",
+        "source_run_id",
+        "source_raw_run_root"
+      ],
+      "declared_rows": 8894,
+      "financial_columns": [],
+      "metadata_only_schema": true,
+      "object": {
+        "generation": 1783344910405429,
+        "reference_mode": "referenced",
+        "relative_path": "tables/symbol_normalization_evidence/part-00000.parquet",
+        "sha256": "sha256:671599ba99e42a33939beba3ef746434255e53fda3bb21be801d36d6b3ad71eb",
+        "size_bytes": 102541,
+        "uri": "gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/equity_us/sp_composite1500_market_daily/v1/tables/symbol_normalization_evidence/part-00000.parquet"
+      },
+      "output_row_limit": 1000,
+      "preconversion_filter": "query_symbol in {'XOM','BK'} or raw_membership_ticker in {'XOM','BK'} where that column exists",
+      "purpose": "Inspect published literal symbol normalization and request/response row-count inventory; not provider-native identity promotion.",
+      "table": "symbol_normalization_evidence"
+    },
+    {
+      "allowed_columns": [
+        "query_symbol",
+        "requested_start",
+        "requested_end",
+        "feed",
+        "timeframe",
+        "adjustment",
+        "returned_row_count",
+        "status",
+        "severity",
+        "task_id",
+        "attempt_id",
+        "source_run_id",
+        "source_raw_run_root"
+      ],
+      "declared_rows": 92180,
+      "financial_columns": [],
+      "metadata_only_schema": true,
+      "object": {
+        "generation": 1783344910553470,
+        "reference_mode": "referenced",
+        "relative_path": "tables/missing_symbol_evidence/part-00000.parquet",
+        "sha256": "sha256:4607c822895dab251dd56bb33602b235483bed8e77b14c934df00adee27b7f74",
+        "size_bytes": 270023,
+        "uri": "gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/equity_us/sp_composite1500_market_daily/v1/tables/missing_symbol_evidence/part-00000.parquet"
+      },
+      "output_row_limit": 1000,
+      "preconversion_filter": "query_symbol in {'XOM','BK'} or raw_membership_ticker in {'XOM','BK'} where that column exists",
+      "purpose": "Inspect published literal symbol normalization and request/response row-count inventory; not provider-native identity promotion.",
+      "table": "missing_symbol_evidence"
+    }
+  ],
+  "parent_protocol_pin": {
+    "path": "/private/tmp/dmv2-route-coverage-20261021/protocol_keys_v2.json",
+    "sha256": "cab562123ce9a8d408226d31488fdd1ec5cbadd5adb9b14259b2cb1208dfd33e",
+    "size_bytes": 4869
+  },
+  "project": "trusty-agility-492109-v0",
+  "proposal_pin": {
+    "path": "/private/tmp/dmv2-route-coverage-20261021/alternate_source_plan/alternate_source_metadata_proposal.json",
+    "sha256": "0af12a82f0eda8a1eb0d9ed79693845a5aec5c8383f3425433c539ceebbee1aa",
+    "size_bytes": 13699
+  },
+  "protocol_id": "xom-bk-sip-query-metadata-20261021-v3",
+  "schema": "dmv2-xom-bk-sip-metadata-protocol/v1",
+  "selection": "Exact XOM/BK query_symbol or raw_membership_ticker; filter in Arrow before Python conversion.",
+  "status": "FROZEN_READ_ONLY_METADATA"
+}

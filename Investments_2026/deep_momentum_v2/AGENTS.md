@@ -380,3 +380,38 @@ exposures, stopped attempt and pause/resume checkpoints. The master remains
 passive; a fresh clone lacks private datasets and run evidence. No new fitting,
 resume or replay is needed to read these summaries. Already examined 2020–2023
 results remain development evidence; protected 2024+ values stay unread.
+
+
+## Current corrected-input refit and RET handoff, 2026-10-21
+
+CURRENT_RESEARCH_STATUS.md is the current entry point. Read
+`docs/CORRECTED_REFIT_AND_RET_BACKTEST_20261021.md`,
+`docs/CORRECTED_BACKTEST_COMPARISON_20261021.md` and the source-only guide at
+`scripts/corrected_refit_20261021/README.md` before interpreting this version.
+The corrected BK/XOM catalog and48 causal RET states supply20 fixed-setting
+annual fits and8 shared training-only preprocessing states. The fifth RF arm
+reuses prior annual CV settings; no new search was run. Original targets,
+cohorts, primary80% context, daily/monthly separation and trading rules remain.
+All120 paths were independently checked:56 complete and64 withheld. Keep
+missing/unvalued holdings and the selected-provider/held-source collision
+explicit; do not compare models on a favorable available subset alone.
+
+The frozen executed worker/test bytes are published in the dated source folder.
+Their safe `run_offline_synthetic_tests.py` entrypoint uses only explicit invented
+tests; do not indiscriminately import historical dated audit helpers or run their
+CLIs. Some preserve absolute private paths and top-level one-off operations.
+A fresh empirical run needs a separately versioned workspace, approved private
+inputs, explicit measured projections/read reservations and guarded launches.
+Publication starts no fitting, resume, data download or backtest. The current
+notebook remains a passive reader of its own older frozen evidence; no active
+pointer is promoted. Preserve the historical README/source-status bytes.
+
+The final verifierV5 preserves Arrow-null optional identifiers in four closed
+nonfinancial diagnostics after unchanged metadata fingerprints, with no NaN
+comparison waiver or financial rule change. Preserve failed attempts, checkpoints
+and all old runs. See the exact failure/gap notes and endpoint-label decision in
+the dated source folder. Repair new quote/action/identity evidence and audit any
+learning/RET impact before changing labels. Protected2024+ financial values,
+knowledge-time identity, survivorship and investability remain outside a full
+certification claim. Raw data, receipts, plans, model artifacts and ledgers stay
+out of Git; only original code/methods and aggregate summaries are published.
