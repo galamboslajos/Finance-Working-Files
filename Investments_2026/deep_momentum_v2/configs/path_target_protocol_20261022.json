@@ -1,0 +1,78 @@
+{
+  "schema": "dmv2_path_target_protocol_v1",
+  "protocol_id": "path-target-engineering-20261022-v1",
+  "status": "ENGINEERING_ONLY_NOT_FIT_READY",
+  "authority": "User approved target-worker implementation and alignment/coverage audit on 2026-10-22; model fitting remains gated.",
+  "execution": {
+    "model_fitting_enabled": false,
+    "full_history_build_enabled": false,
+    "notebook_compute_enabled": false,
+    "max_estimator_fits": 0,
+    "cloud_mutations_enabled": false
+  },
+  "chronology": {
+    "research_start": "2010-01-01",
+    "last_outcome_year": 2023,
+    "rolling_train_years": 10,
+    "annual_refits": true,
+    "prediction_frequency": "monthly",
+    "protected_from": "2024-01-01",
+    "training_availability": "scheduled_execution_endpoint_and_whole_cross_section_completion_not_later_than_cutoff",
+    "payoff_history": "120_consecutive_completed_calendar_outcome_months_with_all_ten_class_cells"
+  },
+  "population": {
+    "universe": "historical_sp500_sp400_union",
+    "preserve_original_keys": true,
+    "prediction_eligibility": "unchanged_signal_time_Paper15_and_provisional_identity_policy",
+    "future_outcome_availability_filters_prediction_rows": false,
+    "ranking": "descending_exact_equal_midrank_within_observed_eligible_outcomes_each_month_family_side_and_stop_variant",
+    "minimum_observed_class_population": 10,
+    "missing_outcomes": "retain_original_rows_and_reasons_never_impute",
+    "diagnostic_matched_mask": "report_only_never_a_prediction_or_trading_universe_filter"
+  },
+  "target_families": [
+    "original_endpoint_control",
+    "executable_return",
+    "return_minus_drawdown"
+  ],
+  "candidate_utility": {
+    "formula": "cash_return - lambda * maximum_drawdown",
+    "lambda": 1.0,
+    "drawdown": "positive_peak_to_trough_loss_of_unit_initial_capital_directional_economic_NAV_at_observed_open_and_close_marks_including_initial_capital",
+    "selection_status": "engineering_candidate_not_empirically_selected",
+    "long_and_short": "independent_signed_economic_paths_never_negate_long_drawdown_or_stopped_return"
+  },
+  "execution_label": {
+    "entry": "next_XNYS_session_open_after_signal",
+    "scheduled_exit": "following_month_first_XNYS_session_open",
+    "final_december_2023": "unavailable_next_open_endpoint_protected_do_not_substitute_terminal_close",
+    "stop_variants": ["unstopped", "asset_stop_10pct"],
+    "stop_rule": "reuse_existing_entry_relative_daily_OHLC_gap_open_and_intraday_threshold_proxy_cash_until_scheduled_exit",
+    "target_cost_bps": 0,
+    "borrow_and_funding_bps": 0,
+    "cost_interpretation": "gross_unit_notional_outcomes_do_not_estimate_portfolio_turnover_costs_from_standalone_target_paths",
+    "corporate_actions": "only_existing_separately_evidenced_cash_and_share_entitlements_with_original_quality_and_identity_guards",
+    "adjusted_price_interpretation": "provider_adjusted_quote_proxy_not_independently_certified_total_return",
+    "maximum_drawdown_observation": "open_and_close_marked_NAV_not_intraday_peak_trough_path_reconstruction"
+  },
+  "score_semantics": {
+    "original_RET": "unchanged_existing_endpoint_class_probabilities_times_past_realized_return_class_means",
+    "path_expected_return": "new_class_probabilities_times_causal_executable_cash_return_means",
+    "expected_utility": "new_class_probabilities_times_causal_utility_means_not_original_RET",
+    "old_payoff_state_reuse_for_new_classes": false
+  },
+  "fit_readiness": {
+    "bounded_engineering_audit_sufficient_for_full_rerun": false,
+    "required": [
+      "bounded_adapter_and_independent_formula_clock_checks_pass",
+      "full_original_cohort_training_history_target_and_action_coverage_report",
+      "unknown_and_ambiguous_terminal_paths_remain_explicit_without_new_hindsight_exclusions",
+      "actual_completion_cutoffs_and_boundary_purge_verified_for_training_inner_validation_and_120_month_payoffs",
+      "fixed_small_RF_expanded_comparison_protocol_and_compute_budget",
+      "explicit_long_short_class_mapping_and_disjoint_selection_policy_for_directional_targets"
+    ],
+    "universal_identity_certification_required": false,
+    "all_comparator_portfolio_paths_complete_required": false,
+    "prior_runs_preserved": true
+  }
+}

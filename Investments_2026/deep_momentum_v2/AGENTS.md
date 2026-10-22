@@ -415,3 +415,148 @@ learning/RET impact before changing labels. Protected2024+ financial values,
 knowledge-time identity, survivorship and investability remain outside a full
 certification claim. Raw data, receipts, plans, model artifacts and ledgers stay
 out of Git; only original code/methods and aggregate summaries are published.
+
+
+## Path-target engineering, 2026-10-22
+
+The user authorized separate forward daily-path target workers and a bounded
+alignment/coverage audit. Read docs/PATH_TARGET_ENGINEERING_20261022.md and
+configs/path_target_protocol_20261022.json. Keep original endpoint targets, RET
+payoff states, feature history, fits, selections and old runs unchanged. New
+labels need their actual next-open completion clock; earlier stops do not make
+cross-sectional labels available early. Long and short outcomes are separate,
+including losses below minus initial notional. Never impute or discard missing
+terminal outcomes or filter prediction rows using future path availability.
+
+The engineering utility is cash_return minus one times positive open/close
+marked maximum drawdown; this fixed candidate was not selected empirically.
+Keep actual returns distinct from utility and expected utility distinct from
+original RET. The bounded 2020 adapter does not certify 2010–2023 training-label
+coverage or authorize estimator fitting. Full target coverage and a frozen
+small comparison/compute protocol remain required before fitting. Universal
+identity certification and complete comparator portfolios are not prerequisites
+for all engineering. No financial 2024+ values, cloud mutation, model fit or
+notebook-triggered full computation is permitted by this stage.
+
+Master sections appended after the historical baseline read public aggregate
+comparison metadata and target-engineering status only. Public report/fixture
+agreement does not reverify private model or accounting receipts. Keep outputs
+empty in the committed notebook and preserve the older cells as dated evidence.
+
+
+## Full-history path-target audit, 2026-10-22
+
+Read docs/FULL_PATH_TARGET_AUDIT_20261022.md and
+configs/full_path_target_audit_20261022.json for this separately versioned audit.
+The reviewed corrected-refit/BK-XOM catalog supplies the primary learning prices.
+Keep all original cohort keys and signal-time qualification; future path availability
+never filters predictions. All29 reviewed action definitions retain their signed
+terms, while the40 execution-only quote amendments remain a separate diagnostic.
+Do not substitute old retirement-only metadata for in-period entitlements or infer
+comprehensive2010–2017 action coverage. Protected January2024 endpoints stay unread.
+
+Master section27 authenticates saved receipts/artifact bytes and, when present, a
+separate independent proof bound to the exact audit/plan. It decodes no financial
+table and starts no audit, resume, fitting or replay. Audit completion is not
+authorization for the proposed same-X/fixed-RF three-target comparison. Its rolling
+completion cutoffs, directional basket mapping, newclass/payoff semantics and fit
+budget need a separate frozen protocol. OriginalRET remains distinct from expected
+utility. Preserve all previous runs, notes, pointers and provisional limitations.
+
+The completed full audit preserves168months/152307originalrows and has an exact-audit
+independent formula/rank/clock/denominator PASS. Read its measured coverage before
+planning models. All stopped side/family groups have0/48 complete120-month payoff
+vectors in2020–2023 due to exact ties/empty class cells; unstopped groups have47/48
+each, with January2020 lacking completed history. This does not withhold otherwise
+valid labels or authorize tie jitter, shorter histories or silent bin changes.
+No model fit is permitted until the separate comparison protocol is frozen.
+
+
+## User-authorized unstopped target comparison,2026-10-22
+
+The user accepted unstopped learning targets and authorized the small comparison
+in configs/unstopped_target_comparison_20261022.json. It supersedes the prior
+no-fit phase for this separate experiment only. Exactly20RFfits/four shared
+preprocessors reuse prior annual settings on common completed training keys.
+Endpoint control uses the same lagged120month payoff clock and is named as such;
+new expected cash/utility scores are not archived originalRET. Keep all forecasts,
+missing outcomes, source flags, prior runs and pointers. Main economic comparison
+is47months from3February2020; old48month results stay separately labelled.
+Learning paths are unstopped; execution retains both stop variants and four costs
+across72scenarios. Run the explicit guarded CLI only. Master section28 reads
+saved progress and independently verified aggregates; RunAll launches nothing.
+The frozen read budgets are separate from the16GiB RAM ceiling. Preserve consumed
+fit attempts, orderly pause/resume checkpoints and all independent verification
+failures. No tuning search, cloud mutation or2024+ financial read is authorized.
+
+
+## Independent comparison verification recovery, 22 October 2026
+
+Read docs/UNSTOPPED_VERIFICATION_RECOVERY_20261022.md before interpreting the
+original FAILED_PRESERVED target-comparison run. The final independent checker
+is verify_unstopped_target_comparison_v5.py; older checker attempts remain
+preserved. A separate verification_recovery/recovery_handoff.json binds its
+72-scenario PASS and the existing 20-model/four-preprocessor PASS to original
+artifact bytes. Never rewrite the original ledger or rerun fits/trades merely
+to display these reports. Master section 29 uses the passive recovery reader;
+all earlier cells and old run evidence remain unchanged. Complete and withheld
+paths both stay visible; calculation PASS does not certify source identity,
+action completeness, historical knowledge time or investability. The common
+comparison remains 47 months/985 sessions, with unchanged target, selection,
+stop, cost and protected-2024 rules. Private evidence remains outside Git.
+
+
+## User priority decision: defer known execution cases, 22 October 2026
+
+Read docs/RESEARCH_CONTINUATION_20261022.md. The user explicitly asked to set the
+known four missing-quote cases and utility second-mode empty-leg case aside and
+move on. They are deferred research items, not routine prerequisites for further
+independent model/target development. Do not repeatedly restart these repairs,
+ask for owner evidence or reauthentication, or block unrelated work on completing
+all72paths. Revisit on explicit user direction or explain a concrete dependency
+if newly requested work requires changing the affected data/rule. Preserve all
+40withheld scenarios, original exposures/runs and existing trading/PIT/cohort
+rules. The complete endpoint/cash primary score baskets are development references;
+utility remains an open arm with unavailable portfolio results, not a rejected
+model. No hindsight exclusions, invented returns or complete-comparison claims.
+Master section30 records this decision; section29 and all numerical evidence
+stay unchanged. This priority change launches no fits, tuning or daily replay.
+
+
+## Saved expanded-RF importance plot, 22 October 2026
+
+Read docs/FEATURE_IMPORTANCE_20261022.md. The user requested importance by lag;
+the saved analysis groups nominal feature lookbacks, keeping paper months and
+composite skip/volume windows distinct. Four byte-pinned endpoint RFs from the
+latest target comparison were read sequentially; no new fitting, predictions,
+panel reads or backtest. Values and missing indicators use exact interleaved
+preprocessor order. MDI describes training split use and cannot establish signed
+effects, out-of-sample value or portfolio contribution. Correlation and group
+size affect interpretation. No feature selection was performed. Master section31
+uses only the passive small-report reader and saved figure; RunAll reloads no
+model. Known execution cases stay deferred and all old numerical runs unchanged.
+
+
+## Return/drawdown label engineering —22October2026
+
+Read docs/RETURN_DD_TARGET_20261022.md and the frozen
+configs/return_dd_target_protocol_20261022.json before consuming the new
+return_dd_targets.py worker. The approved phase builds/audits2010–2023 labels
+only, using cached verified unstopped cash-return/drawdown summaries: no fits,
+preprocessing, predictions, raw-price/feature reads or replays. The literal
+signed ratio is R/max(MDD,0.01); the floor is fixed and untuned. Preserve all
+original metadata/cohorts and exact ties. Next-open actual completion governs
+annual training masks and the unchanged120×10 payoff gate. Numerical future and
+opposite-side means cannot enter a historical payoff request. Expected ratio
+and expected cash return conditional on ratio classes are distinct outputs;
+neither silently replaces archived RET. December2023 stays metadata-only.
+
+The independently verified audit has139,414 labels per side. Short exact−1 ties
+leave classes empty in2010-09 and2019-06, giving0/48 complete short payoff
+vectors; longs have47/48. This is a target/payoff design limit, separate from the
+deferred quote cases. Do not split ties, impute empty class means, shorten the
+gate or launch a two-sided classifier/payoff fit as if complete. Continuous
+RF regression is a proposed next protocol, not execution authority. Literal
+loss-ratio inversion remains unresolved. Master section32 is a passive verified
+aggregate reader. Preserve all prior runs, pinned code and the deferred-case
+user decision; no repair/login request is required by this label audit.

@@ -1,0 +1,205 @@
+{
+  "schema": "dmv2_unstopped_target_comparison_v1",
+  "protocol_id": "dmv2-rf-expanded-unstopped-three-targets-20261022-v2",
+  "status": "SEALED_BEFORE_FINANCIAL_READ",
+  "authority": "User: \"unstopped is fine, lets go\" after full2010\u20132023targetaudit and proposedsame-X fixedRF endpoint/executable-return/return-minus-DD comparison. This separately authorizes20fits, forecasts,72dailyreplays and independent verification within the bounds below; no search.",
+  "project_root": "/Users/lajosgalambos/Desktop/Finance-Working-Files/Investments_2026/deep_momentum_v2",
+  "target_audit_directory": "/Users/lajosgalambos/Desktop/Finance-Working-Files/Investments_2026/deep_momentum_v2/outputs/full_path_target_audit/2010-2023-20261022-v1",
+  "corrected_catalog_path": "/Users/lajosgalambos/Desktop/Finance-Working-Files/Investments_2026/deep_momentum_v2/outputs/corrected_refit/2020-2023-20261021-v1/input_catalog.json",
+  "corrected_catalog_sha256": "7ebc434ae394410ff5f5377a538b0e43eb290d6685f7f9659ef098d8378c7394",
+  "full_audit_sha256": "8f09fec5ed2b0404f9518ef4b6be58e50a4a1a7751e9768ed7e49fe320124547",
+  "full_independent_status": "PASS_FULL_FORMULAS_RANKS_CLOCK_AND_ORIGINAL_DENOMINATORS",
+  "universe": "historical_sp500_sp400_union",
+  "identity_policy": "provisional_unique_resolved_link",
+  "context_policy": "available_cohort_80pct",
+  "feature_set": "expanded",
+  "base_predictors": 715,
+  "outer_years": [
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "training_outcome_years": 10,
+  "fit_frequency": "annual",
+  "prediction_frequency": "monthly",
+  "forecast_outcome_months": 48,
+  "heads": [
+    "endpoint",
+    "cash_long",
+    "cash_short",
+    "utility_long",
+    "utility_short"
+  ],
+  "common_supervised_population": "original_signal_eligible_and_all_five_preserved_classes_observed_and_all_labels_completed_at_annual_signal_cutoff_within_previous_ten_calendar_outcome_years",
+  "full_cohort_target_ranks_recomputed": false,
+  "prediction_population": "all_original_signal_eligible_keys_independent_of_future_labels",
+  "preprocessing": "one_shared_train_partition_median_missing_indicator_state_per_outer_year_on_common_supervised_mask",
+  "normalization_and_features_changed": false,
+  "source_or_identity_promoted": false,
+  "path_targets": {
+    "variant": "unstopped",
+    "families": [
+      "executable_return",
+      "return_minus_drawdown"
+    ],
+    "directions": [
+      "long",
+      "short"
+    ],
+    "risk_penalty": 1.0,
+    "cost_bps": 0,
+    "borrow_bps": 0,
+    "negative_finite_wealth": "retained",
+    "ties": "exact_equal_descending_midrank_no_jitter"
+  },
+  "fixed_rf": {
+    "provenance": "Prior endpoint-label temporal-CV winners, reused without searching new target families; fixed before this experiment.",
+    "by_year": {
+      "2020": {
+        "max_depth": 12,
+        "min_samples_leaf": 20
+      },
+      "2021": {
+        "max_depth": 8,
+        "min_samples_leaf": 20
+      },
+      "2022": {
+        "max_depth": 12,
+        "min_samples_leaf": 100
+      },
+      "2023": {
+        "max_depth": 12,
+        "min_samples_leaf": 100
+      }
+    },
+    "base": {
+      "n_estimators": 500,
+      "criterion": "gini",
+      "max_features": "sqrt",
+      "bootstrap": true,
+      "random_state": 1729,
+      "n_jobs": 4,
+      "min_samples_split": 2,
+      "class_weight": null,
+      "max_samples": null,
+      "oob_score": false,
+      "warm_start": false,
+      "ccp_alpha": 0.0
+    },
+    "inference_threads": 1
+  },
+  "inner_validation": {
+    "new_search": false,
+    "new_inner_fits": 0,
+    "calibration_fitted": false,
+    "source": "Frozen prior annual endpoint temporal-CV configuration only. No target-specific tuning or performance-based rerun."
+  },
+  "payoffs": {
+    "months": 120,
+    "all_ten_month_class_cells_required": true,
+    "window_end": "signal_calendar_month_minus_one",
+    "time_weighting": "equal_month_class_means",
+    "endpoint_control": "endpoint_class_and_endpoint_return_means_on_same_lagged_calendar_grid; named_matched_clock_control_not_original_RET",
+    "cash": "own_direction_probability_times_own_class_cash_means",
+    "utility": "own_direction_probability_times_own_class_utility_means_not_RET",
+    "future_forecast_targets_required": false
+  },
+  "backtest": {
+    "arms": [
+      "endpoint_matched_clock",
+      "cash",
+      "utility"
+    ],
+    "baskets": [
+      "score",
+      "best_mode",
+      "second_mode"
+    ],
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "asset_stop_fractions": [
+      null,
+      0.1
+    ],
+    "primary": "score/asset_stop_10pct/cost10bp",
+    "start": "2020-02-03",
+    "terminal": "2023-12-29",
+    "outcome_months": 47,
+    "scenarios": 72,
+    "long_allocation": 0.5,
+    "short_allocation": 0.5,
+    "maximum_names_per_side": 10,
+    "overlap": "reserve_longs_first_then_disjoint_shorts_stable_source_id_exact_score_ties",
+    "score_ranking": "each_direction_descending; endpoint_short_score_is_negative_matched_clock_endpoint_RET",
+    "mode_labels": {
+      "endpoint": "1long10short_and2long9short",
+      "cash_and_utility": "1long1short_and2long2short_as_short_labels_rank_short_profit_descending"
+    },
+    "costs_and_execution_changed": false,
+    "stop_used_in_learning_target": false,
+    "borrow_annual_bps": 0,
+    "funding_bps": 0,
+    "new_positive_score_filter": false,
+    "actions": "same18current_events_plus11historical_retirements",
+    "quote_repairs": "same40execution_only_rows_not_promoted_to_learning",
+    "handover": "same_exact_approved_PENN_exception",
+    "restrictions": "same_DF_RDC_pre_ranking_trade_restrictions",
+    "missing_held_observations": "retain_exposure_and_withhold_whole_path_metrics",
+    "common_start_nav": 1.0
+  },
+  "limits": {
+    "source_projection_bytes": 4294967296,
+    "derived_read_bytes": 34359738368,
+    "output_bytes": 25769803776,
+    "rss_stop_bytes": 17179869184,
+    "active_seconds": 10800,
+    "per_fit_seconds": 1200,
+    "max_fits": 20,
+    "max_preprocessors": 4,
+    "processes": 1,
+    "fit_threads": 4,
+    "inference_threads": 1,
+    "available_proxy_minimum_bytes": 7516192768,
+    "free_disk_minimum_bytes": 32212254720,
+    "backtest_source_projection_bytes": 1073741824,
+    "backtest_seconds": 3600,
+    "verification_seconds": 3600
+  },
+  "runtime": {
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "exchange-calendars": "4.13.2"
+  },
+  "pause_resume": {
+    "cooperative_pause_between_heads": true,
+    "completed_fits_never_repeated": true,
+    "interrupted_fit_consumes_fit_budget": true,
+    "automatic_retry": false,
+    "hard_kill": "preserve_attempt_and_require_explicit_resource_plan_before_retry"
+  },
+  "interpretation": {
+    "period": "2020\u20132023 already examined development evidence",
+    "original48month_references": "preserved_separately_not_directly_compared_to_new47month_totals",
+    "target_log_losses": "different_targets_not_directly_comparable_for_target_family_selection",
+    "source_certification": false,
+    "financial_2024_plus_read": false,
+    "cloud_mutations": false,
+    "old_runs_preserved": true,
+    "notebook_implicit_fitting": false
+  },
+  "prelaunch_amendment": {
+    "reason": "Before any financial reads: measured prepared-matrix dispatch plus independent reconstruction can exceed16GiB. Separate derived-read allowance32GiB; RAM16GiB, fit20,3h and source budgets unchanged.",
+    "prior_protocol_sha256": "c4247d105b285d860e1355bb6f6b5da890b884187e481efee3b80f82bd8cb156",
+    "financial_values_read_before_amendment": false
+  }
+}

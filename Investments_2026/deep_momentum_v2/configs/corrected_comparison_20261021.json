@@ -1,0 +1,1378 @@
+{
+  "schema": "dmv2_published_comparison_v1",
+  "input_version": "corrected_refit/2020-2023-20261021-v1",
+  "source_report": {
+    "path": "docs/CORRECTED_BACKTEST_COMPARISON_20261021.md",
+    "sha256": "f5aa7e07ce9e1ae9d812eccc8e1aa22d9bb577484ea57ac0ed18148f44ca32cd"
+  },
+  "period": {
+    "start": "2020-01-02",
+    "end": "2023-12-29",
+    "outcome_months": 48,
+    "trading_sessions": 1006,
+    "continuous_nav": true
+  },
+  "policy": {
+    "net_one_way_cost_bps": 10,
+    "gross_one_way_cost_bps": 0,
+    "asset_stop_fraction": 0.1,
+    "borrow_cost": 0,
+    "funding_cost": 0,
+    "sharpe_cash_rate": 0,
+    "annualization_sessions": 252,
+    "already_examined_development_period": true
+  },
+  "counts": {
+    "scenario_count": 120,
+    "complete_paths": 56,
+    "withheld_paths": 64,
+    "metric_rows": 30,
+    "cost_rows": 30,
+    "annual_rows": 15
+  },
+  "verification_scope": {
+    "published_aggregate_only": true,
+    "private_independent_receipts_checked": false
+  },
+  "rows": [
+    {
+      "model": "RF · Paper15",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.3941,
+      "net_total_return": 0.2716,
+      "net_cagr": 0.062,
+      "net_annualized_volatility": 0.2117,
+      "net_sharpe": 0.39,
+      "net_maximum_drawdown": -0.2556
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.2208,
+      "net_total_return": 0.1178,
+      "net_cagr": 0.0283,
+      "net_annualized_volatility": 0.2179,
+      "net_sharpe": 0.23,
+      "net_maximum_drawdown": -0.3187
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.0018,
+      "net_total_return": -0.0835,
+      "net_cagr": -0.0216,
+      "net_annualized_volatility": 0.189,
+      "net_sharpe": -0.02,
+      "net_maximum_drawdown": -0.3101
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.2776,
+      "net_total_return": 0.1752,
+      "net_cagr": 0.0413,
+      "net_annualized_volatility": 0.2035,
+      "net_sharpe": 0.3,
+      "net_maximum_drawdown": -0.3758
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.609,
+      "net_total_return": 0.4787,
+      "net_cagr": 0.103,
+      "net_annualized_volatility": 0.1975,
+      "net_sharpe": 0.59,
+      "net_maximum_drawdown": -0.3452
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.1329,
+      "net_total_return": 0.0349,
+      "net_cagr": 0.0086,
+      "net_annualized_volatility": 0.115,
+      "net_sharpe": 0.13,
+      "net_maximum_drawdown": -0.1461
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.2669,
+      "net_total_return": 0.1587,
+      "net_cagr": 0.0376,
+      "net_annualized_volatility": 0.1911,
+      "net_sharpe": 0.29,
+      "net_maximum_drawdown": -0.2271
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "status": "complete",
+      "gross_total_return": 0.3813,
+      "net_total_return": 0.2711,
+      "net_cagr": 0.0619,
+      "net_annualized_volatility": 0.2041,
+      "net_sharpe": 0.4,
+      "net_maximum_drawdown": -0.3758
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "ret",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "ret",
+      "variant": "unstopped",
+      "status": "complete",
+      "gross_total_return": 0.6824,
+      "net_total_return": 0.5472,
+      "net_cagr": 0.1155,
+      "net_annualized_volatility": 0.2404,
+      "net_sharpe": 0.57,
+      "net_maximum_drawdown": -0.2952
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "status": "complete",
+      "gross_total_return": 0.5464,
+      "net_total_return": 0.4373,
+      "net_cagr": 0.0951,
+      "net_annualized_volatility": 0.2373,
+      "net_sharpe": 0.5,
+      "net_maximum_drawdown": -0.2969
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "ret",
+      "variant": "unstopped",
+      "status": "complete",
+      "gross_total_return": 0.0457,
+      "net_total_return": -0.036,
+      "net_cagr": -0.0091,
+      "net_annualized_volatility": 0.233,
+      "net_sharpe": 0.08,
+      "net_maximum_drawdown": -0.3471
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "status": "complete",
+      "gross_total_return": 0.4908,
+      "net_total_return": 0.3975,
+      "net_cagr": 0.0875,
+      "net_annualized_volatility": 0.2178,
+      "net_sharpe": 0.49,
+      "net_maximum_drawdown": -0.3549
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "ret",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "ret",
+      "variant": "unstopped",
+      "status": "complete",
+      "gross_total_return": 0.5869,
+      "net_total_return": 0.4629,
+      "net_cagr": 0.1,
+      "net_annualized_volatility": 0.2325,
+      "net_sharpe": 0.52,
+      "net_maximum_drawdown": -0.2361
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "status": "complete",
+      "gross_total_return": 0.7966,
+      "net_total_return": 0.6861,
+      "net_cagr": 0.1398,
+      "net_annualized_volatility": 0.2182,
+      "net_sharpe": 0.71,
+      "net_maximum_drawdown": -0.3549
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "status": "withheld",
+      "gross_total_return": null,
+      "net_total_return": null,
+      "net_cagr": null,
+      "net_annualized_volatility": null,
+      "net_sharpe": null,
+      "net_maximum_drawdown": null
+    }
+  ],
+  "cost_sensitivity": [
+    {
+      "model": "RF · Paper15",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "ret",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.3941,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.3315,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.2716,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.1072,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "ret",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.6824,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.6135,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.5472,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.3638,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.2208,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.1682,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.1178,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": -0.0212,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.5464,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.4909,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.4373,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.2872,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.0018,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": -0.0418,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": -0.0835,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": -0.1984,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "ret",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.0457,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.0041,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": -0.036,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": -0.1472,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.2776,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.2254,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.1752,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.0364,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.4908,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.4435,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.3975,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.268,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "ret",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.609,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.5425,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.4787,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.3023,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.1329,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.0828,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.0349,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": -0.0969,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "ret",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.2669,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.2116,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.1587,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.0129,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "ret",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.5869,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.5237,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.4629,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.2941,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_1_10",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.3813,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.3251,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.2711,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.1218,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_1_10",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": 0.7966,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": 0.7405,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": 0.6861,
+          "status": "complete"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": 0.5326,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_2_9",
+      "variant": "asset_stop_10pct",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_2_9",
+      "variant": "unstopped",
+      "returns": [
+        {
+          "cost_bps": 0,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 5,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 10,
+          "total_return": null,
+          "status": "withheld"
+        },
+        {
+          "cost_bps": 25,
+          "total_return": null,
+          "status": "withheld"
+        }
+      ]
+    }
+  ],
+  "annual_returns": [
+    {
+      "model": "RF · Paper15",
+      "basket": "ret",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_1_10",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    },
+    {
+      "model": "RF · Paper15",
+      "basket": "class_2_9",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "ret",
+      "status": "complete",
+      "returns": {
+        "2020": 0.4851,
+        "2021": -0.0639,
+        "2022": -0.0892,
+        "2023": 0.0043
+      }
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_1_10",
+      "status": "complete",
+      "returns": {
+        "2020": 0.2879,
+        "2021": 0.02,
+        "2022": -0.1518,
+        "2023": 0.0032
+      }
+    },
+    {
+      "model": "XGBoost · Paper15",
+      "basket": "class_2_9",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "ret",
+      "status": "complete",
+      "returns": {
+        "2020": 0.1608,
+        "2021": -0.0403,
+        "2022": -0.1191,
+        "2023": -0.0661
+      }
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_1_10",
+      "status": "complete",
+      "returns": {
+        "2020": 0.0739,
+        "2021": -0.1115,
+        "2022": 0.0184,
+        "2023": 0.2094
+      }
+    },
+    {
+      "model": "RF · expanded baseline",
+      "basket": "class_2_9",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "ret",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_1_10",
+      "status": "complete",
+      "returns": {
+        "2020": 0.4399,
+        "2021": 0.0119,
+        "2022": -0.0338,
+        "2023": 0.0504
+      }
+    },
+    {
+      "model": "XGBoost · expanded",
+      "basket": "class_2_9",
+      "status": "complete",
+      "returns": {
+        "2020": 0.0159,
+        "2021": 0.0419,
+        "2022": -0.0551,
+        "2023": 0.0348
+      }
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "ret",
+      "status": "complete",
+      "returns": {
+        "2020": 0.1608,
+        "2021": 0.0811,
+        "2022": -0.1236,
+        "2023": 0.0534
+      }
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_1_10",
+      "status": "complete",
+      "returns": {
+        "2020": 0.0739,
+        "2021": -0.031,
+        "2022": 0.0773,
+        "2023": 0.1339
+      }
+    },
+    {
+      "model": "RF · expanded, prior CV settings",
+      "basket": "class_2_9",
+      "status": "withheld",
+      "returns": {
+        "2020": null,
+        "2021": null,
+        "2022": null,
+        "2023": null
+      }
+    }
+  ]
+}

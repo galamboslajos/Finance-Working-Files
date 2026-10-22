@@ -1,3 +1,158 @@
+# Current Deep Momentum V2 handoff — return/drawdown label audit,22October2026
+
+The [executable return/drawdown label and full audit](docs/RETURN_DD_TARGET_20261022.md)
+are implemented and independently verified for2010–2023. The separate fixed
+candidate is `R / max(MDD,0.01)`, using identical unstopped executable paths for
+both terms, independent long/short directions and actual next-open completion.
+The1% floor is an untuned engineering choice. Literal signed losses and exact
+midrank ties remain visible.
+
+All152,307 original stock-months remain (304,614 directional rows). Each side has
+139,414 labels for140,931 eligible rows:98.92% coverage. Changed classes versus
+same-path cash-return classes are47.72% long and48.62% short. Independent checks
+reconstruct formulas, original cohorts, clocks, classes, dual payoff means and
+annual completion purges.62 invented-data tests passed. No prices, feature
+values or protected2024+ financial values were read; no fitting or replay ran.
+
+**The current ten-class payoff interface is incomplete for this candidate:**
+47/48 long vectors and0/48 short vectors pass the unchanged120×10 gate.
+June2019 has264 exact−1 short ties, leaving classes8 and10 empty; every nominal
+2020–2023 short payoff window includes it. September2010 also has an empty
+short class10. These are structural ratio ties, separate from the deferred quote
+cases. Do not force bins, shorten history or invent class payoffs. The labels
+are verified; a two-sided classifier/payoff experiment is not ready under the
+unchanged protocol. Separate continuous long/short RF regression is a proposed
+next route that avoids that class-cell gate, while retaining the signed-loss
+ranking caveat. Freeze its comparison objective and budget before fitting.
+
+Master section32 reads only verified saved aggregates. Run All starts no label
+build, model fit or backtest. Existing daily history, features, universe, identity
+waiver, selections, stops, costs and all prior runs remain unchanged. Known
+execution cases stay deferred. Original paper targets and RET remain separate.
+
+---
+
+# Expanded RF lookback importance plotted — 22 October 2026
+
+[The saved figure and interpretation](docs/FEATURE_IMPORTANCE_20261022.md)
+cover four latest endpoint RFs,2020–2023. The252/126/63-session groups account
+for57.22% of fitted MDI importance; this describes training splits, not trading
+performance. All715 inputs are assigned once to33groups; missing indicators
+remain separate. Master section31 displays saved reports only. No fit, prediction,
+source-panel read or replay was performed, and deferred execution cases remain
+deferred. Earlier statuses below retain their dated scope.
+
+---
+
+# Continue research; known execution cases deferred — 22 October 2026
+
+By explicit user direction, set aside the known execution quote repairs and
+utility empty-leg case and continue model/target development. These cases are
+not recurring blockers for unrelated research. The original 32 complete and40
+withheld scenarios remain unchanged and visible. Endpoint/cash primary stopped
+score baskets are available development references; utility remains open with
+its portfolio performance unavailable. No global target-family ranking follows.
+Read [the durable continuation decision](docs/RESEARCH_CONTINUATION_20261022.md).
+Master section30 records it; section29 retains the full saved comparison.
+No fitting, tuning or replay was launched by this decision.
+
+---
+
+# Target comparison verification recovered — 22 October 2026
+
+The original 20 RF fits/four shared preprocessors and all 72 saved backtest
+scenarios now have independent PASS receipts. A separate recovery handoff
+preserves the original failed producer and every numerical artifact. There were
+zero refits or trade replays. 32 paths are complete; 40 remain withheld.
+Read [the checker fixes, exact period and primary results](docs/UNSTOPPED_VERIFICATION_RECOVERY_20261022.md).
+Master section 29 is a passive authenticated recovery reader; section 28 retains
+the original failed state. All older handoffs below keep their dated scope.
+
+---
+
+# Unstopped target comparison — authorized22October2026
+
+The user approved unstopped labels. The separate experiment uses corrected715X,
+20fixed RFfits and four shared train-only preprocessing states. Full target audit
+and earlier comparisons below remain unchanged. Learning targets are executable
+return and return-minus-drawdown, with the endpoint control on the same lagged
+payoff clock. The main economic comparison is February2020–December2023,47months,
+with unchanged basket, daily action/quote accounting, stop and cost rules.
+
+Master section28 is a passive progress/result reader. See
+[the frozen comparison](docs/UNSTOPPED_TARGET_COMPARISON_20261022.md).
+Independent model and72path verification must pass before results are reported.
+No result or improvement is claimed by authorization or launch.
+
+---
+
+# Full-history path-target audit complete — 22 October 2026
+
+The corrected 2010–2023 target audit and independent formula/rank/clock checks
+are complete. Start with [the measured coverage and corrected-data lineage](docs/FULL_PATH_TARGET_AUDIT_20261022.md).
+All168 months and152,307 original stock-months remain; 140,931 were signal-time
+eligible. Per target family, available long/short paths are139,414/139,414
+unstopped and139,466/139,455 stopped. Original endpoint targets, features, models,
+prior portfolio results and active pointers remain unchanged. No fit was run.
+
+The important remaining design issue is stopped-target ties: all four
+side/family stopped groups have0/48 complete ten-class payoff states in2020–2023,
+although target values exist. Unstopped groups have47/48 each; January2020 lacks
+120 completed next-open outcomes. December2023's own endpoint remains protected.
+Do not weaken the tie/history rules or treat the existing originalRET states as
+utility payoffs. The intended same-X/fixed-RF endpoint/return/utility comparison
+still needs an explicit frozen fitting and directional scoring protocol.
+
+Master section27 reads saved full-audit summaries and a separate exact-audit
+independent proof. Section26's two-month sample and the completed five-model
+portfolio comparison below remain separate historical stages. Identity, provider
+knowledge-time, terminal-event and investability limitations remain conditional;
+the independent check did not reread original source quotes or certify them.
+
+---
+
+# Current Deep Momentum V2 handoff — 22 October 2026
+
+Path-target engineering is separate from the completed corrected-input RET run.
+Read [the target definitions and fit gate](docs/PATH_TARGET_ENGINEERING_20261022.md)
+and [engineering protocol](configs/path_target_protocol_20261022.json). Original
+endpoint targets, class-payoff states, features, models, selections, prior runs
+and source corrections remain unchanged. No new model fit or parameter search
+is part of this phase; protected 2024+ financial values remain unread.
+
+Master section25 now displays the latest [five-model RET and class-basket
+comparison](docs/CORRECTED_BACKTEST_COMPARISON_20261021.md) from authenticated
+public aggregate files. Section24 remains its older dated source version.
+Public report agreement is not another independent private-data verification.
+Section26 displays the new target protocol and its engineering-only status.
+The [completed two-month audit](docs/PATH_TARGET_AUDIT_20261022.md) retains 1,819
+original stock-months: 6,997 of 7,016 requested directional/stop paths are
+observed, with 19 unavailable episodes preserved. All 182 focused tests and the
+independent 14,552-row formula/clock check passed. Among 1,749 matched long
+unstopped outcomes, 346 (19.78%) change class when execution timing replaces
+calendar endpoints. One stopped-return class is empty because of exact ties;
+the new score's full-history tie/coverage behavior remains to be audited.
+
+The candidates preserve the original endpoint control, add a next-open to next
+rebalance-open executable return, and define a separate directional utility
+cash_return minus positive marked maximum drawdown (fixed engineering lambda1).
+Each target's actual completion date governs training, validation and causal
+120-month payoff states. Stopped names do not release relative classes early.
+Long and short paths are distinct; expected utility is not original RET.
+
+This engineering implementation and its bounded full-cohort audit do not
+establish complete 2010–2023 training-label coverage. The adapter's current
+2020–2023 scope and the December2023 protected next-open endpoint are explicit
+fit gates. Extend and audit training history, then freeze the small RF-expanded
+comparison and compute budget before fitting. A complete identity certification
+or every comparator portfolio path is not a prerequisite for unrelated work.
+All missing/ambiguous outcomes and original denominators remain visible.
+
+Latest corrected-input RET results remain in the linked comparison. Historical
+handoffs below retain their dated source versions.
+
+---
+
 # Current Deep Momentum V2 handoff — 21 October 2026
 
 The corrected-input five-arm refit and daily replay are complete. Start with the
