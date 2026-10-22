@@ -1,0 +1,79 @@
+{
+  "cash_return": "Gross unit-notional executable directional cash P&L, including the original audited corporate-action accounting.",
+  "denominator_floor": 0.01,
+  "floor_rationale": "Fixed engineering choice; not selected using realised performance or tuning.",
+  "formula": "cash_return / max(maximum_drawdown, denominator_floor)",
+  "history": [
+    "2010-01",
+    "2023-12"
+  ],
+  "inputs": "Independently verified cached executable-return and drawdown summaries only. No prices, feature values, models or cloud reads.",
+  "limits": {
+    "active_seconds": 600,
+    "derived_verification_read_bytes": 134217728,
+    "estimator_fits": 0,
+    "independent_source_projection_bytes": 67108864,
+    "output_bytes": 134217728,
+    "processes": 1,
+    "rss_stop_bytes": 4294967296,
+    "source_projection_bytes": 67108864,
+    "trade_replays": 0
+  },
+  "loss_policy": "Literal signed ratio, including loss-ranking inversion and exact -1 ties; no sign-dependent transform.",
+  "missingness": "No label or target imputation, clipping, winsorisation, hindsight stock removal or loss-dependent rank repair.",
+  "model_protocol": "No estimator, selection score or compute run authorised by this engineering protocol.",
+  "observed_through": "2023-12-29",
+  "path": {
+    "entry": "First trading open after signal month-end",
+    "execution_stop_unchanged": "10% per asset execution alternative",
+    "exit": "Following rebalance open",
+    "learning_variant": "unstopped",
+    "marks": "Same audited open/close unit NAV path including initial NAV=1",
+    "maximum_drawdown": "Positive maximum peak-to-trough decline divided by running peak, with initial peak=1",
+    "sides": [
+      "long",
+      "short"
+    ]
+  },
+  "payoffs": {
+    "calendar_months": 120,
+    "completion": "Actual next-open exit no later than signal date",
+    "interpretation": "Expected ratio and expected cash return are distinct scores; neither relabels archived original RET.",
+    "last_outcome_month": "signal month minus one",
+    "missing_cell_policy": "Withhold entire vector; no shortening or skipped months",
+    "required_month_class_cells": 1200,
+    "separate_outputs": [
+      "historical mean ratio conditional on new ratio classes",
+      "historical mean executable cash return conditional on new ratio classes"
+    ]
+  },
+  "preservation": "Original runs, features, daily data, training/basket/stop/cost rules and deferred execution gaps unchanged.",
+  "protected_data": "December 2023 outcome metadata only; no 2024+ financial values decoded. Integrity hashing is separate from financial decoding.",
+  "protocol_id": "signed_executable_return_over_drawdown_20261022_v1",
+  "ranking": {
+    "best_class": 1,
+    "classes": 10,
+    "minimum_observed": 10,
+    "nonexhaustive_requests": "Withhold classes for entire affected month/side",
+    "prediction_cohort": "Unchanged original historical PIT eligible cohort; future availability never changes admission",
+    "tie_rule": "Exact descending-value midrank: min(10,1+floor(10*(lower+upper)/(2*N))) for a zero-based half-open tie group. Preserve ties, never jitter or force equal class sizes."
+  },
+  "schema": "dmv2_return_dd_target_protocol_v1",
+  "source_certification": "Derived formula/rank/clock verification does not certify underlying identity, action, investability or market-data correctness.",
+  "status": "FROZEN_LABEL_ENGINEERING_AND_AUDIT_ONLY",
+  "target_family": "return_over_drawdown",
+  "training_audit": {
+    "purge": "Only outcomes actually completed by last session before outer year",
+    "sides": [
+      "long",
+      "short"
+    ],
+    "window": "Previous ten calendar years",
+    "years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ]
+  }
+}
