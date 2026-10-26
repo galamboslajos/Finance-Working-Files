@@ -1,3 +1,35 @@
+# Isolated Paper15 executable-RET baseline — 26 October 2026
+
+This branch's separate experiment is complete and independently checked:
+16 fixed-setting annual RF/XGBoost fits and 32 RET daily scenarios, with
+24 complete proxy paths and eight withheld RF / 5-year paths. Start with
+[the results and exact gap](docs/PAPER15_RET_BASELINE_RESULTS_20261026.md),
+[the frozen method](docs/PAPER15_RET_BASELINE_20261026.md) and
+[the separate passive notebook](notebooks/10_paper15_ret_baseline.ipynb).
+
+Only the 15 agreed paper momentum/state inputs are used. Complete past daily
+OHLC eligibility, rolling training and causal RET payoff history match each
+five/ten-year arm. The target is unstopped next-open-to-following-monthly-open
+daily cash/share return, ranked into deciles. It is not a calendar-close label
+or the earlier return/drawdown ratio. No tuning or expanded inputs were used.
+
+The paired economic period is 3 February 2020–29 December 2023: 47 months and
+985 sessions. Forty-eight forecast months remain saved; observed learning
+labels end in November 2023. RF / 5 years is withheld on a new EV short order
+at the 1 March 2021 open, not a missing mark on an existing holding. The eight
+withheld rows stay visible; do not rank all four arms on the complete subset.
+Known execution cases remain deferred. Original runs, source files and the
+existing master notebook are unchanged. Financial 2024+ values stay protected.
+
+The actual private run is `outputs/paper15_ret_baseline/20261026-v3`.
+The notebook authenticates saved independent receipts and reads small reports;
+Run All loads no models, fits nothing and launches no backtest. Thirteen
+targeted synthetic tests pass. Data, models and ledgers remain private.
+
+The older handoffs below retain their original experiment and source scope.
+
+---
+
 # Current Deep Momentum V2 handoff — return/drawdown label audit,22October2026
 
 The [executable return/drawdown label and full audit](docs/RETURN_DD_TARGET_20261022.md)

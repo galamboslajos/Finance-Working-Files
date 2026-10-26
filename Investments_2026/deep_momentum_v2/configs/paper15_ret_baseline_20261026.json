@@ -1,0 +1,241 @@
+{
+  "schema": "dmv2_paper15_executable_ret_baseline_v2",
+  "status": "FROZEN_BEFORE_SOURCE_READ_OR_FIT",
+  "authority": "User26October2026: isolated side baseline;15paper features;5/10year rolling training, matching complete daily history and matching RET payoff history;RF/XGBoost; predictions and daily backtests. User clarification: target must be executable daily-path one-month return, not calendar-close return.",
+  "history_outcome_start": "2010-01",
+  "evaluation_start": "2020-01",
+  "evaluation_end": "2023-12",
+  "windows_years": [
+    5,
+    10
+  ],
+  "eligibility": {
+    "window": "(signal_date minus N calendar years, signal_date] on independently generated XNYS sessions",
+    "fields": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "all_expected_sessions_required": true,
+    "positive_finite_prices": true,
+    "accepted_quality_and_bounds_required": true,
+    "volume_required": false,
+    "future_values_affect_eligibility": false,
+    "current_index_membership": "historical_sp500_sp400_union_at_each_signal",
+    "identity_policy": "existing_corrected_provisional_unique_resolved_routes"
+  },
+  "features": [
+    "zMOM1",
+    "zMOM3",
+    "zMOM6",
+    "zMOM9",
+    "zMOM12",
+    "meanMOM1",
+    "meanMOM3",
+    "meanMOM6",
+    "meanMOM9",
+    "meanMOM12",
+    "stdMOM1",
+    "stdMOM3",
+    "stdMOM6",
+    "stdMOM9",
+    "stdMOM12"
+  ],
+  "normalization": "common_eligible_population_each_signal_ddof1;five shared means/SDs retained",
+  "imputation": false,
+  "missing_indicators": false,
+  "market_cap": false,
+  "target": "unstopped gross long-unit cash return from next trading open to following rebalance open, checked at every daily open/close with reviewed signed raw-share actions; then monthly return deciles",
+  "target_ties": "exact_equal_midrank_no_jitter;class1best10worst;minimum10observed",
+  "missing_targets": "retain_original_cohort_rows;never_impute_or_use_to_filter_prediction",
+  "RET": {
+    "months_by_arm": {
+      "5": 60,
+      "10": 120
+    },
+    "cutoff": "signal_month_minus1 outcome, actually completed at its following open by signal; no shifted older substitute",
+    "aggregation": "equal_mean_of_monthly_actual_class_mean_returns",
+    "gate": "every_month_and_all_ten_classes_required;no_imputation",
+    "label": "5year_RET_is_declared_paper_adaptation"
+  },
+  "models": [
+    "rf",
+    "xgb"
+  ],
+  "annual_years": [
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "maximum_fits": 16,
+  "parameter_search": false,
+  "parameters": {
+    "rf": {
+      "n_estimators": 500,
+      "criterion": "gini",
+      "max_depth": 12,
+      "min_samples_split": 2,
+      "min_samples_leaf": 20,
+      "max_features": "sqrt",
+      "bootstrap": true,
+      "class_weight": null,
+      "max_samples": null,
+      "n_jobs": 1,
+      "random_state": 1729,
+      "oob_score": false,
+      "warm_start": false,
+      "ccp_alpha": 0.0
+    },
+    "xgb": {
+      "objective": "multi:softprob",
+      "num_class": 10,
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 20,
+      "reg_lambda": 10.0,
+      "reg_alpha": 0.0,
+      "gamma": 0.0,
+      "tree_method": "hist",
+      "max_bin": 256,
+      "device": "cpu",
+      "n_jobs": 1,
+      "random_state": 1729,
+      "eval_metric": "mlogloss",
+      "verbosity": 0,
+      "early_stopping_rounds": null
+    }
+  },
+  "packages": {
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "narwhals": "2.27.1",
+    "cloudpickle": "3.1.2"
+  },
+  "one_seed_per_year": 1729,
+  "paper_100_fit_ensemble": false,
+  "training": "previous N calendar outcome years with actual next-open completion <= preceding December signal;December training outcome purged without reaching further back",
+  "backtest": {
+    "selector": "RET highest10long/lowest10short;stable_source_id_ties;disjoint;N=min(10,floor(trade_eligible/2))",
+    "weights": [
+      0.5,
+      -0.5
+    ],
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "variants": {
+      "unstopped": null,
+      "asset_stop_10pct": 0.1
+    },
+    "primary": [
+      "asset_stop_10pct",
+      10
+    ],
+    "scenarios": 32,
+    "execution": "next_open_monthly;terminal2023-12-29close;continuousNAV;existing_signed_raw_share_action_accounting",
+    "execution_restrictions": [
+      "sec_gjP4xM",
+      "sec_zmYNnz"
+    ],
+    "additional_reviewed_actions": [
+      {
+        "event_id": "TIF_20210107_CASH_MERGER_EXECUTION_V1",
+        "ticker": "TIF",
+        "predecessor_id": "sec_zr2RRz",
+        "source_security_id": "siblis_ticker_company_c8027fefe226e97cc5c6",
+        "signal_date": "2020-12-31",
+        "effective_date": "2021-01-07",
+        "last_trading_date": "2021-01-06",
+        "cash_per_raw_share": 131.5,
+        "stock_ratio": 0.0,
+        "successor_id": null,
+        "verified": true,
+        "evidence_reference": "https://www.sec.gov/Archives/edgar/data/98246/000087666121000016/ruleprovisionnotice.htm",
+        "predecessor_cik": "0000098246",
+        "action_type": "cash_merger",
+        "primary_legal_terms_reviewed": true,
+        "identity_certified": false,
+        "settlement_convention": "economic_entitlement_at_effective_open_cash_zero_rate",
+        "application_convention": "before_open_cash_conversion_of_existing_public_common_shares",
+        "identity_policy": "existing_provisional_unique_resolved_route_not_new_provider_certification"
+      },
+      {
+        "event_id": "LHCG_20230222_CASH_MERGER_EXECUTION_V1",
+        "ticker": "LHCG",
+        "predecessor_id": "sec_gwdLQX",
+        "source_security_id": "siblis_ticker_company_861896334ac84256608e",
+        "signal_date": "2023-01-31",
+        "effective_date": "2023-02-22",
+        "last_trading_date": "2023-02-21",
+        "cash_per_raw_share": 170.0,
+        "stock_ratio": 0.0,
+        "successor_id": null,
+        "verified": true,
+        "evidence_reference": "https://www.nasdaqtrader.com/TraderNews.aspx?id=ECA2023-99",
+        "predecessor_cik": "0001303313",
+        "action_type": "cash_merger",
+        "primary_legal_terms_reviewed": true,
+        "identity_certified": false,
+        "settlement_convention": "economic_entitlement_at_effective_open_cash_zero_rate",
+        "application_convention": "before_open_cash_conversion_of_existing_public_common_shares",
+        "identity_policy": "existing_provisional_unique_resolved_route_not_new_provider_certification"
+      }
+    ],
+    "preserve_prior20events_11retirements_40overlays_PENN_handover": true,
+    "unexplained_missing_required_quote": "retain_exposure_withhold_full_period_metrics",
+    "borrow_and_funding": 0,
+    "period": "2020-02-03 through2023-12-29;47months985sessions for common paired comparison",
+    "January2020": "retain all48forecasts;excludeJanuaryeconomicperiodforbotharms because10year executableRET lacks completed120monthhistory"
+  },
+  "metrics": [
+    "equal_month_log_loss",
+    "equal_month_accuracy",
+    "pooled_log_loss",
+    "pooled_accuracy",
+    "Brier_sum10",
+    "classwise_precision_recall_support",
+    "confusion_matrix",
+    "uniform_and_annual_train_prior_references",
+    "daily_backtest_coverage_and_metrics"
+  ],
+  "budgets": {
+    "source_projection_bytes_per_pass": 2147483648,
+    "source_passes": 2,
+    "derived_verification_bytes": 2147483648,
+    "peak_rss_bytes": 8589934592,
+    "output_bytes": 4294967296,
+    "total_active_seconds": 10800,
+    "per_phase_seconds": 1800,
+    "per_fit_seconds": 600,
+    "fit_threads": 1,
+    "fits": 16
+  },
+  "financial_2024_plus_read": false,
+  "cloud_operations": false,
+  "source_corrections": "pinned raw2000-2023history for all historical admitted identities, including pre-index history;verified corrected2010-2023cached observations override raw keys;no pre-index membership requirement;execution40overlays stay separate",
+  "original_runs": "immutable;new private output and isolatedGitbranch",
+  "cross_arm_interpretation": "5vs10changeseligibleuniverse,normalization,classes,trainingandpayoffs jointly;not_pure_training_length_effect",
+  "label_clock": {
+    "entry": "first open after signal",
+    "exit": "following monthly first open",
+    "completion": "common actual scheduled exit, including cash-retired episodes",
+    "December2023": "unavailable protectedJanuary2024endpoint;no terminalclose substitution",
+    "learning_action_scope": "29reviewed2010-2023terms plus approvedTIF/LHCG cash terms;execution quote overlays not promoted"
+  },
+  "metadata_only_superseded_plan": "20261026-v1 was calendar-close draft, never executed;archive its pinned code/config before superseding"
+}

@@ -560,3 +560,33 @@ RF regression is a proposed next protocol, not execution authority. Literal
 loss-ratio inversion remains unresolved. Master section32 is a passive verified
 aggregate reader. Preserve all prior runs, pinned code and the deferred-case
 user decision; no repair/login request is required by this label audit.
+
+
+## User-authorized isolated Paper15 RET baseline —26October2026
+
+On branch codex/paper15-ret-5y-10y, read docs/PAPER15_RET_BASELINE_20261026.md
+and configs/paper15_ret_baseline_20261026.json. The user authorized16fixed
+RF/XGBoost annual fits across5/10year rolling training, matching complete past
+dailyOHLCeligibility and60/120monthRETpayoffs. Preserve all original historical
+S&P500/400rows. Rebuild only the15momentum/statefeatures, their common qualified
+normalization and executable daily-path return deciles; no expanded bank or
+imputation. Read full2000-2023providerhistory for pre-index availability, applying
+verified corrected cached observations with explicit priority. Future coverage
+never determines eligibility; missing future holdings still withhold paths.
+The forecast ledger has48months; paired economic evaluation has47months/985
+sessions from3February2020. Labels enter nextopen and exit the following
+monthlyopen, with daily cash/share accounting and actual completion purges.
+December2023labels stay unavailable; no terminalclose substitution. The old
+calendar-close metadata plan was superseded before any source-value read or fit. No2024+values,tuning,cloudchanges,oldrun
+mutation or automatic notebookcompute. The explicit runner owns source proof,
+16fits,inference/metricproof,32fixedRETdaily paths and independent accounting.
+Keep all four arms and any withheld rows visible. Pause/resume only at clean
+checkpoints; failed consumed fits do not retry automatically.
+
+The completed v3 experiment has16independently checked fits and32daily
+scenarios:24completeproxy paths and8withheld RF/5year variants. Read
+docs/PAPER15_RET_BASELINE_RESULTS_20261026.md and CURRENT_RESEARCH_STATUS.md
+on this branch. The first RF/5year failure is a newEVshort order at the
+1March2021open, not a missing existing-holding mark. All8variants retain
+unavailablefull-period metrics. The earlier deferred-case policy remains;
+publication does not authorize repairs, refits or changing frozen sources.

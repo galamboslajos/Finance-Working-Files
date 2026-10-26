@@ -1,3 +1,17 @@
+## Isolated Paper15 executable-RET baseline,26October2026
+
+This branch runs RF/XGBoost on only15paper inputs with matching5/10year
+complete past dailyOHLCeligibility, rolling training and RET payoff windows.
+The target comes from the daily next-open-to-following-open cash/share path.
+Start with [the separate notebook](notebooks/10_paper15_ret_baseline.ipynb),
+[the results](docs/PAPER15_RET_BASELINE_RESULTS_20261026.md)
+and [the frozen method](docs/PAPER15_RET_BASELINE_20261026.md). RunAll only reads
+saved verified reports. Use `scripts/run_paper15_baseline_current.py` for
+explicit fresh runs. The earlier V2work and every historical result remain
+unchanged; protected2024+financial values are excluded.
+
+---
+
 # Deep Momentum V2
 
 ## Source correction status, 2026-10-16
