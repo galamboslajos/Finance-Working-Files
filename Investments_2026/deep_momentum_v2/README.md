@@ -1,3 +1,14 @@
+## Strict monthly-return comparison, 26 October 2026
+
+The new monthly-label experiment and its available common-period backtest are
+in [the results](docs/PAPER15_MONTHLY_RESULTS_20261026.md) and
+[notebook 11](notebooks/11_paper15_monthly_baseline.ipynb).
+The common economic period is **14 months, January 2020–February 2021**;
+full 2020–2023 portfolio results remain withheld for missing selected returns.
+The prior executable daily-return experiment below is preserved separately.
+
+---
+
 ## Isolated Paper15 executable-RET baseline,26October2026
 
 This branch runs RF/XGBoost on only15paper inputs with matching5/10year

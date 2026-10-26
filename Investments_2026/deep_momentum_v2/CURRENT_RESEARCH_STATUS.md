@@ -1,3 +1,29 @@
+# Strict monthly Paper15 benchmark — 26 October 2026
+
+The separate monthly-label experiment completed16fixed annual fits and
+independent checks of32monthly scenarios. Full2020–2023 results remain
+0complete/32withheld because selected accepted monthly endpoints are missing.
+The user explicitly chose strict adjusted-close returns and a common available
+period; no corporate-action return patch, imputation or further refit was made.
+
+Start with [the complete results and gap audit](docs/PAPER15_MONTHLY_RESULTS_20261026.md),
+[the frozen monthly protocol](docs/PAPER15_MONTHLY_BASELINE_20261026.md) and
+[the separate passive notebook](notebooks/11_paper15_monthly_baseline.ipynb).
+The coverage-limited common economic diagnostic is January2020–February2021:
+14months. At10bp one-way costs, no stops, net totals are RF5y+21.18%,XGB5y+25.48%,
+RF10y+6.58%,XGB10y+33.51%. These are not four-year results. Risk metrics use
+monthly returns and month-end drawdowns, not daily observations.
+
+Prediction scores separately cover48outcome monthsJanuary2020–December2023.
+The same15inputs, eligibility, annual5/10year rolling windows and fixed
+settings remain. The monthly label is adjusted close-to-close; RET and annual
+training include outcomes completed at the signal close. Same-close execution
+is an explicit idealized assumption. All prior runs and the master stay intact.
+Financial2024+ values remain protected. No tuning, cloud or automatic notebook
+compute. The branch remains codex/paper15-ret-5y-10y, separate from main.
+
+---
+
 # Isolated Paper15 executable-RET baseline — 26 October 2026
 
 This branch's separate experiment is complete and independently checked:

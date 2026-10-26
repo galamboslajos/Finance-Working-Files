@@ -1,0 +1,170 @@
+{
+  "history_outcome_start": "2010-01",
+  "evaluation_start": "2020-01",
+  "evaluation_end": "2023-12",
+  "windows_years": [
+    5,
+    10
+  ],
+  "eligibility": {
+    "window": "(signal_date minus N calendar years, signal_date] on independently generated XNYS sessions",
+    "fields": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "all_expected_sessions_required": true,
+    "positive_finite_prices": true,
+    "accepted_quality_and_bounds_required": true,
+    "volume_required": false,
+    "future_values_affect_eligibility": false,
+    "current_index_membership": "historical_sp500_sp400_union_at_each_signal",
+    "identity_policy": "existing_corrected_provisional_unique_resolved_routes"
+  },
+  "features": [
+    "zMOM1",
+    "zMOM3",
+    "zMOM6",
+    "zMOM9",
+    "zMOM12",
+    "meanMOM1",
+    "meanMOM3",
+    "meanMOM6",
+    "meanMOM9",
+    "meanMOM12",
+    "stdMOM1",
+    "stdMOM3",
+    "stdMOM6",
+    "stdMOM9",
+    "stdMOM12"
+  ],
+  "normalization": "common_eligible_population_each_signal_ddof1;five shared means/SDs retained",
+  "imputation": false,
+  "missing_indicators": false,
+  "market_cap": false,
+  "target_ties": "exact_equal_midrank_no_jitter;class1best10worst;minimum10observed",
+  "missing_targets": "retain_original_cohort_rows;never_impute_or_use_to_filter_prediction",
+  "models": [
+    "rf",
+    "xgb"
+  ],
+  "annual_years": [
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "maximum_fits": 16,
+  "parameter_search": false,
+  "parameters": {
+    "rf": {
+      "n_estimators": 500,
+      "criterion": "gini",
+      "max_depth": 12,
+      "min_samples_split": 2,
+      "min_samples_leaf": 20,
+      "max_features": "sqrt",
+      "bootstrap": true,
+      "class_weight": null,
+      "max_samples": null,
+      "n_jobs": 1,
+      "random_state": 1729,
+      "oob_score": false,
+      "warm_start": false,
+      "ccp_alpha": 0.0
+    },
+    "xgb": {
+      "objective": "multi:softprob",
+      "num_class": 10,
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 20,
+      "reg_lambda": 10.0,
+      "reg_alpha": 0.0,
+      "gamma": 0.0,
+      "tree_method": "hist",
+      "max_bin": 256,
+      "device": "cpu",
+      "n_jobs": 1,
+      "random_state": 1729,
+      "eval_metric": "mlogloss",
+      "verbosity": 0,
+      "early_stopping_rounds": null
+    }
+  },
+  "packages": {
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "narwhals": "2.27.1",
+    "cloudpickle": "3.1.2"
+  },
+  "one_seed_per_year": 1729,
+  "paper_100_fit_ensemble": false,
+  "schema": "dmv2_paper15_monthly_baseline_v1",
+  "status": "FROZEN_BEFORE_NUMERIC_READ_OR_FIT",
+  "authority": "User26October2026: run paper-style calendar-month return decile training and monthly-return backtest. Keep the four previously approved RF/XGBoost 5/10-year arms, eligibility, 15 inputs, settings and RET mechanism.",
+  "target": "adj_close[exact outcome month end]/adj_close[exact preceding signal month end]-1, then exact within-month deciles; missing remains missing",
+  "training": "preceding N calendar outcome years completed at preceding December close, including that December; no next-open purge because this target is complete at the close",
+  "RET": {
+    "months_by_arm": {
+      "5": 60,
+      "10": 120
+    },
+    "cutoff": "latest completed calendar outcome is signal month; every actual label release <= signal",
+    "aggregation": "equal temporal average of actual monthly class means",
+    "gate": "all ten class cells in every one of exactly60/120months"
+  },
+  "backtest": {
+    "selector": "RET highest10long/lowest10short;stable source-ID ties;balanced disjoint",
+    "weights": [
+      0.5,
+      -0.5
+    ],
+    "execution_restrictions": [
+      "sec_gjP4xM",
+      "sec_zmYNnz"
+    ],
+    "cost_bps": [
+      0,
+      5,
+      10,
+      25
+    ],
+    "periods": {
+      "full48": "2020-01 through2023-12",
+      "matched47": "2020-02 through2023-12"
+    },
+    "scenarios": 32,
+    "stops": false,
+    "same_close_execution": "idealized assumption: signal close features/model outputs/RET are assumed investable at that same close; no real-time latency claim",
+    "accounting": "signed monthly total-return notionals, pretradeNAVtargets, drift-aware one-way turnover, fee deducted fromcash; startflat eachperiod; noannualreset orforcedterminal liquidation",
+    "missing_selected_return": "retain selected row;withhold entire continuous period;nozero,drop,renormalization,forwardfill orlegalpayout invention",
+    "borrow_and_funding": 0,
+    "metrics": "monthlyreturns:12*mean,sqrt12*sampleSD,zero-cash-rateSharpe;month-end-onlyMDD;CAGRgeometric;notdailyriskmetrics"
+  },
+  "comparability": "48-month primary and separately started47-month common calendar; label,training-completion,RET clock and return-accounting change together. Not a fill-only attribution or full paper replication.",
+  "budgets": {
+    "source_projection_bytes_per_pass": 67108864,
+    "derived_read_bytes_per_phase": 2147483648,
+    "peak_rss_bytes": 8589934592,
+    "output_bytes": 4294967296,
+    "per_fit_seconds": 600,
+    "per_phase_seconds": 1800,
+    "total_active_seconds": 10800,
+    "fit_threads": 1,
+    "maximum_fits": 16
+  },
+  "protected_financial_values": "2024+ never read",
+  "preserve_existing_runs": true
+}

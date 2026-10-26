@@ -590,3 +590,28 @@ on this branch. The first RF/5year failure is a newEVshort order at the
 1March2021open, not a missing existing-holding mark. All8variants retain
 unavailablefull-period metrics. The earlier deferred-case policy remains;
 publication does not authorize repairs, refits or changing frozen sources.
+
+
+## User-authorized strict monthly baseline — 26 October 2026
+
+Read docs/PAPER15_MONTHLY_BASELINE_20261026.md, its frozen JSON and
+docs/PAPER15_MONTHLY_RESULTS_20261026.md. The user requested calendar-month
+return classes and idealized same-close monthly-return backtesting on the
+same four Paper15 RF/XGBoost five/ten-year arms. Sixteen fixed annual fits
+and32scenarios are independently checked; no tuning or original-run mutation.
+Reuse exact verified X/eligibility. Training and RET may use signal-close
+completed outcomes under this separate monthly clock. No intramonth stops,
+daily-risk claims, future eligibility filters or price/target imputation.
+
+All full48/matched47 paths remain withheld: EV2021-03,CDK2022-07,XEC2021-10,
+XLNX2022-02 produce six selected arm/stock/month gaps. After seeing this,
+the user explicitly chose to KEEP strict adjusted-close returns and show the
+common available period, rather than build action-aware labels and refit.
+Respect this decision; do not reopen these repairs automatically. Full-period
+unavailability remains visible. The common January2020–February2021 report is
+14months chosen from earliest failure metadata, a post-run coverage diagnostic,
+not full2020–2023 evidence or a new holdout. Its extra16cost-report rows use
+saved verified ledgers only: zero fits, fills, selection changes or replays.
+Monthly Sharpe/volatility use sqrt12, drawdown is month-end-only. Notebook11
+is passive; all private data, models, receipts and ledgers stay out of Git.
+Source identity/action/knowledge-time and investability limitations persist.
