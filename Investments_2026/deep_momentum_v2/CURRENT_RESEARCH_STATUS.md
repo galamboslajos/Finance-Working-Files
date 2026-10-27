@@ -1,3 +1,31 @@
+# Full monthly comparison completed — 27 October 2026
+
+All 32 fixed monthly scenarios now pass independent checks:32 complete, 0 withheld.
+The user authorized realized-return repairs only for EV/CDK/XEC/XLNX. Four
+cached cash/share reconstructions preserve all 16 saved models, forecasts,
+training labels, RET payoff inputs and selected baskets; **zero new fits**.
+
+Start with [the full results](docs/MONTHLY_MERGER_RESULTS_20261027.md),
+[the frozen method and evidence](docs/MONTHLY_MERGER_REPLAY_20261026.md) and
+[passive notebook 12](notebooks/12_monthly_merger_replay.ipynb). At 10 bp one-way
+costs,48 monthly returns January 2020–December 2023, no stops, net totals are
+RF 5y +18.49%, XGBoost 5y +12.56%, RF 10y −9.16%, XGBoost 10y +46.84%.
+Monthly Sharpe/month-end drawdown are not daily risk measures. Same-close entry,
+zero borrow/funding, fractional merger units and provisional source identities
+remain assumptions. The learning labels/RET population has not been repaired.
+
+The independent zero-fit audit checks all 32 paths / 128 annual rows, twelve cached
+quote points/four corrections, unchanged upstream artifacts, and exact first
+14-month reproduction at every cost. No stock is removed or replaced. All old
+runs and notebooks00/10/11 remain preserved. The branch stays
+`codex/paper15-ret-5y-10y`, separate from main; financial 2024+ values stay protected.
+Private evidence is `outputs/paper15_monthly_merger_replay/20261026-v1`.
+A Git clone includes code and aggregate documentation, not data/models/ledgers.
+
+Earlier dated handoffs below preserve their original scope.
+
+---
+
 # Strict monthly Paper15 benchmark — 26 October 2026
 
 The separate monthly-label experiment completed16fixed annual fits and

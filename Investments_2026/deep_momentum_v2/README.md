@@ -1,3 +1,17 @@
+## Full monthly comparison, 27 October 2026
+
+All 32 monthly scenarios are now complete after the user-authorized
+realized-return repairs for EV, CDK, XEC and XLNX. Saved forecasts, strict
+training labels, RET estimates and selections are unchanged; no refits.
+See [the full four-year results](docs/MONTHLY_MERGER_RESULTS_20261027.md),
+[the method](docs/MONTHLY_MERGER_REPLAY_20261026.md) and
+[passive notebook 12](notebooks/12_monthly_merger_replay.ipynb).
+January 2020–December 2023 covers 48 monthly returns. Risk measures are monthly,
+no stops, same-close fills idealized. The prior strict results below remain
+historical references; no source datasets or generated outputs enter Git.
+
+---
+
 ## Strict monthly-return comparison, 26 October 2026
 
 The new monthly-label experiment and its available common-period backtest are

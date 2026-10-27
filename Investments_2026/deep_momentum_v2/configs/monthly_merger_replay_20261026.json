@@ -1,0 +1,133 @@
+{
+  "schema": "dmv2_monthly_merger_replay_v1",
+  "status": "FROZEN_BEFORE_QUOTE_POINT_READ",
+  "authority": "User26October2026 explicitly reopened EV/CDK/XEC/XLNX for a full comparison, then selected realized-portfolio-return repair ONLY with saved forecasts and RET selections fixed.",
+  "maximum_fits": 0,
+  "change_training_labels": false,
+  "change_features": false,
+  "change_RET": false,
+  "change_predictions": false,
+  "change_selection": false,
+  "events": [
+    {
+      "event_id": "EV_20210301_MONTHLY_REALIZED_REPAIR_V1",
+      "ticker": "EV",
+      "source_security_id": "siblis_ticker_company_c5cb397c9b68ff2018c3",
+      "predecessor_id": "sec_yRvj1y",
+      "successor_id": "sec_zJBkez",
+      "signal_date": "2021-02-26",
+      "predecessor_basis_date": "2021-02-26",
+      "effective_date": "2021-03-01",
+      "outcome_month": "2021-03",
+      "outcome_end": "2021-03-31",
+      "cash_per_raw_share": 28.25,
+      "stock_ratio": 0.5833,
+      "evidence_references": [
+        "https://infomemo.theocc.com/infomemos?number=48362",
+        "https://www.sec.gov/Archives/edgar/data/350797/000095010321003212/dp147036_ex9901.htm"
+      ],
+      "legal_terms_reviewed": true,
+      "identity_policy": "unchanged_provisional_unique_resolved_route",
+      "consideration_convention": "documented_non_election_mixed_cash_and_stock",
+      "prior_special_dividend_not_added": {
+        "amount": 4.25,
+        "payment_date": "2020-12-18",
+        "reason": "before_this_holding_month_and_adjusted_history_retained"
+      }
+    },
+    {
+      "event_id": "CDK_20220706_MONTHLY_REALIZED_REPAIR_V1",
+      "ticker": "CDK",
+      "source_security_id": "siblis_ticker_company_19ba906495470d3d1d53",
+      "predecessor_id": "sec_2z91Bz",
+      "successor_id": null,
+      "signal_date": "2022-06-30",
+      "predecessor_basis_date": "2022-07-05",
+      "effective_date": "2022-07-06",
+      "outcome_month": "2022-07",
+      "outcome_end": "2022-07-29",
+      "cash_per_raw_share": 54.87,
+      "stock_ratio": 0.0,
+      "evidence_references": [
+        "https://www.nasdaqtrader.com/TraderNews.aspx?id=eca2022-164",
+        "https://www.sec.gov/Archives/edgar/data/1609702/000110465922077726/tm2220236d3_8k.htm"
+      ],
+      "legal_terms_reviewed": true,
+      "identity_policy": "unchanged_provisional_unique_resolved_route"
+    },
+    {
+      "event_id": "XEC_20211001_MONTHLY_REALIZED_REPAIR_V1",
+      "ticker": "XEC",
+      "source_security_id": "siblis_ticker_company_2e84b287a677bce25012",
+      "predecessor_id": "sec_gejbJX",
+      "successor_id": "sec_gjdDVM",
+      "signal_date": "2021-09-30",
+      "predecessor_basis_date": "2021-09-30",
+      "effective_date": "2021-10-01",
+      "outcome_month": "2021-10",
+      "outcome_end": "2021-10-29",
+      "cash_per_raw_share": 0.0,
+      "stock_ratio": 4.0146,
+      "evidence_references": [
+        "https://www.sec.gov/Archives/edgar/data/1168054/000110465921122062/tm2129003d1_8k.htm"
+      ],
+      "legal_terms_reviewed": true,
+      "identity_policy": "unchanged_provisional_unique_resolved_route",
+      "separate_successor_dividend": "not_added_again;source_adjusted_successor_return_proxy_retained"
+    },
+    {
+      "event_id": "XLNX_20220214_MONTHLY_REALIZED_REPAIR_V1",
+      "ticker": "XLNX",
+      "source_security_id": "siblis_ticker_company_eb6dfeed4d16849c05c1",
+      "predecessor_id": "sec_zvLa8g",
+      "successor_id": "sec_Dg2OZX",
+      "signal_date": "2022-01-31",
+      "predecessor_basis_date": "2022-02-11",
+      "effective_date": "2022-02-14",
+      "outcome_month": "2022-02",
+      "outcome_end": "2022-02-28",
+      "cash_per_raw_share": 0.0,
+      "stock_ratio": 1.7234,
+      "evidence_references": [
+        "https://www.sec.gov/Archives/edgar/data/743988/000110465922021762/tm226258d1_8k.htm",
+        "https://www.nasdaqtrader.com/TraderNews.aspx?id=ECA2022-23"
+      ],
+      "legal_terms_reviewed": true,
+      "identity_policy": "unchanged_provisional_unique_resolved_route",
+      "ordinary_dividend": "no_extra_cash;predecessor_adjusted_close_factor_handles_source_adjustments"
+    }
+  ],
+  "periods": [
+    "full48",
+    "matched47"
+  ],
+  "cost_bps": [
+    0,
+    5,
+    10,
+    25
+  ],
+  "scenarios": 32,
+  "stops": false,
+  "quote_unit_convention": "paired last predecessor raw/adjusted close;successor effective-session raw/adjusted CLOSE factor;successor exact month-end adjusted close;no false predecessor month-end quote",
+  "exposure_convention": "signed cash/share entitlement;cash zero-rate until rebalance;successor shares net by exact cached native security;no substitution or target reweighting",
+  "cost_convention": "same one-way fee rates and pretradeNAVtarget weights;mandatory conversions generate no market-trade fee;actual successor holdings and cash determine next rebalance turnover",
+  "retained_limitations": [
+    "idealized same-close monthly entry",
+    "provider retrospective adjustment factors and incomplete dividend-feed certification",
+    "provisional identity/knowledge-time",
+    "fractional economic successor units instead of invented cash-in-lieu",
+    "economic effective-date cash entitlement rather than certified physical settlement",
+    "zero borrow/funding",
+    "strict learning labels and RET remain conditional on originally observed adjusted-close outcomes"
+  ],
+  "budgets": {
+    "cached_input_file_bytes": 536870912,
+    "peak_rss_bytes": 2147483648,
+    "output_bytes": 268435456,
+    "per_phase_seconds": 600,
+    "total_active_seconds": 2400
+  },
+  "preserved_strict_run": "paper15_monthly_baseline/20261026-v1",
+  "protected_financial_values": "2024+ never read"
+}

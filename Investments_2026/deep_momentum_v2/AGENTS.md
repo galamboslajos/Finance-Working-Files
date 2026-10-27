@@ -615,3 +615,27 @@ saved verified ledgers only: zero fits, fills, selection changes or replays.
 Monthly Sharpe/volatility use sqrt12, drawdown is month-end-only. Notebook11
 is passive; all private data, models, receipts and ledgers stay out of Git.
 Source identity/action/knowledge-time and investability limitations persist.
+
+
+## Latest user override: realized monthly merger replay — 26–27 October 2026
+
+Read docs/MONTHLY_MERGER_REPLAY_20261026.md, its frozen config and
+docs/MONTHLY_MERGER_RESULTS_20261027.md. The user explicitly reopened the
+four EV/CDK/XEC/XLNX monthly realized-return cases and selected portfolio
+repairs only. This supersedes the earlier deferral only for these cases.
+Keep all saved models, forecasts, strict labels, features, RET means/scores
+and selected baskets unchanged. No new fit, target patch, replacement stock,
+new exclusion or tuning is authorized by this replay. The sixteen earlier
+monthly models remain the source models.
+
+The completed run has 32 complete / 0 withheld monthly paths: full48 and matched47
+periods, all four arms, four original costs. Independent zero-fit proofs bind
+four legal cash/share corrections from twelve cached close points, signed
+native successor holdings and voluntary costs. First 14 months reproduce the
+old common report at every cost. Learning scope audit is metadata-only;
+strict observed-return labels/RET have not been repaired. Future learning
+changes require a separate frozen experiment, not silent promotion of these
+payoffs. Monthly risk/no stops/idealized same-close and source identity/action
+limitations remain explicit. All old runs and master and notebooks 10/11 stay
+unchanged. Notebook 12 is a passive small-report reader; Run All launches
+nothing. No raw download, cloud mutation or 2024+ financial read is included.
