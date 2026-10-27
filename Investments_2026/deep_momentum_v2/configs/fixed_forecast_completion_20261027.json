@@ -1,0 +1,53 @@
+{
+  "schema": "dmv2_fixed_forecast_completion_v1",
+  "status": "FROZEN_BEFORE_OBSERVED_POINT_VALUE_READ",
+  "authority": "User27October2026 approved the fixed-forecast reconciliation. Necessary additive control completion uses an already independently verified observed source point, not a synthetic quote or a stock-selection change.",
+  "maximum_fits": 0,
+  "date": "2022-12-30",
+  "native": "sec_z9QxBz",
+  "source_security_id": "siblis_ticker_company_9f3c03dbe95bb1e9c67d",
+  "membership_alias": "PBF",
+  "cases": [
+    [
+      "xgb_paper15_5y",
+      "execution_close_gross"
+    ],
+    [
+      "xgb_paper15_5y",
+      "execution_close_open_units"
+    ],
+    [
+      "rf_paper15_10y",
+      "execution_close_gross"
+    ],
+    [
+      "rf_paper15_10y",
+      "execution_close_open_units"
+    ],
+    [
+      "xgb_paper15_10y",
+      "execution_close_gross"
+    ],
+    [
+      "xgb_paper15_10y",
+      "execution_close_open_units"
+    ]
+  ],
+  "comparison_rows": 28,
+  "replayed_paths": 6,
+  "source": "Existing independently reconstructed full-history OC cache from the completed original reconciliation.",
+  "point_policy": "Require exact existing accepted observed OC point; assert absent execution key; append exactly this one row in a separate derived adapter. Do not invent high/low.",
+  "admission_policy": "For original execution rows, exactly preserve daily/completion/quality/bounds flags in an explicit price_accepted boolean. For the one observed cache row, use its independently verified original OC acceptance. No stop stage consumes the new row.",
+  "unchanged": "Reuse all22original complete rows and every parent artifact; replay only six original failed close-clock controls. No changes to next-open paths, predictions, labels, RET, selections or models.",
+  "budgets": {
+    "cached_input_file_bytes": 67108864,
+    "execution_projection_bytes": 67108864,
+    "peak_rss_bytes": 4294967296,
+    "output_bytes": 536870912,
+    "derived_verification_bytes": 1073741824,
+    "per_phase_seconds": 1200,
+    "total_active_seconds": 2400
+  },
+  "financial_2024_plus_read": false,
+  "old_attempt": "Preserve original COMPLETE_VERIFIED22complete/6withheld run as reference"
+}

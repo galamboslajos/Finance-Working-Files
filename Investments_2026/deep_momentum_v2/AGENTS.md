@@ -639,3 +639,211 @@ payoffs. Monthly risk/no stops/idealized same-close and source identity/action
 limitations remain explicit. All old runs and master and notebooks 10/11 stay
 unchanged. Notebook 12 is a passive small-report reader; Run All launches
 nothing. No raw download, cloud mutation or 2024+ financial read is included.
+
+
+## Fixed-forecast realization reconciliation — 27 October 2026
+
+Read docs/FIXED_FORECAST_RESULTS_20261027.md and the main/completion method
+notes and frozen configurations. The user requested the same predicted names
+under monthly-return versus daily cash/share backtesting, with timing, costs
+and stops separated. Zero fits or reselection. Preserve strict learning labels,
+features, RET states and all prior forecast/run bytes. All eight original-cache
+close controls reproduce 47 monthly NAVs to numerical precision. Next-open
+monthly-return correlations are 0.987–0.995. This does not certify individual
+training labels or isolate the earlier learning-target effect.
+
+The original independently checked run has22complete/sixwithheld close-clock
+controls. The separately sealed observed-PBF boundary completion replays only
+those six and preserves the other22rows; the composite has28complete/zero
+withheld. No high/low quote is invented. Keep the original unavailable paths
+visible as reference. Close/open successor-unit residuals remain recorded;
+never relax the tolerance or call every changed-convention control identical.
+
+Notebook13 authenticates independent proofs and small reports, then checks
+its plotted/displayed month-end curves against the independently verified
+saved daily NAV ledgers. RunAll launches no build, fit, download or replay.
+The auxiliary producer quote-difference inventory is not an independently
+certified numerical output. Keep monthly/daily risk frequencies explicit,
+the47outcomes/985following sessions from31January2020close through29December2023,
+and terminal marking without forced liquidation. Source, knowledge-time,
+action/distribution, same-close fill and investability limits persist. Do not
+merge this side branch or read financial2024+values without applicable scope.
+
+
+## User correction: explicit return units, 27 October 2026
+
+The user found the report misleading because cumulative returns could be read
+as annual returns. Every performance table and figure must state its period
+and distinguish cumulative compounded total return from annualized CAGR.
+For fixed-forecast results the period is February2020–December2023,47months,
+985following sessions, with startingNAV at31January2020close. The5/10year
+labels are training windows. Keep annualized CAGR separately labelled and use
+the frozen252/985daily convention when quoting the verified cagr field.
+Separate the fixed-forecast execution test from older differently trained
+Paper15 and expanded-RF experiments. Relabelling does not authorize any fit,
+new raw-price/feature-panel read, replay, frozen-input change or main-branch merge.
+
+
+## User direction: longest supported walk-forward horizon, 27 October 2026
+
+The user requested confirmation of later data and a longer walk-forward run.
+Read the horizon section of docs/FIXED_FORECAST_RESULTS_20261027.md and the
+proposed extension JSON. The zero-fit metadata audit confirms local price keys
+through24July2026 and primary S&P500/400member flags through31March2026.
+April2026 is the candidate final holding month, not a completed audited path.
+Keeping the2010initialization gives75matched months fromFebruary2020, or76for
+the monthly-onlyJanuary2020start. Preserve all old48/47month results and recipes.
+Do not describe their2023boundary as a source-data limit. Retain the current
+four Paper15 monthly-label arms, annual5/10year rolling fits and monthly RET
+predictions as the default extension scope. Do not silently switch to expanded
+RF or change targets/tuning. The user has requested an extension; no repeat
+blanket permission request is needed. A new explicit sealed execution recipe,
+source/clock/resource/read-budget audit and independent checks must precede
+financial2024+reads and new fits. The availability pass reads no financial
+columns and launches no fitting/replay. A newer source release is not an
+automatic historical input replacement. Its referenced private-run objects
+return403while curated metadata reads work; retain exact access errors and
+source-impact requirements. The prepared owner message was not sent.
+
+
+## Explicit extension input audit completed — 27 October 2026
+
+Read docs/WALKFORWARD_EXTENSION_INPUTS_20261027.md and the separately sealed
+configs/walkforward_extension_inputs_20261027.json. The user authorized the
+bounded input readiness phase after requesting the longest supported current
+Paper15 comparison. This new worker alone reads approved source values through
+30April2026; every historical guard/config/worker stays unchanged. The private
+run outputs/walkforward_extension_inputs/20261027-v1 has independently verified
+source arrays and all15feature/monthly-class/RET formulas, plus separately checked
+coverage aggregates. It preserves25460original rows per history arm, with
+23589/20949eligible,31/24missinglabels and28/28completeRETstates. These are
+stock-month counts, not failed economic paths. Zero new fits or backtests ran.
+
+The bounded source plan pins the old manifest versions and unchanged parent
+history. It does not promote current cloud releases. ApprovedBK/XOMshadow routes
+end in2023; retain54post2023member-months as a visible route-continuation dependency
+rather than silently reverting to demonstrated wrong IDs or claiming new route
+evidence. Do not erase those member rows or screen on missing future returns.
+Keep the584new daily sessions/eight raw-adjustedOHLC fields separate. Forward
+endpoint/event gaps still need legal execution treatment if selected. Strict
+learning labels/RET remain the declared monthly convention; changing their
+payouts would need a separate impact/refit protocol.
+
+Notebook14 uses only dmv2.extension_reporting.read_extension_inputs and bounded
+savedJSON reports; RunAll must not open source panels, load models or compute.
+The prospective12annualRF/XGBoostfits and continuous75month realization remain
+unrun, and require a separately sealed compute/replay recipe. The user has
+already requested the extension; do not repeat blanket permission questions.
+No main-branch merge is authorized by this audit. Keep all prior47/48month
+results, failed attempts and pause/resume evidence unchanged.
+
+
+## Paper15 model extension complete with zero-fit selection recovery —27October2026
+
+Read docs/WALKFORWARD_EXTENSION_MODELS_20261027.md, its frozen JSON and
+WALKFORWARD_EXTENSION_MODEL_RESULTS_20261027.md. The user said next step;
+the12fixedRF/XGBoostannualfits for2024/2025/2026, monthlyinference andRET
+selection are now independently verified. Source version is the unchanged
+walkforward_extension_inputs/20261027-v1 audit. No tuning, expandedfeatures,
+newsource, imputation, target/payoff repair or raw/dailyfinancialread occurred.
+All old2020–2023forecasts and names/sides/weights/RET scores remain exact.
+
+The originalmodelrun outputs/walkforward_extension_models/20261027-v1 remains
+FAILED_PRESERVED because its finaloldpickparitycheck encountered pandasobject
+versusStringDtype forside. All12fits and originalindependentmodelverification
+had already passed. Never rerun them or rewrite thatledger. The separate
+extension_selection_recovery_20261027 recipe/runner/checker haszero fits and
+zerobacktests; it casts onlyside in the two parityviews and preserves exact
+numeric checks. OneULP RET changes still fail. Its completed independent
+selection proof is linked by the originalrun's
+verification_recovery/selection_handoff.json. Preserve the failed selection
+attempt, recovery, all12modelreceipts and their code/plan bytes.
+
+Notebook15 calls only extension_model_reporting.read_extension_models. That
+reader authenticates both original12modelPASS and recoveredselectionPASS;
+it reports originalFAILED_PRESERVED and compositeverifiedcompletion explicitly.
+RunAll loads no financialpanels or estimators and launches nofit orreplay.
+Scores are class metrics overJan2024–Apr2026: RF5y2.282878/12.57%;XGB5y
+2.285083/12.46%;RF10y2.284015/12.13%;XGB10y2.286926/12.04%meanmonthly
+logloss/accuracy. Fulljoinedmonthlyforecasts span76months; the next common
+realization is75months February2020–April2026. No newportfolio returns exist.
+
+All four arms have560addedselectedrows,10long/10short over28months. The only
+addedselectedmissingmonthlyendpoint is U.S.Steel(X),June2025,shortRF5y.
+Official18June2025SEC8K terms confirm55USDcash percommonshare and removal
+before thatopen; those terms are researched but not installed. Follow the
+existing signedrawshare executionmethod under a new sealed75monthreplay
+recipe. Retain the original learning labels/RET and fixednames; do not erase
+X or change selection. A monthlyendpoint inventory is not full dailyquote,
+stop or actionpreflight. BK/XOMroute limitations remain in the cohort, with
+neither selected inDec2023/Jan2024 boundarybaskets. The provisionalwaiver stays;
+no broadidentityrecertification,loginrequest orownercontact is a prerequisite.
+This phase authorizes no mainbranchmerge or further estimatorsearch/refits.
+
+
+## Continuous75month Paper15 realization verified —27October2026
+
+Read docs/WALKFORWARD_EXTENSION_BACKTEST_20261027.md and notebook16. The user
+said lets go after the12model extension/zero-fit selection recovery. The new
+sealed walkforward_extension_backtest_20261027 recipe has completed all48daily
+paths and16monthly references: COMPLETE_VERIFIED, zero withheld. Period is
+February2020–April2026,75months/1569following sessions, Jan31,2020initialclose.
+All28old47month control curves remain unchanged. Total returns are cumulative;
+CAGR separately uses252/1569. The branch is still codex/paper15-ret-5y-10y;
+no main merge, tuning, target repair or further fit is implied.
+
+Only new execution event is U.S.Steel X/sec_g4KJZy's55USDcash entitlement at
+June18,2025open, evidenced by the privately pinned complete SEC8K. Preserve
+signed short cash liability, zero-rate economic settlement and unchanged
+strict monthly learning labels/RET/probabilities/selections. Existing22events,
+11historicalretirements, exactPENN handover and observedPBF point are inherited.
+Daily engine financial equations are unchanged; its new calendar guard is
+explicitly bounded to the1570-session anchor/terminal grid endingApr30,2026.
+Oldworkers/guards/plans/results and failedmodelselectionattempt remain intact.
+
+At10bp one-way costs, no-stop cumulative net totals / annualizedCAGR are
+RF5y+24.67%/+3.61%,XGB5y+44.49%/+6.09%,RF10y−8.47%/−1.41%,
+XGB10y+74.04%/+9.31%. Stop10%-asset net totals are−12.37%,−6.14%,−42.58%,
+−8.72%. These are Paper15arms, not expandedRF. Monthly/daily same-cache/close
+controls agree within1.34e−15NAV. Costs/stops/nextopen assumptions materially
+change returns; this is no proof of full identity, PITrelease or investability.
+
+Private run outputs/walkforward_extension_backtest/20261027-v1 and separate
+plan retain allcheckpoints. Independent source reconstruction and transition
+oracle checked allmarks/actions/units/stops/metrics and oldcurves. Runtime550.50s,
+peak1.36GiB;40focusedtests and all4notebookcodecells passed. Notebook16 only
+calls extension_backtest_reporting.read_extension_backtest and displays verified
+JSON/chart outputs; RunAll never startsfits, builds, source financialreads or
+replay. Charts/tables use optional pinned requirements-reporting.txt packages,
+installed privately in .reporting; modelpackages stayunchanged.
+Do not commit that runtime, raw SECHTML, models, privateconfigs, data oroutputs.
+
+The original sealed controller plan CLI wrote the validplan then failed in a
+console diagnostic key. Its bytes/plan are preserved; the plan was validated
+before financial phases. Use additive scripts/seal_extension_backtest.py for
+fresh metadata planning and the original controller run action with freshIDs.
+Never rerun or mutate this completed financial attempt to fix that diagnostic.
+Keep provisional cohort/identity policy and BK/XOMroute limits visible; no
+blanket recertification or owner message is required for this saved comparison.
+
+
+## Full-period top-down monthly/daily report —27October2026
+
+The user requested both methods in the full-period report. The additive
+prepare_full_period_comparison_report.py reads only the16independently verified
+monthly aggregate tables and the verified daily report. It preserves the separate
+actual monthly-engine return rather than merely duplicating a daily column.
+Its private display export is outputs/full_period_comparison_report/20261027-v1,
+with a sealed aggregate read plan and proof. No models, source panels, raw quotes,
+labels or selections are read or changed; zero fits/replays. Native charts use
+rounded display values while full-precision saved results stay unchanged.
+
+Notebook17 explicitly displays monthly gross, daily same-close gross, daily
+next-open gross, next-open net10bp and net10bp+10%asset-stop cumulative totals
+over February2020–April2026,75months/1569sessions. CAGR and daily risk remain
+separate. RET is the expected-return selection score, not the realized monthly
+return. Monthly values include the approved execution-only delisting entitlements.
+The new8slide deck is outputs/presentations/20261027_full_period_monthly_daily/
+Deep_Momentum_V2_Full_Period_Monthly_Daily_20261027.pptx. Earlier47/48monthdecks
+and allfinancialruns remain preserved. This does not extend earlier executable-
+target or expandedRF experiments beyond their original horizons. No mainmerge.

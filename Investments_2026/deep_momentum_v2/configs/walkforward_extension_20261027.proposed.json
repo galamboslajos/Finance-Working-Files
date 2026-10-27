@@ -1,0 +1,63 @@
+{
+  "schema": "dmv2_walkforward_horizon_extension_proposal_v1",
+  "status": "METADATA_CONFIRMED_EXECUTION_NOT_STARTED",
+  "user_direction": "27 October 2026: extend the walk-forward backtest as far as supported data permits",
+  "existing_runs_immutable": true,
+  "model_family": "Current isolated Paper15 monthly close-return classifiers with RET scoring",
+  "models": [
+    "rf",
+    "xgb"
+  ],
+  "training_windows_years": [
+    5,
+    10
+  ],
+  "research_initialization": "2010-01",
+  "annual_refits": true,
+  "monthly_predictions": true,
+  "common_comparison": {
+    "start_outcome_month": "2020-02",
+    "candidate_end_outcome_month": "2026-04",
+    "candidate_months": 75,
+    "additional_months": 28,
+    "terminal_close": "2026-04-30"
+  },
+  "monthly_only_reference": {
+    "start_outcome_month": "2020-01",
+    "candidate_end_outcome_month": "2026-04",
+    "candidate_months": 76
+  },
+  "additional_annual_windows": [
+    {
+      "year": 2024,
+      "train5": "2019–2023",
+      "train10": "2014–2023"
+    },
+    {
+      "year": 2025,
+      "train5": "2020–2024",
+      "train10": "2015–2024"
+    },
+    {
+      "year": 2026,
+      "train5": "2021–2025",
+      "train10": "2016–2025"
+    }
+  ],
+  "eligibility": "Retain existing per-arm complete past daily OHLC requirement at each signal; no future-price eligibility filter",
+  "selection": "Same RET ranking, up to ten per side, balanced counts, 50% long / 50% short, no replacement or redistribution for retired orders",
+  "execution": "Preserve current comparison stages, next-open daily backtest, 0/10bp cost controls, no-stop/10%-asset-stop variants and terminal marking",
+  "target_change": false,
+  "tuning": false,
+  "incremental_fits_if_old_models_and_sources_reusable": 12,
+  "source_upgrade_rule": "Do not promote the changed current membership/identity releases automatically. Obtain exact object access and audit their impact on old and new cohorts/identities before reuse/refit decisions.",
+  "execution_enabled": false,
+  "max_fits_this_metadata_phase": 0,
+  "financial_value_reads_this_phase": 0,
+  "next_required_work": [
+    "Seal a source-consistent extension recipe and measured financial projection/resource budgets before opening post-2023 price values. User has requested the extension; do not re-ask for the same general intent.",
+    "Audit 2024–2026 membership joins, identity eligibility, past-history and feature/label coverage under the selected immutable source version.",
+    "Resolve any concrete new action/quote requirements without dropping losses or future-based filtering.",
+    "Fit annual windows and independently verify inference, RET selections and continuous monthly/daily ledgers. Preserve original 2020–2023 models and runs as references."
+  ]
+}

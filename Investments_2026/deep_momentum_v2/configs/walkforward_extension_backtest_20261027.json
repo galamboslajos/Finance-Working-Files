@@ -1,0 +1,167 @@
+{
+  "schema": "dmv2_paper15_extension_backtest_v1",
+  "status": "FROZEN_BEFORE_DAILY_VALUE_READ",
+  "authority": "User27October2026: lets go; continuous75month realization of verified fixed Paper15 extension with unchanged rules.",
+  "maximum_fits": 0,
+  "models_loaded": false,
+  "scenarios": 48,
+  "monthly_references": 16,
+  "arms": [
+    "rf_paper15_5y",
+    "xgb_paper15_5y",
+    "rf_paper15_10y",
+    "xgb_paper15_10y"
+  ],
+  "stages": [
+    {
+      "key": "cache_close_gross",
+      "view": "cache",
+      "clock": "signal_close",
+      "unit": "close",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "cache_close_net",
+      "view": "cache",
+      "clock": "signal_close",
+      "unit": "close",
+      "cost": 10,
+      "stop": null
+    },
+    {
+      "key": "execution_close_gross",
+      "view": "execution",
+      "clock": "signal_close",
+      "unit": "close",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "execution_close_open_units",
+      "view": "execution",
+      "clock": "signal_close",
+      "unit": "open",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "execution_open_gross",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "execution_open_gross_stop",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 0,
+      "stop": 0.1
+    },
+    {
+      "key": "execution_open_cost5",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 5,
+      "stop": null
+    },
+    {
+      "key": "execution_open_cost5_stop",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 5,
+      "stop": 0.1
+    },
+    {
+      "key": "execution_open_net",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 10,
+      "stop": null
+    },
+    {
+      "key": "execution_open_net_stop",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 10,
+      "stop": 0.1
+    },
+    {
+      "key": "execution_open_cost25",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 25,
+      "stop": null
+    },
+    {
+      "key": "execution_open_cost25_stop",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 25,
+      "stop": 0.1
+    }
+  ],
+  "first_outcome": "2020-02",
+  "last_outcome": "2026-04",
+  "initial_anchor": "2020-01-31",
+  "terminal_date": "2026-04-30",
+  "sessions_after_anchor": 1569,
+  "months": 75,
+  "annual_refits": "Saved annual5/10year RF/XGBoost monthly-target models only; no new fitting or tuning",
+  "selection": "Saved exact RET-ranked10long10short,50/50, no future quote screen or replacement",
+  "RET": "Frozen60/120completedmonthlyclassmeans probability-weighted; unchanged",
+  "costs_bps": [
+    0,
+    5,
+    10,
+    25
+  ],
+  "asset_stops": [
+    null,
+    0.1
+  ],
+  "borrow_bps": 0,
+  "cash_rate": 0,
+  "terminal": "Mark surviving holdings without forced liquidation or year resets",
+  "source_policy": "Unchanged independently verified source versions, old execution overlays/PBF point inherited; new584sessions from verified extension OHLC/quality arrays. Only selected January2024 observed Dec29anchors may supplement old projections.",
+  "source_projection": "Full source-file bytes reserved per pass, memory-map only fixed natives/dates. No raw source fallback, bulk download or new source upgrade.",
+  "additional_event": {
+    "event_id": "X_20250618_CASH55_EXECUTION_V1",
+    "effective_date": "2025-06-18",
+    "predecessor_id": "sec_g4KJZy",
+    "successor_id": null,
+    "cash_per_raw_share": 55.0,
+    "stock_ratio": 0.0,
+    "verified": true,
+    "evidence_reference": "https://www.sec.gov/Archives/edgar/data/1163302/000110465925060674/tm2517314d1_8k.htm; Introductory Note and Item3.01",
+    "execution_only": true,
+    "identity_certified": false
+  },
+  "legal_evidence_path": "/Users/lajosgalambos/Desktop/Finance-Working-Files/Investments_2026/deep_momentum_v2/data/execution_evidence/20261027/ussteel-20250618-8k.html",
+  "corporate_actions": "Signed raw-share cash/successor entitlements at effective open. Cash zero-rate settlement proxy; adjusted history retained, no duplicate dividends. Existing legal events and PENN handover unchanged.",
+  "stops": "Monthly entry-relative10% perasset; gap open at observed open otherwise idealized daily high/low threshold. Cash until next rebalance; no replacement.",
+  "learning_scope": "No change to prices used for learning, features, strict monthly adjusted-close labels, probabilities, RET or selections. Corporate actions repair realized holdings only.",
+  "equality_claim": "Same-cache close-clock/close successor-unit gross and10bp NAV must match independent monthly reference. Changed clock/price/unit cases report differences without loosening tolerance.",
+  "execution_restrictions": [
+    "sec_gjP4xM",
+    "sec_zmYNnz"
+  ],
+  "budgets": {
+    "source_read_bytes_per_pass": 1073741824,
+    "derived_verification_bytes": 1073741824,
+    "peak_rss_bytes": 8589934592,
+    "output_bytes": 4294967296,
+    "per_phase_seconds": 2700,
+    "total_active_seconds": 7200
+  },
+  "preserve_old_runs": true
+}

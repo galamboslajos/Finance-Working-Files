@@ -1,3 +1,82 @@
+# Latest: verified continuous Paper15 backtest through April 2026
+
+**75 monthly outcomes, February 2020–April 2026; 1,569 trading sessions. All 48 daily paths and 16 monthly references are independently verified; zero withheld.** The four saved RF/XGBoost × five/ten-year arms use unchanged monthly-label predictions, RET baskets, 50/50 allocation, costs and stop rules. This realization phase ran zero new fits. All 28 earlier 47-month control curves remain unchanged.
+
+At 10 bp one-way costs, cumulative no-stop net returns / separately annualized CAGRs are RF5y +24.67% / +3.61%, XGBoost5y +44.49% / +6.09%, RF10y −8.47% / −1.41%, XGBoost10y +74.04% / +9.31%. With 10%-asset stops the cumulative net totals are −12.37%, −6.14%, −42.58% and −8.72%, respectively. Every total covers the same 75 months. Same-cache, same-close monthly/daily NAVs match within 1.34e−15; changed clock/cost/stop cases remain separate.
+
+Start with [the full results and method](docs/WALKFORWARD_EXTENSION_BACKTEST_20261027.md) and [the separate monthly/daily comparison in notebook17](notebooks/17_full_period_monthly_daily_report.ipynb). [Notebook16](notebooks/16_walkforward_extension_backtest.ipynb) retains the original full-period display. U.S.Steel's evidenced $55 cash entitlement is applied only to realized holdings; strict learning labels/RET and saved selections stay frozen. Provisional identity, zero borrow/funding, economic cash-settlement and idealized OHLC stop assumptions remain. Forty focused tests and all four passive notebook cells passed. Optional chart packages are isolated from the model environment. The branch remains `codex/paper15-ret-5y-10y`; no main merge has occurred.
+
+The eight-slide full-period report now gives separate top-down monthly, daily same-close and daily next-open results, plus cost/stop/CAGR/daily-risk tables. All are February2020–April2026. This report-only update reads verified aggregates and runs no fits or backtests. Earlier dated phases below retain their original scope.
+
+# Prior phase: verified Paper15 extension models and RET picks, 27 October 2026
+
+All12additional annualRF/XGBoostfits and28added monthly forecasts per arm are independently verified, with unchanged Paper15/monthly-close labels/RET/settings. January2024–April2026 mean-monthly log loss / accuracy: RF5y2.282878 /12.57%; XGB5y2.285083 /12.46%; RF10y2.284015 /12.13%; XGB10y2.286926 /12.04%. These are classification metrics, not portfolio returns. Each arm has28new10long/10short baskets. All old48monthly baskets preserve names/sides/weights/RET exactly.
+
+The original run preserves a final selection parity failure caused by pandas side-column dtype. All12model fits and their independent model checker passed before it stopped. A separately sealed zero-fit recovery completed selection and its independent checker without changing numeric comparisons or refitting. The passive reader authenticates the original model proof and recovered selection proof; the failed original ledger remains unchanged.
+
+[Results, exact scope and next accounting step](docs/WALKFORWARD_EXTENSION_MODEL_RESULTS_20261027.md); [passive notebook15](notebooks/15_walkforward_extension_models.ipynb). That model phase ran no backtest; the subsequent verified realization is linked above. The one new selected monthly endpoint gap is RF5y's U.S.Steel short inJune2025; official cash-merger terms are researched but not applied. Full daily quote/stop/action preflight and continuous75month realization remain next. BK/XOM source-route limits remain explicit; no such name is selected in the December2023/January2024 boundary baskets. The previous runs and all stopped attempts remain reference evidence.
+
+# Prior phase: Paper15 extension input audit, 27 October 2026
+
+The separate bounded January 2024–April 2026 input build and independent source/formula/coverage checks are complete. All 25,460 original member-months survive. Five-year eligibility is 23,589 (92.65%); ten-year eligibility is 20,949 (82.28%). Observed monthly labels are 23,558 / 20,925; 31 / 24 remain missing. All 28 RET states per arm are complete. These are coverage counts, not a new backtest. No new model fits or trades ran. The potential matched horizon is 75 months, February 2020–April 2026.
+
+Read [the input audit and concrete remaining dependencies](docs/WALKFORWARD_EXTENSION_INPUTS_20261027.md) or open [notebook 14](notebooks/14_walkforward_extension_inputs.ipynb). BK/XOM's reviewed route intervals still end in 2023; new raw/adjusted daily OHLC remain separate. Twelve incremental annual fits and updated corporate-action-aware realization remain pending. All previous runs are preserved.
+
+# Longer walk-forward horizon: metadata check, 27 October 2026
+
+December2023 was the frozen experiment boundary, not the end of the downloaded
+data. Actual local keys show Intrinio prices through24July2026 and S&P500/400
+membership through31March2026. Keeping the 2010 initialization, the candidate
+matched daily/monthly extension is February2020–April2026:75months,28additional.
+A January2020 monthly-only reference would contain76months. These are candidate
+horizons, not new portfolio results. Stock-level prices/actions and source joins
+still require a bounded extension build. No post2023financial values or fits
+were consumed in this metadata audit.
+
+See the horizon section in [the results note](docs/FIXED_FORECAST_RESULTS_20261027.md)
+and `configs/walkforward_extension_20261027.proposed.json`. Continue annual5/10year
+training and monthly predictions under the same current Paper15/RET/basket/
+cost/stop rules. Twelve incremental annual fits suffice only if old source/model
+reuse remains valid. A current cloud membership/identity source upgrade changes
+objects and needs an impact audit; its referenced source objects currently deny
+storage.objects.get to info@galamboscapital.com. Curated metadata reads work.
+The prepared owner message remains unsent. Existing local inputs and all old
+runs stay unchanged. Current verified performance still ends inDecember2023.
+
+---
+
+# Same-basket monthly/daily realization checked — 27 October 2026
+
+**Performance labels:** The current fixed-forecast tables report **47-month compounded total returns, February 2020–December 2023**. Five/ten years means the rolling training window. Annualized CAGR is a separate measure, explicitly labelled in the results note and notebook. Example: +40.39% cumulative corresponds to +9.07% annualized CAGR using 252/985 trading years. Earlier dated experiments retain their own periods and forecasts.
+
+The fixed monthly-model forecasts and RET baskets now pass a direct backtest
+realization comparison: monthly-return accounting versus daily cash/share
+accounting with the same close-to-close boundaries. All four arms reproduce
+all 47 month-end NAVs at both zero and 10 bp costs to numerical precision.
+Next-open gross monthly returns correlate 0.987–0.995 with the monthly-engine
+returns; average absolute monthly differences are 0.42–0.52 percentage points.
+No model, forecast, label, RET estimate or selected basket changed.
+
+Start with [the results](docs/FIXED_FORECAST_RESULTS_20261027.md) and
+[passive notebook 13](notebooks/13_fixed_forecast_reconciliation.ipynb).
+February 2020–December 2023 covers 47 outcomes / 985 following sessions,
+anchored at the 31 January close. XGBoost 10-year gross monthly/same-close daily
+return is +55.11%; next-open gross +52.36%, next-open net at 10 bp +40.39%,
+and the same net path with 10% asset stops −8.02%. Stops change the payoff.
+Every new path marks terminal holdings without forced liquidation.
+
+The preserved original run has 22 complete / six withheld diagnostic close
+controls. A separately sealed and independently checked completion adds one
+already observed PBF boundary OC point; the composite has 28 complete / zero
+withheld, with the original 22 rows unchanged. Successor open/close conversion
+controls retain tiny recorded differences rather than relaxing the original
+tolerance. Source identity/action/knowledge-time and investability limits
+persist. Earlier executable-target models use different forecasts and RET
+baskets, so their performance gap is not a pure daily-accounting effect.
+The branch remains codex/paper15-ret-5y-10y; no merge is implied.
+
+---
+
 # Full monthly comparison completed — 27 October 2026
 
 All 32 fixed monthly scenarios now pass independent checks:32 complete, 0 withheld.

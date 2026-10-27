@@ -1,0 +1,115 @@
+{
+  "schema": "dmv2_fixed_forecast_reconciliation_v1",
+  "status": "FROZEN_BEFORE_DAILY_VALUE_READ",
+  "authority": "User27October2026 approved a fixed-forecast close/daily reconciliation, then next-open timing, costs and stops separately.",
+  "maximum_fits": 0,
+  "models_loaded": false,
+  "change_labels": false,
+  "change_features": false,
+  "change_RET": false,
+  "change_forecasts": false,
+  "change_selection": false,
+  "arms": [
+    "rf_paper15_5y",
+    "xgb_paper15_5y",
+    "rf_paper15_10y",
+    "xgb_paper15_10y"
+  ],
+  "stages": [
+    {
+      "key": "cache_close_gross",
+      "view": "cache",
+      "clock": "signal_close",
+      "unit": "close",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "cache_close_net",
+      "view": "cache",
+      "clock": "signal_close",
+      "unit": "close",
+      "cost": 10,
+      "stop": null
+    },
+    {
+      "key": "execution_close_gross",
+      "view": "execution",
+      "clock": "signal_close",
+      "unit": "close",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "execution_close_open_units",
+      "view": "execution",
+      "clock": "signal_close",
+      "unit": "open",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "execution_open_gross",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 0,
+      "stop": null
+    },
+    {
+      "key": "execution_open_net",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 10,
+      "stop": null
+    },
+    {
+      "key": "execution_open_net_stop",
+      "view": "execution",
+      "clock": "next_open",
+      "unit": "open",
+      "cost": 10,
+      "stop": 0.1
+    }
+  ],
+  "scenarios": 28,
+  "primary_focus": "xgb_paper15_10y; all four previously fixed arms retained",
+  "period": "2020-02 through2023-12;47outcome months; initial anchor2020-01-31close;985subsequent sessions",
+  "terminal": "2023-12-29close mark;no forced liquidation in any stage",
+  "weights": [
+    0.5,
+    -0.5
+  ],
+  "names_per_side": 10,
+  "borrow_and_funding_bps": 0,
+  "actions": "Original20daily events plus exact EV/XLNX terms from independently verified monthly replay; existing CDK/XEC terms unchanged;11prior retirements;original40quote overlays;datedPENN handover only in open stages.",
+  "retired_new_order": "Keep selected order and intended slot in cash;no replacement,no redistribution,no entitlement for an order first placed after legal retirement.",
+  "daily_marks": "Open and close cash/share transitions;47month-end wealth uses pre-rebalance close NAV for signal-close stages so the next month entry fee is not charged to the preceding outcome.",
+  "source_comparison": "Prepared daily cache OC versus independently reconstructed execution OHLC plus original40overlays; no raw-source fallback or new quote repair.",
+  "action_unit_control": "Effective-session successor close factor first reproduces the monthly basis, then effective-open factor isolates unit-convention differences before moving fills.",
+  "source_limitations": [
+    "Provisional identities and adjustment/distribution coverage",
+    "No certified historical knowledge time",
+    "Fractional successor economic units",
+    "Idealized fills and stops",
+    "No certified short borrow"
+  ],
+  "reconciliation_tolerance": {
+    "relative": 1e-09,
+    "absolute": 1e-10
+  },
+  "mismatch_policy": "Preserve and report every reference difference or missing path; never rewrite source returns, selected baskets or the parent benchmark to make reconciliation pass.",
+  "budgets": {
+    "cached_input_file_bytes": 536870912,
+    "execution_projection_bytes": 134217728,
+    "peak_rss_bytes": 4294967296,
+    "output_bytes": 1073741824,
+    "derived_verification_bytes": 2147483648,
+    "per_phase_seconds": 1800,
+    "total_active_seconds": 5400
+  },
+  "financial_2024_plus_read": false,
+  "cloud_mutations": false,
+  "old_runs": "Immutable"
+}

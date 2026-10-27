@@ -1,3 +1,23 @@
+Latest: [verified 75-month continuous Paper15 backtest and full model comparison](docs/WALKFORWARD_EXTENSION_BACKTEST_20261027.md), with [the explicit top-down monthly/daily report in notebook17](notebooks/17_full_period_monthly_daily_report.ipynb) and [the original passive notebook16](notebooks/16_walkforward_extension_backtest.ipynb). February2020–April2026 covers75months/1,569sessions:48daily paths and16monthly references verified, zero withheld. At10bp one-way costs, XGBoost10y has+74.04% cumulative net return (+9.31% annualized CAGR) without stops;−8.72% with10%-asset stops. Allfourmodel arms/cost/stop sensitivities remain visible. The old47-month curves, forecasts and source versions are preserved; this replay ran zero fits.
+
+## Earlier47-month comparison: monthly versus daily,27October2026
+
+**Performance labels:** The earlier fixed-forecast tables report **47-month compounded total returns, February 2020–December 2023**. Five/ten years means the rolling training window. Annualized CAGR is a separate measure, explicitly labelled in the results note and notebook. Example: +40.39% cumulative corresponds to +9.07% annualized CAGR using 252/985 trading years. Earlier dated experiments retain their own periods and forecasts.
+
+The zero-fit realization comparison is complete. With matching close-to-close
+boundaries, daily cash/share accounting reproduces the monthly-return backtest
+at every month-end for all four arms and both zero/10 bp costs. Next-open
+monthly returns remain closely related; asset stops materially change the payoff.
+See [the full results](docs/FIXED_FORECAST_RESULTS_20261027.md) and
+[passive notebook 13](notebooks/13_fixed_forecast_reconciliation.ipynb).
+The composite has 28 complete paths after one separately verified observed PBF
+boundary completion; the original 22 complete / six withheld run is preserved.
+No labels, fits, predictions, RET scores or baskets change. The common period
+is February 2020–December 2023, 47 outcomes; provisional source and execution
+limits remain. Prior notebooks and runs stay unchanged.
+
+---
+
 ## Full monthly comparison, 27 October 2026
 
 All 32 monthly scenarios are now complete after the user-authorized

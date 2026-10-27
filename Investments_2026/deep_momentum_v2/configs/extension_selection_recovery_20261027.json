@@ -1,0 +1,17 @@
+{
+  "schema": "dmv2_extension_selection_recovery_v1",
+  "status": "FROZEN_BEFORE_ZERO_FIT_SELECTION_RECOVERY",
+  "authority": "User authorized fixed extension; correct only pandas side-label representation parity after all12model fits and independent inference passed.",
+  "maximum_fits": 0,
+  "maximum_backtests": 0,
+  "repair": "Cast only side columns to pandas string dtype on both parity-check views. All names, weights, RET values and numerical comparisons remain exact; no selections/rules/sources/model changes.",
+  "preserve_failed_parent": true,
+  "source_policy": "Inherit verified monthly panels, forecasts and model proof. Never load serialized estimators, fit, open raw/daily price sources or replay trades.",
+  "budgets": {
+    "phase_seconds": 1800,
+    "total_active_seconds": 10800,
+    "peak_rss_bytes": 8589934592,
+    "output_bytes": 1073741824,
+    "derived_read_bytes_per_phase": 2147483648
+  }
+}

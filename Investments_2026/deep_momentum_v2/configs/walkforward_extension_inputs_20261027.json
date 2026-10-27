@@ -1,0 +1,31 @@
+{
+  "schema": "dmv2_paper15_extension_inputs_v1",
+  "status": "FROZEN_BEFORE_EXTENSION_NUMERIC_READ",
+  "authority": "User 27 October 2026: extend the current Paper15 walk-forward as far as supported; lets go authorizes the bounded input readiness build first.",
+  "first_outcome": "2024-01",
+  "last_outcome": "2026-04",
+  "financial_start": "2000-01-01",
+  "financial_end": "2026-04-30",
+  "windows_years": [5, 10],
+  "features": ["zMOM1", "zMOM3", "zMOM6", "zMOM9", "zMOM12", "meanMOM1", "meanMOM3", "meanMOM6", "meanMOM9", "meanMOM12", "stdMOM1", "stdMOM3", "stdMOM6", "stdMOM9", "stdMOM12"],
+  "maximum_fits": 0,
+  "maximum_backtests": 0,
+  "parameter_search": false,
+  "source_upgrade": false,
+  "source_policy": "Existing canonical manifest pins only; reuse independently verified pre2024 validity/monthly anchors and monthly training panels unchanged. Read raw pre2024 history only for identities absent from parent cache, post2023 OHLC for admitted original IDs. Newer cloud versions not promoted.",
+  "eligibility": "Historical S&P500/400 at exact signal; prior matching5/10calendar years of every expected XNYS session, all8OHLC positive finite accepted and bounds-valid. No future eligibility screen or imputation.",
+  "identity": "Original provisional unique resolved rule; original flags retained. Known BBBY conflicts blocked. Reviewed BK/XOM route intervals retained exactly; post2023 continuation explicitly pending rather than reverting to demonstrated wrong originals.",
+  "features_and_targets": "Past-only exact Paper15/common-cohort ddof1, no size. Target separate next-calendar adjusted-close ratio, exact ties with midpoint deciles, missing retained. RET60/120completed months ending signal month, full10class gate.",
+  "daily_preservation": "New 2024-Apr2026 raw/adjusted8OHLC and quote validity saved separately. These are source observations; no certification of economic actions, terminal values or execution readiness.",
+  "old_runs_immutable": true,
+  "two_bounded_source_passes": "producer and independent arithmetic verifier; shared authenticated Arrow date/ID projection and membership adapter explicitly disclosed",
+  "budgets": {
+    "source_projection_bytes_per_pass": 2147483648,
+    "derived_read_bytes_per_phase": 536870912,
+    "peak_rss_bytes": 8589934592,
+    "output_bytes": 1073741824,
+    "phase_seconds": 1800,
+    "total_active_seconds": 3600,
+    "threads": 1
+  }
+}

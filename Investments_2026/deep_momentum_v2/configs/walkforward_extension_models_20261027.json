@@ -1,0 +1,133 @@
+{
+  "history_outcome_start": "2010-01",
+  "evaluation_start": "2024-01",
+  "evaluation_end": "2026-04",
+  "windows_years": [
+    5,
+    10
+  ],
+  "features": [
+    "zMOM1",
+    "zMOM3",
+    "zMOM6",
+    "zMOM9",
+    "zMOM12",
+    "meanMOM1",
+    "meanMOM3",
+    "meanMOM6",
+    "meanMOM9",
+    "meanMOM12",
+    "stdMOM1",
+    "stdMOM3",
+    "stdMOM6",
+    "stdMOM9",
+    "stdMOM12"
+  ],
+  "normalization": "common_eligible_population_each_signal_ddof1;five shared means/SDs retained",
+  "imputation": false,
+  "missing_indicators": false,
+  "market_cap": false,
+  "target_ties": "exact_equal_midrank_no_jitter;class1best10worst;minimum10observed",
+  "missing_targets": "retain_original_cohort_rows;never_impute_or_use_to_filter_prediction",
+  "models": [
+    "rf",
+    "xgb"
+  ],
+  "annual_years": [
+    2024,
+    2025,
+    2026
+  ],
+  "maximum_fits": 12,
+  "parameter_search": false,
+  "parameters": {
+    "rf": {
+      "n_estimators": 500,
+      "criterion": "gini",
+      "max_depth": 12,
+      "min_samples_split": 2,
+      "min_samples_leaf": 20,
+      "max_features": "sqrt",
+      "bootstrap": true,
+      "class_weight": null,
+      "max_samples": null,
+      "n_jobs": 1,
+      "random_state": 1729,
+      "oob_score": false,
+      "warm_start": false,
+      "ccp_alpha": 0.0
+    },
+    "xgb": {
+      "objective": "multi:softprob",
+      "num_class": 10,
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 20,
+      "reg_lambda": 10.0,
+      "reg_alpha": 0.0,
+      "gamma": 0.0,
+      "tree_method": "hist",
+      "max_bin": 256,
+      "device": "cpu",
+      "n_jobs": 1,
+      "random_state": 1729,
+      "eval_metric": "mlogloss",
+      "verbosity": 0,
+      "early_stopping_rounds": null
+    }
+  },
+  "packages": {
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "narwhals": "2.27.1",
+    "cloudpickle": "3.1.2"
+  },
+  "one_seed_per_year": 1729,
+  "paper_100_fit_ensemble": false,
+  "schema": "dmv2_paper15_extension_models_v1",
+  "status": "FROZEN_BEFORE_MODEL_INPUT_READ_OR_FIT",
+  "authority": "User27October2026: extend current four Paper15 arms throughApril2026; next step authorizes the fixed annual fitting/inference/RET selection stage on independently audited frozen inputs.",
+  "target": "adj_close[exact outcome month end]/adj_close[exact preceding signal month end]-1, then exact within-month deciles; missing remains missing",
+  "training": "preceding N calendar outcome years completed at preceding December close, including that December; no next-open purge because this target is complete at the close",
+  "RET": {
+    "months_by_arm": {
+      "5": 60,
+      "10": 120
+    },
+    "cutoff": "latest completed calendar outcome is signal month; every actual label release <= signal",
+    "aggregation": "equal temporal average of actual monthly class means",
+    "gate": "all ten class cells in every one of exactly60/120months"
+  },
+  "budgets": {
+    "source_projection_bytes_per_pass": 67108864,
+    "derived_read_bytes_per_phase": 2147483648,
+    "peak_rss_bytes": 8589934592,
+    "output_bytes": 4294967296,
+    "per_fit_seconds": 600,
+    "per_phase_seconds": 1800,
+    "total_active_seconds": 10800,
+    "fit_threads": 1,
+    "maximum_fits": 12
+  },
+  "preserve_existing_runs": true,
+  "maximum_backtests": 0,
+  "source_upgrade": false,
+  "input_version": "walkforward_extension_inputs/20261027-v1",
+  "execution_restrictions": [
+    "sec_gjP4xM",
+    "sec_zmYNnz"
+  ],
+  "route_policy": "Reuse audited input admission unchanged, including visible BK/XOM post2023 interval limits. No disputed-route fallback or source repair in fitting. All original rows survive; future missing outcomes never screen predictions.",
+  "replay_policy": "No performance replay in this model phase. Preserve historical forecasts and exact RET picks through2023; freeze additional28monthly picks before any economic gap repair. Same planned basket/cost/stop rules remain.",
+  "sources": "Verified old and new monthly panels and RET vectors only; no raw/daily financial source reads, no old serialized model reloads, no expanded features.",
+  "forecast_periods": {
+    "full76": "2020-01 through2026-04",
+    "matched75": "2020-02 through2026-04"
+  }
+}
