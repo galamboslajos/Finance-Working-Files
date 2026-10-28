@@ -1,0 +1,74 @@
+{
+  "pair": [
+    "USD",
+    "UBT"
+  ],
+  "signal_pair": [
+    "USD",
+    "UBT"
+  ],
+  "source_csv": "data/etf_daily_joint.csv",
+  "source_sha256": "61a3c4248efafe7894762251c0503768c7e6b8c3915821d48de7c3679b87fc64",
+  "sample_start": "2010-01-21",
+  "sample_end": "2026-10-26",
+  "baseline": {
+    "rsi_window": 3,
+    "entry_low": 10,
+    "entry_high": 90,
+    "exit_risk": 60,
+    "exit_bond": 40
+  },
+  "parameter_grid": {
+    "rsi_window": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      10,
+      14
+    ],
+    "entry_low": [
+      5,
+      10,
+      15,
+      20,
+      25,
+      30
+    ],
+    "entry_high": [
+      70,
+      75,
+      80,
+      85,
+      90,
+      95
+    ],
+    "exit_risk": [
+      50,
+      60,
+      70,
+      80
+    ],
+    "exit_bond": [
+      20,
+      30,
+      40,
+      50
+    ]
+  },
+  "configurations_tested": 2800,
+  "in_sample_best": {
+    "rsi_window": 2,
+    "entry_low": 25,
+    "entry_high": 70,
+    "exit_risk": 50,
+    "exit_bond": 50
+  },
+  "selection": "Full-sample maximum annualized Sharpe, zero risk-free rate, 252 sessions/year",
+  "execution": "Previous close signal, next observed session open; adjusted price accounting",
+  "costs": 0,
+  "cash_return": 0,
+  "additional_rules": "None; baseline RSI rules only",
+  "generated_at_utc": "2026-10-28T10:20:33.834895+00:00"
+}

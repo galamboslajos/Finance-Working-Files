@@ -1,0 +1,58 @@
+{
+  "pair": [
+    "USD",
+    "UBT"
+  ],
+  "signal_pair": [
+    "USD",
+    "UBT"
+  ],
+  "rule_set": "bollinger",
+  "source_csv": "data/etf_daily_joint.csv",
+  "source_sha256": "61a3c4248efafe7894762251c0503768c7e6b8c3915821d48de7c3679b87fc64",
+  "sample_start": "2010-01-21",
+  "sample_end": "2026-10-26",
+  "baseline": {
+    "length": 20,
+    "ma_type": "SMA",
+    "stdev": 2.0
+  },
+  "parameter_grid": {
+    "length": [
+      5,
+      10,
+      15,
+      20,
+      30,
+      40,
+      60
+    ],
+    "ma_type": [
+      "SMA",
+      "EMA",
+      "WMA"
+    ],
+    "stdev": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0
+    ]
+  },
+  "configurations_tested": 105,
+  "in_sample_best": {
+    "length": 5,
+    "ma_type": "SMA",
+    "stdev": 1.0
+  },
+  "selection": "Full-sample maximum annualized Sharpe, zero risk-free rate, 252 sessions/year",
+  "execution": "Previous close signal, next observed session open; adjusted price accounting",
+  "costs": 0,
+  "cash_return": 0,
+  "attribution": "Equity/bond P&L weighted by pre-session wealth relative to period-start wealth; exact additive contributions",
+  "rules": "Enter risk below lower band; enter bond above upper band; exit risk above middle; exit bond below middle",
+  "bollinger_std": "Rolling population standard deviation of spread, ddof=0",
+  "ma_conventions": "SMA; EMA span=length adjust=False; WMA weights 1..length; all require length observations",
+  "generated_at_utc": "2026-10-28T10:47:16.595957+00:00"
+}
