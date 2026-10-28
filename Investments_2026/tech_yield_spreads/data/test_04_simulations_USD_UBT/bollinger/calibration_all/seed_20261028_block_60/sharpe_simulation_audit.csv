@@ -1,0 +1,7 @@
+check,status
+Each path tested separately using only its own simulated OOS returns,PASS
+Tested Sharpe matches each path's net performance statistic,PASS
+Inference bootstrap is reproducible from the recorded seed,PASS
+Sharpe inference is invariant to positive return rescaling,PASS
+P-values agree with one-sided confidence-bound decisions outside Monte Carlo boundary,PASS
+No simulated paths were filtered or promoted based on test significance,PASS

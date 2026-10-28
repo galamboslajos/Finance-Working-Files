@@ -1,0 +1,24 @@
+check,status
+Fixed seed reproduces sampled source blocks,PASS
+Resampling uses only the frozen historical calibration pool,PASS
+Sampler allows source reuse with replacement,PASS
+All required assets share each sampled source row,PASS
+Price reconstruction matches source overnight/intraday returns without pasted level jumps,PASS
+Every pre-specified seed/path/year is retained,PASS
+Training indices end before investment indices,PASS
+Rolling training uses only real history and already-observed simulated sessions,PASS
+Actual holdings carry continuously across annual WFO boundaries,PASS
+Zero-cost scenarios equal gross curves under the same decisions,PASS
+Wealth-normalized daily and annual equity/bond/cost contributions reconcile to net returns,PASS
+Selected configuration maximizes eligible net training Sharpe on every path/year,PASS
+Parameters remain frozen throughout every simulated investment year,PASS
+Features match when future simulated observations are removed,PASS
+Changing future simulated prices leaves earlier training scores and investment results unchanged,PASS
+Synthetic signal tests enforce next-session entry/exit execution,PASS
+Cost factors reconcile and switches pay two legs,PASS
+Compiled training scores match an independent scalar transaction-cost calculation,PASS
+Per-leg transaction ledger reconciles to all paid costs and delayed fills,PASS
+Higher component-wise costs cannot improve equity under identical holding decisions,PASS
+Monthly compounded returns reconcile to each simulated annual return,PASS
+Large-equity roundoff is assessed in portfolio-relative return units,PASS
+Accounting checks still reject a genuine missing-cost error,PASS

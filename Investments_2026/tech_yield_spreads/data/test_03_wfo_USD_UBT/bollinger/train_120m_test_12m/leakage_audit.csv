@@ -1,0 +1,14 @@
+,check,status
+0,Every fold trains strictly before its first OOS session,PASS
+1,All OOS sessions occur exactly once with no date gaps,PASS
+2,Each trade executes after the signal date,PASS
+3,Actual OOS holdings carry continuously across annual boundaries,PASS
+4,Exact rolling training/test windows are disjoint within every fold,PASS
+5,Selected parameters maximize eligible training-only net Sharpe,PASS
+6,Selected configuration stays frozen throughout each OOS investment block,PASS
+7,Indicators match when all observations after training cutoff are removed,PASS
+8,Synthetic entries and exits cannot execute using the current session close,PASS
+9,Changing future prices cannot alter earlier training results or OOS trades/equity,PASS
+10,Zero-cost replay equals the gross curve with identical holding decisions,PASS
+11,"Entries/exits pay one cost leg, switches pay two, unchanged holdings pay none",PASS
+12,Trade-ledger costs and equity/bond/cost attribution reconcile to net equity,PASS

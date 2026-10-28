@@ -1,0 +1,120 @@
+{
+  "kind": "Conditional stationary-block bootstrap simulation; not historical OOS evidence",
+  "pair": [
+    "USD",
+    "UBT"
+  ],
+  "signal_pair": [
+    "USD",
+    "UBT"
+  ],
+  "rule_set": "bollinger",
+  "origin": "2026-10-27",
+  "calibration_start": "2010-01-22",
+  "calibration_years": null,
+  "calibration_scope": "entire joint dataset",
+  "mean_block_length": 60,
+  "replacement": true,
+  "shared_source_indices_across_assets": true,
+  "master_seed": 20261028,
+  "child_seeds": [
+    3458662461,
+    1334675065,
+    3661117191,
+    1350303508,
+    3870639956,
+    8877476,
+    968133149,
+    1411562759,
+    3992135531,
+    2375801364,
+    3676282196,
+    3683846524,
+    2064910752,
+    2776190707,
+    1763477818,
+    657830656,
+    2797472673,
+    643057741,
+    669159009,
+    1783527896,
+    120622869,
+    2766538161,
+    35810075,
+    3929955576,
+    2674509556
+  ],
+  "paths": 25,
+  "future_years": 20,
+  "sessions_per_year": 252,
+  "training_sessions": 2520,
+  "investment_sessions": 252,
+  "grid": {
+    "length": [
+      5,
+      10,
+      15,
+      20,
+      30,
+      40,
+      60
+    ],
+    "ma_type": [
+      "SMA",
+      "EMA",
+      "WMA"
+    ],
+    "stdev": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0
+    ]
+  },
+  "selection": "Maximum preceding-window net Sharpe, zero risk-free rate; no path filtering",
+  "commission_bps": 1.0,
+  "slippage_bps": 4.0,
+  "cost_paths_bps": {
+    "Zero cost": [
+      0.0,
+      0.0
+    ],
+    "Base cost": [
+      1.0,
+      4.0
+    ],
+    "10 bps per leg": [
+      1.0,
+      9.0
+    ],
+    "20 bps per leg": [
+      1.0,
+      19.0
+    ]
+  },
+  "cost_paths_reoptimized": false,
+  "sharpe_test": {
+    "null": 0.5,
+    "alpha": 0.05,
+    "primary_block": 20,
+    "block_lengths": [
+      5,
+      10,
+      20,
+      60
+    ],
+    "HAC_lags": 20,
+    "replicates_per_path_per_block": 10000,
+    "seed": 20261028,
+    "scope": "Each simulated OOS path separately; conditional on generator; no pooling; no path filtering",
+    "primary_rejections": 9,
+    "paths_tested": 25
+  },
+  "initial_capital": 100000.0,
+  "audits_passed": 23,
+  "historical_input_snapshot": "historical_input_snapshot.csv.gz",
+  "source_csv": "data/etf_daily_joint.csv",
+  "source_sha256": "cc9f8ee3fa5ad9d9535565f8a2824973d05f42ce7f882132b0678d7ac6788d21",
+  "generated_at_utc": "2026-10-28T14:24:41.084100+00:00"
+}
