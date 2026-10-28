@@ -1,0 +1,98 @@
+{
+  "pair": [
+    "USD",
+    "UBT"
+  ],
+  "signal_pair": [
+    "USD",
+    "UBT"
+  ],
+  "rule_set": "bollinger",
+  "train_months": 120,
+  "test_months": 12,
+  "audit_checks_passed": 13,
+  "audit_failures": 0,
+  "sharpe_hypothesis_test": {
+    "null": 0.5,
+    "alternative": "underlying historical OOS net Sharpe > null",
+    "alpha": 0.05,
+    "primary_block": 20,
+    "block_lengths": [
+      5,
+      10,
+      20,
+      60
+    ],
+    "HAC_lags": 20,
+    "replicates_per_block": 10000,
+    "seed": 20261028,
+    "method": "Studentized stationary block bootstrap; Sharpe influence-function Newey-West HAC standard errors",
+    "risk_free_rate": 0,
+    "reported_annualization": 252,
+    "observed_sharpe": 0.7461414213238604,
+    "primary_p_value": 0.23467653234676533,
+    "primary_lower_bound": 0.2039471640134567,
+    "reject_null": false,
+    "selection_adjusted": false,
+    "synthetic_observations_used": 0
+  },
+  "audit_limitations": "Does not remove historical research-selection bias or provider revisions to adjusted data",
+  "grid": {
+    "length": [
+      5,
+      10,
+      15,
+      20,
+      30,
+      40,
+      60
+    ],
+    "ma_type": [
+      "SMA",
+      "EMA",
+      "WMA"
+    ],
+    "stdev": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0
+    ]
+  },
+  "selection": "Maximum training net Sharpe; 252 sessions/year; zero risk-free rate",
+  "min_train_entries": 1,
+  "initial_capital": 100000.0,
+  "commission_bps": 1.0,
+  "slippage_bps": 4.0,
+  "cost_paths_bps": {
+    "Zero cost": [
+      0.0,
+      0.0
+    ],
+    "Base cost": [
+      1.0,
+      4.0
+    ],
+    "10 bps per leg": [
+      1.0,
+      9.0
+    ],
+    "20 bps per leg": [
+      1.0,
+      19.0
+    ]
+  },
+  "cost_paths_reoptimized": false,
+  "oos_start": "2021-01-04",
+  "oos_end": "2026-10-27",
+  "folds": 6,
+  "cash_fallback_folds": 0,
+  "boundary_policy": "Carry actual OOS holding; apply new parameters using previous-close signal at next open",
+  "training_start_state": "cash",
+  "oos_initial_state": "cash",
+  "force_final_liquidation": false,
+  "source_csv": "data/etf_daily_joint.csv",
+  "source_sha256": "cc9f8ee3fa5ad9d9535565f8a2824973d05f42ce7f882132b0678d7ac6788d21",
+  "generated_at_utc": "2026-10-28T13:57:26.233893+00:00"
+}

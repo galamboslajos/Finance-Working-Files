@@ -1,0 +1,71 @@
+{
+  "pair": [
+    "USD",
+    "UBT"
+  ],
+  "signal_pair": [
+    "USD",
+    "UBT"
+  ],
+  "rule_set": "bollinger",
+  "train_months": 12,
+  "test_months": 3,
+  "grid": {
+    "length": [
+      5,
+      10,
+      15,
+      20,
+      30,
+      40,
+      60
+    ],
+    "ma_type": [
+      "SMA",
+      "EMA",
+      "WMA"
+    ],
+    "stdev": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0
+    ]
+  },
+  "selection": "Maximum training net Sharpe; 252 sessions/year; zero risk-free rate",
+  "min_train_entries": 1,
+  "initial_capital": 100000.0,
+  "commission_bps": 1.0,
+  "slippage_bps": 4.0,
+  "cost_paths_bps": {
+    "Zero cost": [
+      0.0,
+      0.0
+    ],
+    "Base cost": [
+      1.0,
+      4.0
+    ],
+    "10 bps per leg": [
+      1.0,
+      9.0
+    ],
+    "20 bps per leg": [
+      1.0,
+      19.0
+    ]
+  },
+  "cost_paths_reoptimized": false,
+  "oos_start": "2011-04-01",
+  "oos_end": "2026-10-27",
+  "folds": 63,
+  "cash_fallback_folds": 0,
+  "boundary_policy": "Carry actual OOS holding; apply new parameters using previous-close signal at next open",
+  "training_start_state": "cash",
+  "oos_initial_state": "cash",
+  "force_final_liquidation": false,
+  "source_csv": "data/etf_daily_joint.csv",
+  "source_sha256": "cc9f8ee3fa5ad9d9535565f8a2824973d05f42ce7f882132b0678d7ac6788d21",
+  "generated_at_utc": "2026-10-28T12:35:58.500304+00:00"
+}

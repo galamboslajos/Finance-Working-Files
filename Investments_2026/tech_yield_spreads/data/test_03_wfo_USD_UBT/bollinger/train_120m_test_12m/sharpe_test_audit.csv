@@ -1,0 +1,8 @@
+,check,status
+0,Test Sharpe matches reported historical net OOS Sharpe,PASS
+1,Compiled HAC standard error matches independent NumPy calculation,PASS
+2,Positive rescaling leaves Sharpe and inference unchanged,PASS
+3,Fixed bootstrap seed reproduces the same draws,PASS
+4,A higher Sharpe hurdle cannot lower the one-sided p-value,PASS
+5,P-value and one-sided confidence-bound decisions agree outside Monte Carlo boundary,PASS
+6,Inference does not mutate or add observations to the historical return series,PASS
