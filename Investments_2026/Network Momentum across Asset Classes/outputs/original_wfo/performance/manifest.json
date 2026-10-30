@@ -1,0 +1,111 @@
+{
+  "status": "complete",
+  "purpose": "Additional descriptive diagnostics; no model or strategy changes",
+  "results_manifest_sha256": "7fad2053eec5e87556e0930a7610ffd8156e8d103b1e72222a0827ddacb80f63",
+  "daily_returns_sha256": "09383a45504fc418843eec772dedf82968616aa67a128bd66f2403d66dc8186f",
+  "verification_sha256": "67292de93e6a197b927089d1ffdf757381ce6ac6b53f5241aad750a328dffffa",
+  "script_sha256": "8347b8a7e0a01a50bb2dc9b9e509bc0c4dfd69a727daf7404e744c5ab5d8f06b",
+  "sessions": 1760,
+  "complete_sessions": 1722,
+  "unavailable_sessions": 38,
+  "complete_runs": 37,
+  "complete_months": 53,
+  "months": 84,
+  "longest_run": {
+    "segment": 29,
+    "start": "2024-05-06",
+    "end": "2024-11-21",
+    "sessions": 140,
+    "first_signal_date": "2024-05-03"
+  },
+  "equity_across_missing_dates": false,
+  "full_period_cagr_and_drawdown": "withheld",
+  "rolling_window_sessions": 63,
+  "outputs": [
+    {
+      "path": "complete_segments.csv",
+      "sha256": "2acc68db09f275700a04ad39931fd12ff7535281dfe2e7ef1cc8899ed9815269",
+      "size_bytes": 1479
+    },
+    {
+      "path": "equity_drawdown_segments.png",
+      "sha256": "4fc9da95dfbfdeea861df0b3bd822d59baa4d96c41da1c61d5d9deff7859cdb7",
+      "size_bytes": 360410
+    },
+    {
+      "path": "equity_drawdown_segments.svg",
+      "sha256": "7443c51240da0f0ace28c4a9b99d7b1ab781062dc524446a1407bdad102703b7",
+      "size_bytes": 419241
+    },
+    {
+      "path": "extended_metrics.csv",
+      "sha256": "5271986998fd3aa56b9d22a48ae34c5ad74d81441075035daf2dd84896546874",
+      "size_bytes": 20008
+    },
+    {
+      "path": "longest_complete_interval_metrics.csv",
+      "sha256": "329ac3813562807b129147116e7fbfd6371df57fe442867313ff9625fb676464",
+      "size_bytes": 3334
+    },
+    {
+      "path": "longest_complete_period.png",
+      "sha256": "a30a5784ab316f0230af9ebf47752a20a8594b377f4b7c6a63aa42a95fb608f9",
+      "size_bytes": 356033
+    },
+    {
+      "path": "longest_complete_period.svg",
+      "sha256": "926e2da9888cb45b6123351521686932c2e8693050c280322884e5414b2a1447",
+      "size_bytes": 109434
+    },
+    {
+      "path": "monthly_returns.csv",
+      "sha256": "c734d8b42380c7513508a35109a9e4f4f28850c4ba42dac2e5b8a5f063103dab",
+      "size_bytes": 9266
+    },
+    {
+      "path": "performance_charts.pdf",
+      "sha256": "340b9cb20f1a8228c8c35b195b91d96b0a16e4083d0df0ec9803d1365cd76b94",
+      "size_bytes": 222831
+    },
+    {
+      "path": "performance_overview.png",
+      "sha256": "25b8b7b4ec56e263149e04f17cce1ca0d754e3927c178d49a881a297846cd9d6",
+      "size_bytes": 265824
+    },
+    {
+      "path": "performance_overview.svg",
+      "sha256": "f63a736a6398843323afecb017374e24f241e1073f48d021b4d1bd761d4ded0c",
+      "size_bytes": 198083
+    },
+    {
+      "path": "performance_report.html",
+      "sha256": "44a64dee1f1817127c554e6882728de8c6c13464effdc390a2719c54c8cff610",
+      "size_bytes": 1748819
+    },
+    {
+      "path": "return_correlations.csv",
+      "sha256": "40ffdd87bb0245ee77dc6b09ec967eb40f367f45fd18ed55769dd82980e720aa",
+      "size_bytes": 707
+    },
+    {
+      "path": "rolling_63_sessions.csv",
+      "sha256": "e5d427494fe15e5b46d70ee5985f4053f8b5438ce2912a1bf09f4729bf56d77b",
+      "size_bytes": 128017
+    },
+    {
+      "path": "rolling_risk_and_exposure.png",
+      "sha256": "07c127acf0c9e1fecbb753edf7945ee130b249d744e4ce66a2d07522a3cfa810",
+      "size_bytes": 324902
+    },
+    {
+      "path": "rolling_risk_and_exposure.svg",
+      "sha256": "ece4abfc2906c8e8c2e58e7a59f65af22c221006a2a90e21660cc4bc43ac4e7a",
+      "size_bytes": 224216
+    },
+    {
+      "path": "segment_curves.csv",
+      "sha256": "420112e61a30c1486fa14d91cd73c6d0ea3c62136b619a08a792198ef721c74f",
+      "size_bytes": 671164
+    }
+  ]
+}

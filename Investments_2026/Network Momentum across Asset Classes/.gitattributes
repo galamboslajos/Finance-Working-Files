@@ -1,0 +1,2 @@
+# Preserve generated vector charts byte-for-byte with the verified source run.
+outputs/original_wfo/performance/*.svg -diff -whitespace

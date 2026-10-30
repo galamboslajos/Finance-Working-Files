@@ -1,5 +1,8 @@
 # Network Momentum across Asset Classes
 
+Start with the [saved original WFO results and charts](outputs/original_wfo/README.md)
+to review the completed experiment directly on GitHub.
+
 The paper's equations, training procedure, equity adaptation and replication
 tests are recorded in [Network Momentum methodology and S&P 500 replication](docs/NETWORK_MOMENTUM_REPLICATION.md).
 The corresponding [parameter record](configs/network_momentum_paper.json)
@@ -19,8 +22,42 @@ The [first feature and network pilot](docs/FIRST_NETWORK_PILOT.md) is complete:
 all eight features qualify **429 of 505 PIT members** for the five-network
 ensemble after the close on **2016-01-04**. Run `build_momentum_features.py`,
 `learn_momentum_network.py` and `validate_momentum_pilot.py` with fresh output
-directories to reproduce it. The graphs use untuned `alpha=beta=1`; no
-regression or performance backtest has been fitted. All 42 tests pass.
+directories to reproduce it. That first pilot used untuned `alpha=beta=1`
+and contained no regression or performance backtest. Its 42 tests passed.
+
+The user subsequently selected an [annual expanding walk-forward experiment](docs/ANNUAL_WALK_FORWARD.md):
+initial OLS training in 2016–2018, latest 10% of dates reserved for validation,
+and seven annual unseen return blocks in 2019–2025. `walk_forward.py` freezes
+the folds; `run_daily_years.py` constructs all daily network candidates;
+`evaluate_walk_forward.py` selects parameters using past validation dates and
+fits the annual models. The [completed, independently verified results](docs/ANNUAL_WALK_FORWARD_RESULTS.md)
+preserve 771,773 OOS forecasts across seven folds. On complete portfolio dates,
+GMOM Sharpe is 0.757 versus 0.774 for matched own-stock LinReg, before costs.
+Results are the paper's zero-cost close-to-close research proxy; 38 unavailable
+portfolio dates prevent reporting continuous CAGR or drawdown. All 58 tests pass.
+
+Additional [performance diagnostics](docs/ANNUAL_WALK_FORWARD_PERFORMANCE.md)
+include Sortino, positive-day frequency, tail losses, monthly returns,
+correlations, rolling risk and intended exposures. Run `analyze_walk_forward.py`
+to create a self-contained HTML report, a four-page chart PDF and CSV tables.
+Equity and drawdown charts reset at each uninterrupted complete-data run;
+they do not bridge the 38 unavailable portfolio dates. The expanded suite has
+63 passing tests.
+
+## Saved outputs for review
+
+The active strategy is the original **full eligible PIT S&P 500 universe**,
+with long/short direction from the sign of each OLS forecast and position size
+scaled by asset volatility. It has no top-N selector. The graph universe and
+portfolio contain the same eligible stocks, averaging about 439 positions per
+day in the 2019–2025 test.
+
+The [saved WFO outputs](outputs/original_wfo/README.md) include the results,
+daily returns, annual model coefficients, validation scores, independent
+verification and performance charts. They can be reviewed directly on GitHub
+without the local raw dataset. Start with the
+[PDF charts](outputs/original_wfo/performance/performance_charts.pdf) or the
+[performance overview](outputs/original_wfo/performance/performance_overview.png).
 
 `prepare_sp500_daily.py` assembles a daily **S&P 500 only** research dataset from
 the same pinned local Siblis membership, unified identity bridge and Intrinio

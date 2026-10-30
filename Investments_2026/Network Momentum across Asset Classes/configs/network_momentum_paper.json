@@ -1,9 +1,14 @@
 {
   "schema_version": 1,
-  "status": "paper_methodology_record_and_proposed_equity_adaptation",
+  "status": "paper_methodology_record_with_equity_research_proxy_wfo_results",
   "paper": {
     "title": "Network Momentum across Asset Classes",
-    "authors": ["Xingyue (Stacy) Pu", "Stephen Roberts", "Xiaowen Dong", "Stefan Zohren"],
+    "authors": [
+      "Xingyue (Stacy) Pu",
+      "Stephen Roberts",
+      "Xiaowen Dong",
+      "Stefan Zohren"
+    ],
     "version": "August 2023 supplied PDF",
     "pages": 32,
     "path": "/Users/lajosgalambos/Desktop/Network Momentum across Asset Classes.pdf",
@@ -12,18 +17,43 @@
   },
   "paper_settings": {
     "signal_frequency": "daily",
-    "return_feature_horizons_sessions": [1, 21, 63, 126, 252],
+    "return_feature_horizons_sessions": [
+      1,
+      21,
+      63,
+      126,
+      252
+    ],
     "daily_volatility_ewm_span": 60,
     "daily_volatility_alpha": "2/61",
     "daily_volatility_variance": "weighted population variance in Appendix A.2",
-    "macd_scale_pairs": [[8, 24], [16, 48], [32, 96]],
+    "macd_scale_pairs": [
+      [
+        8,
+        24
+      ],
+      [
+        16,
+        48
+      ],
+      [
+        32,
+        96
+      ]
+    ],
     "macd_ema_alpha": "1/J",
     "macd_price_std_window": 63,
     "macd_normalized_std_window": 252,
     "feature_winsorization_ewm_halflife": 252,
     "feature_winsorization_std_multiple": 5,
     "graph_input": "concatenated eight-feature observations over each trailing window",
-    "graph_lookbacks_sessions": [252, 504, 756, 1008, 1260],
+    "graph_lookbacks_sessions": [
+      252,
+      504,
+      756,
+      1008,
+      1260
+    ],
     "graph_objective": "trace(V.T@(D-A)@V)-alpha*sum(log(A@1))+beta*sum(A**2)",
     "graph_symmetric": true,
     "graph_nonnegative": true,
@@ -42,19 +72,93 @@
     "refit_frequency_years": 5,
     "training_history": "expanding",
     "validation": "latest 10 percent of each pre-test training sample",
-    "alpha_grid": [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10],
-    "beta_grid": [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10],
+    "alpha_grid": [
+      0.0001,
+      0.0005,
+      0.001,
+      0.005,
+      0.01,
+      0.05,
+      0.1,
+      0.5,
+      1,
+      5,
+      10
+    ],
+    "beta_grid": [
+      0.0001,
+      0.0005,
+      0.001,
+      0.005,
+      0.01,
+      0.05,
+      0.1,
+      0.5,
+      1,
+      5,
+      10
+    ],
     "paper_solver": "CVXPY with MOSEK",
-    "paper_test_blocks": [[2000, 2004], [2005, 2009], [2010, 2014], [2015, 2019], [2020, 2022]],
-    "comparison_arms": ["Long Only", "MACD", "LinReg", "GMOM", "RegCombo", "SignCombo"],
-    "pseudo_costs_bps": [0, 0.5, 1, 2, 3, 4, 5]
+    "paper_test_blocks": [
+      [
+        2000,
+        2004
+      ],
+      [
+        2005,
+        2009
+      ],
+      [
+        2010,
+        2014
+      ],
+      [
+        2015,
+        2019
+      ],
+      [
+        2020,
+        2022
+      ]
+    ],
+    "comparison_arms": [
+      "Long Only",
+      "MACD",
+      "LinReg",
+      "GMOM",
+      "RegCombo",
+      "SignCombo"
+    ],
+    "pseudo_costs_bps": [
+      0,
+      0.5,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
   },
   "user_direction": {
     "universe": "historical point-in-time S&P 500 stocks only",
     "purpose": "understand methodology for replication and testing",
-    "first_network_history_window": ["2011-01-01", "2015-12-31"],
+    "first_network_history_window": [
+      "2011-01-01",
+      "2015-12-31"
+    ],
     "window_interpretation": "2011 is the start of feature history used to learn networks; the first complete ensemble is around early 2016",
-    "ols_fit_and_first_test_dates": "not yet selected"
+    "ols_fit_and_first_test_dates": {
+      "selected": "2026-10-30",
+      "initial_ols_training": [
+        "2016-01-04",
+        "2018-12-31"
+      ],
+      "first_oos_return_year": 2019,
+      "last_complete_oos_return_year": 2025,
+      "refit_frequency": "annual",
+      "training_window": "expanding",
+      "validation_fraction_dates": 0.1
+    }
   },
   "proposed_equity_conventions": {
     "primary_question": "Does GMOM improve on own-stock LinReg with matched causal cohorts and equity trading costs?",
@@ -63,39 +167,50 @@
     "first_window_reviewed_feature_history": "data/feature_close_review/v1/feature_prices",
     "first_window_close_mask": "feature_close_eligible",
     "first_window_feature_return": "feature_return_1d",
-    "stable_panel_key": ["source_security_id", "date"],
+    "stable_panel_key": [
+      "source_security_id",
+      "date"
+    ],
     "multi_session_returns": "simple adjusted-close endpoint ratios; frozen for first pilot",
     "common_ensemble_nodes": "current PIT members with complete eight-feature histories over all 1260 trailing sessions",
     "pre_entry_price_history": "allowed for currently eligible members; prior index membership throughout lookback is not required",
     "missing_data": "no synthetic prices/returns; retain original membership and eligibility reasons",
     "validation_split_unit": "chronological trading dates with all stocks of a date together",
-    "validation_score": "raw GMOM portfolio Sharpe; MSE retained as diagnostic; not specified by paper",
-    "alpha_beta_scope": "one shared pair for all ensemble windows; not specified by paper",
+    "validation_score": "Complete-date raw GMOM paper-proxy Sharpe; frozen in annual WFO protocol; MSE diagnostic. Paper does not specify the score.",
+    "alpha_beta_scope": "One shared pair for all ensemble windows, selected annually; scope unspecified by paper.",
     "post_selection_refit": "refit OLS/scaler on all complete pre-test examples",
     "proposed_portfolio_scale": "lagged 60-span EWM strategy volatility; not specified by paper",
     "future_labels": "never select signal-time membership or delete held positions",
-    "execution_variants": ["paper close-to-close proxy", "separately specified next-session executable schedule"]
+    "execution_variants": [
+      "paper close-to-close proxy",
+      "separately specified next-session executable schedule"
+    ]
   },
   "unresolved_before_performance_testing": [
-    "Exact equity study dates and final test blocks after feature-history coverage audit",
-    "Final hyperparameter selection score and scope",
-    "Full-grid numerical robustness and historical batch compute settings; first-anchor solver and zero edge threshold are frozen",
     "Executable fills, corresponding target alignment and equity cost/borrow/financing rules",
     "Portfolio volatility initialization, lag, leverage limits and missing-held-valuation treatment",
     "Complete equity corporate-action and terminal-event accounting"
   ],
   "separate_extensions": [
-    "market or beta neutrality", "sector controls with dated classifications",
-    "long-only or ranked baskets", "alternative graph estimators",
-    "less frequent graphs", "smaller parameter grid", "shorter graph lookbacks"
+    "market or beta neutrality",
+    "sector controls with dated classifications",
+    "long-only or ranked baskets",
+    "alternative graph estimators",
+    "less frequent graphs",
+    "smaller parameter grid",
+    "shorter graph lookbacks"
   ],
   "execution": {
     "features_built": true,
     "graphs_fitted": true,
-    "graph_fit_scope": "first anchor 2016-01-04; all five paper lookbacks, common 429 nodes, untuned alpha=beta=1",
-    "regressions_fitted": false,
-    "hyperparameters_selected": false,
-    "backtest_run": false
+    "graph_fit_scope": "2016-2025 daily full shared-pair grid: 377100 graph fits; 30 exact parameter-product groups represent 121 original pairs",
+    "regressions_fitted": true,
+    "hyperparameters_selected": true,
+    "backtest_run": true,
+    "regression_fit_scope": "Seven annual expanding folds; 21 final OLS models plus validation fits",
+    "hyperparameter_selection_scope": "All seven folds, selected from pre-test validation only",
+    "backtest_kind": "zero-cost paper-style close-to-close research proxy, observed complete dates",
+    "executable_backtest_run": false
   },
   "first_window_data_audit": {
     "report": "docs/FIRST_WINDOW_DATA_AUDIT.md",
@@ -120,7 +235,13 @@
     "longest_feature_history_start": "2010-12-31",
     "anchor_members": 505,
     "anchor_current_feature_ready": 456,
-    "eligible_by_lookback": {"252": 450, "504": 446, "756": 438, "1008": 433, "1260": 429},
+    "eligible_by_lookback": {
+      "252": 450,
+      "504": 446,
+      "756": 438,
+      "1008": 433,
+      "1260": 429
+    },
     "common_ensemble_nodes": 429,
     "feature_choices": {
       "volatility": "normalized EWM population standard deviation alpha=2/61, minimum 60 returns",
@@ -133,15 +254,20 @@
     "beta": 1,
     "hyperparameters": "untuned engineering defaults; no validation selection",
     "solver": "equivalent N-variable convex dual, SciPy damped Newton",
-    "relative_degree_tolerance": 0.000001,
+    "relative_degree_tolerance": 1e-06,
     "edge_threshold": 0,
     "distance_normalization": "none",
     "ensemble_positive_edges": 1068,
-    "ensemble_component_sizes": [423, 2, 2, 2],
+    "ensemble_component_sizes": [
+      423,
+      2,
+      2,
+      2
+    ],
     "structural_tests_passed": 42,
     "actual_feature_values_tested": true,
     "historical_daily_graph_series_built": false,
-    "regression_fitting_and_test_dates_selected": false
+    "regression_fitting_and_test_dates_selected": true
   },
   "first_window_close_review": {
     "report": "docs/FEATURE_CLOSE_REVIEW.md",
@@ -155,5 +281,59 @@
     "source_recovery_block": "Authenticated raw archive manifest and tested SPGI page reads returned HTTP 403",
     "original_source_prices_changed": false,
     "execution_quality_flags_preserved": true
+  },
+  "annual_walk_forward": {
+    "status": "complete_verified_research_proxy",
+    "protocol": "walk_forward.PROTOCOL",
+    "plan": "data/walk_forward/annual_expanding_v2",
+    "feature_history": "data/momentum_history/wfo_2016_2025_v1",
+    "daily_grid_series": "data/daily_networks/wfo_grid_by_year_v1",
+    "evaluation": "data/walk_forward/annual_results_v1",
+    "initial_training_years": [
+      2016,
+      2017,
+      2018
+    ],
+    "test_return_years": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "refit_frequency": "annual",
+    "training_window": "expanding",
+    "validation_fraction_dates": 0.1,
+    "test_year_index": "return realization date",
+    "selection_score": "zero-cost paper close-to-close proxy validation Sharpe",
+    "shared_parameters_across_lookbacks": true,
+    "original_parameter_grid_pairs": 121,
+    "equivalent_normalized_graph_products": 30,
+    "parameter_grouping": "exact identity A(alpha,beta)=alpha*A(1,alpha*beta); shared ensemble normalization cancels alpha",
+    "paper_departures": [
+      "three initial OLS years instead of ten",
+      "annual refits instead of five-year refits"
+    ],
+    "research_proxy_only": true,
+    "executable_fills_and_financing_implemented": false,
+    "first_fold_frozen_models": "data/walk_forward/first_fold_frozen_v1/models.json",
+    "first_fold_evaluation": "data/walk_forward/first_fold_results_v1/manifest.json",
+    "first_fold_verification": "data/walk_forward/first_fold_verification_v1/report.json",
+    "paper_window_note": "The paper declares a ten-year pre-test training span, but does not fully specify initial graph/indicator warmup and exact usable OLS row counts.",
+    "report": "docs/ANNUAL_WALK_FORWARD_RESULTS.md",
+    "protocol_report": "docs/ANNUAL_WALK_FORWARD.md",
+    "verification": "data/walk_forward/verification_v1/report.json",
+    "structural_tests_passed": 58,
+    "folds": 7,
+    "final_ols_models": 21,
+    "graph_fits": 377100,
+    "oos_forecasts": 771773,
+    "oos_return_dates": 1760,
+    "complete_portfolio_dates": 1722,
+    "unavailable_portfolio_dates": 38,
+    "result_manifest_sha256": "7fad2053eec5e87556e0930a7610ffd8156e8d103b1e72222a0827ddacb80f63",
+    "continuous_cagr_and_drawdown_reported": false
   }
 }

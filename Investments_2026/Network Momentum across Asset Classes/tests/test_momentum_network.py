@@ -70,6 +70,20 @@ class MomentumNetworkTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             fit_graph(np.ones((2, 2)))
 
+    def test_warm_start_preserves_solution_and_validates_alignment(self):
+        random = np.random.default_rng(95)
+        vectors = random.normal(size=(12, 15))
+        distances = squareform(pdist(vectors, "sqeuclidean"))
+        _, dual, _, _ = fit_graph(distances, tolerance=1e-9)
+        vectors += .001 * random.normal(size=vectors.shape)
+        changed = squareform(pdist(vectors, "sqeuclidean"))
+        cold, _, cold_check, _ = fit_graph(changed, tolerance=1e-9)
+        warm, _, warm_check, _ = fit_graph(changed, tolerance=1e-9, initial_dual=dual)
+        np.testing.assert_allclose(warm, cold, rtol=1e-7, atol=1e-9)
+        self.assertLess(warm_check['iterations'], cold_check['iterations'])
+        with self.assertRaises(ValueError):
+            fit_graph(changed, initial_dual=dual[:-1])
+
 
 if __name__ == "__main__":
     unittest.main()

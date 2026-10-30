@@ -1,0 +1,182 @@
+{
+  "status": "complete",
+  "purpose": "annual expanding WFO; zero-cost paper-style research proxy",
+  "protocol_id": "sp500-annual-expanding-ols-three-initial-years-v2",
+  "test_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "folds": 7,
+  "validation_candidates_per_fold": 121,
+  "distinct_normalized_graph_candidates": 30,
+  "models_refitted": 21,
+  "out_of_sample_signal_dates": 1760,
+  "out_of_sample_predictor_rows": 771773,
+  "out_of_sample_labeled_rows": 771711,
+  "complete_portfolio_dates": 1722,
+  "unavailable_portfolio_dates": 38,
+  "selection_uses_test_labels": false,
+  "missing_labels_change_nodes": false,
+  "source_year_manifests": [
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2016/manifest.json",
+      "sha256": "235d9b3cf3c72edd27c5980b6756e3db8315d86fe2945268aec88ffd4151c48a"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2017/manifest.json",
+      "sha256": "c8516e272e6e4a690e87e5a150dea9da3add8bf0d43bb18c9e11435537b0ce01"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2018/manifest.json",
+      "sha256": "3fdcba579e1d766640d4aaf0e94efbaf4c25bc92bb81a98531f8b6b84b3106b0"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2019/manifest.json",
+      "sha256": "35c74755c51988747de7695b359a2fc7b041bf789ef4849d502beb7380a01a67"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2020/manifest.json",
+      "sha256": "cfb7fc392ce46b04db37989f24a9cd3c567c8ff06773b42371078c81ccd04e30"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2021/manifest.json",
+      "sha256": "82d164b89221b12c273a3fa587c0369fc793b4b7dd45d584bc019f3968ad71b8"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2022/manifest.json",
+      "sha256": "9bc686a0263092a06d406457092d6ba96d00a37c75a3fdc4a54a03225ca29f62"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2023/manifest.json",
+      "sha256": "3f7d4763cad6fbccd55a292ec8b1f0387fb4db2c88714881b5a918acf9aa79a9"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2024/manifest.json",
+      "sha256": "f058678b43c1a540020dde4422ca479a34a532fd5ae533d603d9ee3038788e04"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/daily_networks/wfo_grid_by_year_v1/2025/manifest.json",
+      "sha256": "8725ed9e20e8cf140774b10c9f6b9e5bc83145415ec60c82b89ec8fe1240bbed"
+    }
+  ],
+  "script_sha256": "172309bff95ec10ffba4b6eb988ccf4456733443e15f0347c5e25c33d00e632a",
+  "protocol_script_sha256": "7d63f43cde0a7f8b20e1eb31f3686285847f11e4644ae4204f999c348175df56",
+  "limits": [
+    "Research proxy uses final signal close to next close; these are not certified executable returns.",
+    "Costs, borrow/financing, portfolio volatility targeting, terminal distributions and missing-held valuation accounting are not included.",
+    "All source identity, corporate-action and provisional close-review limitations remain.",
+    "With missing forward observations, Sharpe and moments describe only complete portfolio dates; CAGR and drawdown are withheld across gaps."
+  ],
+  "outputs": [
+    {
+      "path": "daily_paper_proxy_returns.csv",
+      "size_bytes": 703817,
+      "sha256": "09383a45504fc418843eec772dedf82968616aa67a128bd66f2403d66dc8186f"
+    },
+    {
+      "path": "folds.csv",
+      "size_bytes": 1418,
+      "sha256": "09f5262834293a8cbbae0eba7cb553b5f2bdefd985fd32f85df5010ab272269e"
+    },
+    {
+      "path": "forecast_metrics.json",
+      "size_bytes": 316,
+      "sha256": "953f2494d50501e6412aa71bf5f8de2dff5c69aec8062181a1e88e2dbe8bf2ba"
+    },
+    {
+      "path": "models_2019.json",
+      "size_bytes": 4574,
+      "sha256": "d4b229af956505ba62a73f70b84b8619d4a3b37bf33f431673d1ad40f0361042"
+    },
+    {
+      "path": "models_2020.json",
+      "size_bytes": 4574,
+      "sha256": "8c46a22cdccc7597a268b8d971d910c9319c19d86fe37b9e7bcb0d181d6a47e7"
+    },
+    {
+      "path": "models_2021.json",
+      "size_bytes": 4584,
+      "sha256": "d621a6f6caa805b3a010e93b4560254fad177cefed77e8422f3458df65adaaad"
+    },
+    {
+      "path": "models_2022.json",
+      "size_bytes": 4587,
+      "sha256": "f9c12f68822417552061a5ba46f095002431063b13e1d6ba9a7f5b07c1f7db25"
+    },
+    {
+      "path": "models_2023.json",
+      "size_bytes": 4587,
+      "sha256": "fd00867ee8dbc7246fdc84d8c1dd4e38dc681fcd85c555f05967502258ef7a56"
+    },
+    {
+      "path": "models_2024.json",
+      "size_bytes": 4593,
+      "sha256": "0554697ca993fef94fecdfab32990633212f2f92d1e3cd12ee6870c0e01e9b8a"
+    },
+    {
+      "path": "models_2025.json",
+      "size_bytes": 4598,
+      "sha256": "06e4762bfb490b16b13900e16ef30eec14f05c570404a19bf787853aba3df9b9"
+    },
+    {
+      "path": "paper_proxy_metrics.csv",
+      "size_bytes": 4974,
+      "sha256": "86dc2ca140977769f1aca707fa85ca0d2a1e6edd2cff7933caed00a1306a76c7"
+    },
+    {
+      "path": "predictions/year=2019/part-00000.parquet",
+      "size_bytes": 15941942,
+      "sha256": "1d2329b6424be4d9628e1198190ba2235725bb892b7d232266f76cf4d154eae9"
+    },
+    {
+      "path": "predictions/year=2020/part-00000.parquet",
+      "size_bytes": 15779385,
+      "sha256": "7490b1f960ffede21226ff2eab38cbff60f7bd315deef15b7e9637e479990d60"
+    },
+    {
+      "path": "predictions/year=2021/part-00000.parquet",
+      "size_bytes": 15890208,
+      "sha256": "9d60672d6125d001a840148d86c2813a2ef308c00206bb34e24343d9d767a5e5"
+    },
+    {
+      "path": "predictions/year=2022/part-00000.parquet",
+      "size_bytes": 15823199,
+      "sha256": "61d6968fa8e751cd0e22202fa4172dd816191b5ef6930e0d47aa56e526b4b862"
+    },
+    {
+      "path": "predictions/year=2023/part-00000.parquet",
+      "size_bytes": 15921112,
+      "sha256": "b8c21ccdd95cff6f727a93b13c936e1fd42d7d7e856704373e042e4894f43186"
+    },
+    {
+      "path": "predictions/year=2024/part-00000.parquet",
+      "size_bytes": 16007967,
+      "sha256": "95e235361d1be187dba8331789f43d77740ba934cef8452e1cd569301ddd3445"
+    },
+    {
+      "path": "predictions/year=2025/part-00000.parquet",
+      "size_bytes": 16149873,
+      "sha256": "de3f8dac319a7e051304d829643630889b8eec71d1d62039621fa00acb841d93"
+    },
+    {
+      "path": "protocol.json",
+      "size_bytes": 2065,
+      "sha256": "b5ed9c547b9eb55ee64f4b88a25d0ec0dff1b2ef74f76dbb9c0e219d5f573f83"
+    },
+    {
+      "path": "selected_parameters.csv",
+      "size_bytes": 783,
+      "sha256": "ae4b5b623ab2352b4fc05e5a8b51a31fad751f4ff3341367346f8cb0ec4cf78f"
+    },
+    {
+      "path": "validation_scores.csv",
+      "size_bytes": 18539,
+      "sha256": "b20a35ea8eaffc9f24a37ffac13b030c9c93afde988ee1ea6897e178cc34765e"
+    }
+  ]
+}

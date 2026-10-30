@@ -1,0 +1,18 @@
+{
+  "LinReg": {
+    "labeled_rows": 771711,
+    "mse": 1.1427053101715692
+  },
+  "GMOM": {
+    "labeled_rows": 771711,
+    "mse": 1.1428571273689008
+  },
+  "RegCombo": {
+    "labeled_rows": 771711,
+    "mse": 1.1428385690878182
+  },
+  "ZeroForecast": {
+    "labeled_rows": 771711,
+    "mse": 1.143111094003996
+  }
+}

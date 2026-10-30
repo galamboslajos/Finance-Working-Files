@@ -1,0 +1,19 @@
+{
+  "status": "complete",
+  "purpose": "frozen WFO chronology, not fitted models or results",
+  "folds": 7,
+  "test_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "original_parameter_pairs": 121,
+  "distinct_normalized_graph_products": 30,
+  "script_sha256": "7d63f43cde0a7f8b20e1eb31f3686285847f11e4644ae4204f999c348175df56",
+  "ols_models_fitted": false,
+  "out_of_sample_evaluated": false
+}

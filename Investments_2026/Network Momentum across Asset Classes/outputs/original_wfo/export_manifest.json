@@ -1,0 +1,243 @@
+{
+  "status": "complete",
+  "strategy": "original full eligible universe; sign forecast; asset-volatility sizing",
+  "purpose": "compact GitHub review outputs",
+  "source_result_manifest_sha256": "7fad2053eec5e87556e0930a7610ffd8156e8d103b1e72222a0827ddacb80f63",
+  "source_performance_manifest_sha256": "9a2ba9ce341c4f8481f462af061519957fa44330b5967ae66701ec7389a9cd74",
+  "export_script_sha256": "0e183096b761b504e522055ef999e7bc3fa197e431dcd0d16bb96e933aa6ea54",
+  "original_test_suite_count": 63,
+  "top_n_selector": false,
+  "raw_dataset_included": false,
+  "stock_date_prediction_tables_included": false,
+  "copied_outputs": [
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/daily_paper_proxy_returns.csv",
+      "path": "results/daily_paper_proxy_returns.csv",
+      "sha256": "09383a45504fc418843eec772dedf82968616aa67a128bd66f2403d66dc8186f",
+      "size_bytes": 703817
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/folds.csv",
+      "path": "results/folds.csv",
+      "sha256": "09f5262834293a8cbbae0eba7cb553b5f2bdefd985fd32f85df5010ab272269e",
+      "size_bytes": 1418
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/forecast_metrics.json",
+      "path": "results/forecast_metrics.json",
+      "sha256": "953f2494d50501e6412aa71bf5f8de2dff5c69aec8062181a1e88e2dbe8bf2ba",
+      "size_bytes": 316
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/manifest.json",
+      "path": "results/manifest.json",
+      "sha256": "7fad2053eec5e87556e0930a7610ffd8156e8d103b1e72222a0827ddacb80f63",
+      "size_bytes": 7392
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2019.json",
+      "path": "results/models_2019.json",
+      "sha256": "d4b229af956505ba62a73f70b84b8619d4a3b37bf33f431673d1ad40f0361042",
+      "size_bytes": 4574
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2020.json",
+      "path": "results/models_2020.json",
+      "sha256": "8c46a22cdccc7597a268b8d971d910c9319c19d86fe37b9e7bcb0d181d6a47e7",
+      "size_bytes": 4574
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2021.json",
+      "path": "results/models_2021.json",
+      "sha256": "d621a6f6caa805b3a010e93b4560254fad177cefed77e8422f3458df65adaaad",
+      "size_bytes": 4584
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2022.json",
+      "path": "results/models_2022.json",
+      "sha256": "f9c12f68822417552061a5ba46f095002431063b13e1d6ba9a7f5b07c1f7db25",
+      "size_bytes": 4587
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2023.json",
+      "path": "results/models_2023.json",
+      "sha256": "fd00867ee8dbc7246fdc84d8c1dd4e38dc681fcd85c555f05967502258ef7a56",
+      "size_bytes": 4587
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2024.json",
+      "path": "results/models_2024.json",
+      "sha256": "0554697ca993fef94fecdfab32990633212f2f92d1e3cd12ee6870c0e01e9b8a",
+      "size_bytes": 4593
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/models_2025.json",
+      "path": "results/models_2025.json",
+      "sha256": "06e4762bfb490b16b13900e16ef30eec14f05c570404a19bf787853aba3df9b9",
+      "size_bytes": 4598
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/paper_proxy_metrics.csv",
+      "path": "results/paper_proxy_metrics.csv",
+      "sha256": "86dc2ca140977769f1aca707fa85ca0d2a1e6edd2cff7933caed00a1306a76c7",
+      "size_bytes": 4974
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/protocol.json",
+      "path": "results/protocol.json",
+      "sha256": "b5ed9c547b9eb55ee64f4b88a25d0ec0dff1b2ef74f76dbb9c0e219d5f573f83",
+      "size_bytes": 2065
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/selected_parameters.csv",
+      "path": "results/selected_parameters.csv",
+      "sha256": "ae4b5b623ab2352b4fc05e5a8b51a31fad751f4ff3341367346f8cb0ec4cf78f",
+      "size_bytes": 783
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_results_v1/validation_scores.csv",
+      "path": "results/validation_scores.csv",
+      "sha256": "b20a35ea8eaffc9f24a37ffac13b030c9c93afde988ee1ea6897e178cc34765e",
+      "size_bytes": 18539
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/complete_segments.csv",
+      "path": "performance/complete_segments.csv",
+      "sha256": "2acc68db09f275700a04ad39931fd12ff7535281dfe2e7ef1cc8899ed9815269",
+      "size_bytes": 1479
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/equity_drawdown_segments.png",
+      "path": "performance/equity_drawdown_segments.png",
+      "sha256": "4fc9da95dfbfdeea861df0b3bd822d59baa4d96c41da1c61d5d9deff7859cdb7",
+      "size_bytes": 360410
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/equity_drawdown_segments.svg",
+      "path": "performance/equity_drawdown_segments.svg",
+      "sha256": "7443c51240da0f0ace28c4a9b99d7b1ab781062dc524446a1407bdad102703b7",
+      "size_bytes": 419241
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/extended_metrics.csv",
+      "path": "performance/extended_metrics.csv",
+      "sha256": "5271986998fd3aa56b9d22a48ae34c5ad74d81441075035daf2dd84896546874",
+      "size_bytes": 20008
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/longest_complete_interval_metrics.csv",
+      "path": "performance/longest_complete_interval_metrics.csv",
+      "sha256": "329ac3813562807b129147116e7fbfd6371df57fe442867313ff9625fb676464",
+      "size_bytes": 3334
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/longest_complete_period.png",
+      "path": "performance/longest_complete_period.png",
+      "sha256": "a30a5784ab316f0230af9ebf47752a20a8594b377f4b7c6a63aa42a95fb608f9",
+      "size_bytes": 356033
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/longest_complete_period.svg",
+      "path": "performance/longest_complete_period.svg",
+      "sha256": "926e2da9888cb45b6123351521686932c2e8693050c280322884e5414b2a1447",
+      "size_bytes": 109434
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/manifest.json",
+      "path": "performance/manifest.json",
+      "sha256": "9a2ba9ce341c4f8481f462af061519957fa44330b5967ae66701ec7389a9cd74",
+      "size_bytes": 3742
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/monthly_returns.csv",
+      "path": "performance/monthly_returns.csv",
+      "sha256": "c734d8b42380c7513508a35109a9e4f4f28850c4ba42dac2e5b8a5f063103dab",
+      "size_bytes": 9266
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/performance_charts.pdf",
+      "path": "performance/performance_charts.pdf",
+      "sha256": "340b9cb20f1a8228c8c35b195b91d96b0a16e4083d0df0ec9803d1365cd76b94",
+      "size_bytes": 222831
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/performance_overview.png",
+      "path": "performance/performance_overview.png",
+      "sha256": "25b8b7b4ec56e263149e04f17cce1ca0d754e3927c178d49a881a297846cd9d6",
+      "size_bytes": 265824
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/performance_overview.svg",
+      "path": "performance/performance_overview.svg",
+      "sha256": "f63a736a6398843323afecb017374e24f241e1073f48d021b4d1bd761d4ded0c",
+      "size_bytes": 198083
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/performance_report.html",
+      "path": "performance/performance_report.html",
+      "sha256": "44a64dee1f1817127c554e6882728de8c6c13464effdc390a2719c54c8cff610",
+      "size_bytes": 1748819
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/return_correlations.csv",
+      "path": "performance/return_correlations.csv",
+      "sha256": "40ffdd87bb0245ee77dc6b09ec967eb40f367f45fd18ed55769dd82980e720aa",
+      "size_bytes": 707
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/rolling_63_sessions.csv",
+      "path": "performance/rolling_63_sessions.csv",
+      "sha256": "e5d427494fe15e5b46d70ee5985f4053f8b5438ce2912a1bf09f4729bf56d77b",
+      "size_bytes": 128017
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/rolling_risk_and_exposure.png",
+      "path": "performance/rolling_risk_and_exposure.png",
+      "sha256": "07c127acf0c9e1fecbb753edf7945ee130b249d744e4ce66a2d07522a3cfa810",
+      "size_bytes": 324902
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/rolling_risk_and_exposure.svg",
+      "path": "performance/rolling_risk_and_exposure.svg",
+      "sha256": "ece4abfc2906c8e8c2e58e7a59f65af22c221006a2a90e21660cc4bc43ac4e7a",
+      "size_bytes": 224216
+    },
+    {
+      "source_relative_path": "data/walk_forward/performance_v1/segment_curves.csv",
+      "path": "performance/segment_curves.csv",
+      "sha256": "420112e61a30c1486fa14d91cd73c6d0ea3c62136b619a08a792198ef721c74f",
+      "size_bytes": 671164
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_expanding_v2/folds.csv",
+      "path": "protocol/folds.csv",
+      "sha256": "09f5262834293a8cbbae0eba7cb553b5f2bdefd985fd32f85df5010ab272269e",
+      "size_bytes": 1418
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_expanding_v2/manifest.json",
+      "path": "protocol/manifest.json",
+      "sha256": "ce3713d52ed23627813268bd3bc03f7879c91697310cfc493436b1a95f06b1dc",
+      "size_bytes": 433
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_expanding_v2/parameter_groups.json",
+      "path": "protocol/parameter_groups.json",
+      "sha256": "eb2efca7a5f06583347d8dc754157f89dd40ad9ba0c1e974114b1f0058ec950f",
+      "size_bytes": 8370
+    },
+    {
+      "source_relative_path": "data/walk_forward/annual_expanding_v2/protocol.json",
+      "path": "protocol/protocol.json",
+      "sha256": "b5ed9c547b9eb55ee64f4b88a25d0ec0dff1b2ef74f76dbb9c0e219d5f573f83",
+      "size_bytes": 2065
+    },
+    {
+      "source_relative_path": "data/walk_forward/verification_v1/report.json",
+      "path": "verification/wfo_report.json",
+      "sha256": "67292de93e6a197b927089d1ffdf757381ce6ac6b53f5241aad750a328dffffa",
+      "size_bytes": 702
+    }
+  ],
+  "readme_sha256": "6b42ff2d74a27de7486c15d925a2402c8a123a895959744afdd2710e4c7c9d2e"
+}

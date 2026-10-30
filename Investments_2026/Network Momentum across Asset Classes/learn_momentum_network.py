@@ -34,7 +34,7 @@ def graph_objective(adjacency, distances, alpha, beta):
                  + beta * np.square(adjacency).sum())
 
 
-def fit_graph(distances, alpha=1., beta=1., tolerance=1e-6, max_iterations=1000):
+def fit_graph(distances, alpha=1., beta=1., tolerance=1e-6, max_iterations=1000, initial_dual=None):
     """Solve z'w + 2*beta*w'w - alpha*sum(log(Sw)), w>=0.
 
     With y>0 the convex dual minimization is
@@ -53,6 +53,11 @@ def fit_graph(distances, alpha=1., beta=1., tolerance=1e-6, max_iterations=1000)
     left, right = np.triu_indices(n, 1)
     z = zmat[left, right]
     y = np.full(n, max(float(z.max()) / 2, np.sqrt(alpha * beta / (n - 1))))
+    if initial_dual is not None:
+        initial_dual = np.asarray(initial_dual, dtype=float)
+        require(initial_dual.shape == (n,) and np.isfinite(initial_dual).all() and (initial_dual > 0).all(),
+                "Initial dual must be finite, positive and aligned to all current nodes")
+        y = initial_dual.copy()
     trace = []
 
     def evaluate(v):
@@ -122,7 +127,7 @@ def fit_graph(distances, alpha=1., beta=1., tolerance=1e-6, max_iterations=1000)
         "positive_edges": int((weights > 0).sum()), "candidate_edges": len(weights),
         "minimum_degree": float(degree.min()), "maximum_degree": float(degree.max()),
         "connected_components": int(connected_components(adjacency > 0, directed=False)[0]),
-        "edge_threshold": 0., "degrees_floored": False}
+        "edge_threshold": 0., "degrees_floored": False, "warm_started": initial_dual is not None}
     return adjacency, y, certificate, trace
 
 

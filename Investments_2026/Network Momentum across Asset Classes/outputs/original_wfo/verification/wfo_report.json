@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "independent_ols_models_checked": 21,
+  "forecasts_preserved": 771773,
+  "portfolio_return_dates_checked": 1760,
+  "strategy_returns_and_exposures_checked": 10560,
+  "maximum_standardized_coefficient_error": 4.4781236011037784e-14,
+  "maximum_prediction_absolute_error": 5.551115123125783e-17,
+  "first_fold_frozen_models_unchanged": true,
+  "selection_uses_test_labels": false,
+  "independent_source_label_samples_checked": 28,
+  "continuous_wealth_withheld_across_gaps": true,
+  "result_manifest_sha256": "7fad2053eec5e87556e0930a7610ffd8156e8d103b1e72222a0827ddacb80f63",
+  "verification_script_sha256": "9170913e8b01027f55b03f962f2e1a2ad43174ff1f0e1ea823e6cffda81ac095"
+}

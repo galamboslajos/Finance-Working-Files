@@ -185,3 +185,8 @@ next-session volatility-scaled labels, and explicit OLS fitting, validation and
 out-of-sample dates. The single January 2016 graph cannot be reused backward
 as historical training features. Execution timing and equity holding/exit
 accounting still need specifications before a strategy backtest.
+
+The subsequent [annual expanding WFO](ANNUAL_WALK_FORWARD.md) implements the
+selected 2016–2018 initial OLS sample and 2019–2025 annual tests. Its
+[verified research-proxy results](ANNUAL_WALK_FORWARD_RESULTS.md) are saved
+separately; the pilot artifacts above remain unchanged.

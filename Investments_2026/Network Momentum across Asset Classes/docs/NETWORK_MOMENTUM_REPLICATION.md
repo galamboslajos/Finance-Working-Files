@@ -474,7 +474,7 @@ require explicit ID-aligned updates. Weekly graph estimation, fewer lookbacks,
 a smaller hyperparameter grid or a different objective are named engineering
 variants, not an exact reproduction of the daily ensemble.
 
-## Choices to resolve before performance testing
+## Implementation choices and remaining execution questions
 
 The PDF specifies the architecture sufficiently to build it, but does not
 uniquely specify all implementation details. The following must be recorded
@@ -485,10 +485,10 @@ before results are used to choose a variant:
 | Multi-session return definition | Simple adjusted-price ratios frozen for the first pilot. |
 | Rolling variance, EWM initialization and clipping timing | First-pilot policy freezes ddof=0, full rolling windows, first-price EMA seeds, population EWM volatility with 60 returns, and current-inclusive clipping. |
 | Missing data and multi-lookback node alignment | First pilot resets all indicator state after missing closes and uses the common longest-window node set. |
-| Hyperparameter score and common/per-window parameters | Latest 10% validation and parameter grid stated; common pair and validation Sharpe proposed. |
-| Post-selection refit | Proposed OLS/scaler refit on all pre-test dates after selection. |
+| Hyperparameter score and common/per-window parameters | Annual equity WFO uses a shared pair and complete-date raw proxy validation Sharpe; the paper does not specify the score/scope. |
+| Post-selection refit | Annual equity WFO refits OLS/scalers on all pre-test labels known by the cutoff after selection. |
 | Portfolio-level volatility estimator and leverage | 15% target stated; estimator, lag and limits need a frozen convention. |
-| Equity training/test calendar | Expanding five-year chronology preserved in principle; dates await feature-coverage audit. |
+| Equity training/test calendar | User selected 2016–2018 initial OLS training and annual expanding tests in 2019–2025, departing from the paper's five-year recalibrations. |
 | Executable trading schedule and return label | Daily positions and next-day return target stated; equity fill timing must be specified. |
 | Corporate actions, terminal values and short financing | Require equity accounting in addition to the futures pseudo-cost model. |
 
@@ -496,6 +496,8 @@ The [first feature and network pilot](FIRST_NETWORK_PILOT.md) now implements
 the eight features, retains every dated historical member, and fits the first
 five networks after the 2016-01-04 close. All 429 price-history-qualified anchor
 members also qualify on actual features. Alpha and beta remain untuned at one;
-no regressions, selected hyperparameters or backtest results exist. Daily
-historical network features and the OLS/validation/testing chronology are the
-next modeling stage.
+that pilot contains no regressions, selected hyperparameters or backtest results.
+The subsequent [annual expanding WFO](ANNUAL_WALK_FORWARD.md) implements
+the user-selected 2016–2018 initial OLS window and seven unseen return years
+in 2019–2025. The [verified research-proxy results](ANNUAL_WALK_FORWARD_RESULTS.md)
+are separate from the first-anchor pilot and retain all unavailable valuation dates.

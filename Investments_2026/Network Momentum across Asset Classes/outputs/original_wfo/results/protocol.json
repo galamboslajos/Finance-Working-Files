@@ -1,0 +1,62 @@
+{
+  "id": "sp500-annual-expanding-ols-three-initial-years-v2",
+  "status": "user_selected_2026-10-30",
+  "initial_training_years": [
+    2016,
+    2017,
+    2018
+  ],
+  "training_start": "2016-01-04",
+  "first_test_year": 2019,
+  "last_complete_test_year": 2025,
+  "training_window": "expanding",
+  "refit_frequency": "annual",
+  "validation_fraction_dates": 0.1,
+  "validation_rounding": "ceiling; whole exchange dates",
+  "graph_lookbacks_sessions": [
+    252,
+    504,
+    756,
+    1008,
+    1260
+  ],
+  "graph_frequency": "daily",
+  "node_alignment": "current PIT members with all eight features throughout the longest lookback",
+  "target": "next exchange-session adjusted-close return / signal-date daily volatility",
+  "split_boundary": "label must be observed by each fitting cutoff; purge crossing labels",
+  "validation_labels": "observed by last training-year session",
+  "test_year_index": "return realization date; first signal is the previous year's final session after refitting",
+  "ols": "pooled eight features plus intercept; population standardization fitted on fit rows only",
+  "post_selection_refit": "fit selected model/scaler on all labeled pre-test rows known by fit cutoff",
+  "frozen_during_test": [
+    "selected graph hyperparameters",
+    "feature scaler",
+    "OLS coefficients"
+  ],
+  "updates_during_test": [
+    "dated PIT membership",
+    "causal features",
+    "five daily graphs"
+  ],
+  "selection_score": "annualized Sharpe of zero-cost paper-style close-to-close validation proxy",
+  "selection_scope": "one shared alpha/beta pair for all five windows",
+  "tie_break": "highest score, then smallest alpha, then smallest beta; no OOS comparisons",
+  "parameter_grid": [
+    0.0001,
+    0.0005,
+    0.001,
+    0.005,
+    0.01,
+    0.05,
+    0.1,
+    0.5,
+    1,
+    5,
+    10
+  ],
+  "reporting": "paper-style research proxy; execution, financing and full terminal accounting are not certified",
+  "paper_departures": [
+    "three initial OLS training years instead of ten",
+    "annual refits instead of five-year refits"
+  ]
+}
