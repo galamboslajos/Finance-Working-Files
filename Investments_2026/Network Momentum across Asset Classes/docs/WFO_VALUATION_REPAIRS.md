@@ -1,5 +1,10 @@
 # Held-valuation repairs for the original WFO
 
+The latest [continuous accounting-scenario report](CONTINUOUS_WFO_PERFORMANCE.md)
+handles the two remaining unquoted rights with explicit long-zero/short-cap
+marks. It covers every session and month. This earlier audit preserves which
+source valuations were actually recovered and which remain assumptions.
+
 The missing months were caused by a strict completeness rule: one unavailable
 held stock's next-session return withheld the entire common-cohort portfolio
 day, and any such day withheld that month's compounded return. The market data

@@ -1,6 +1,15 @@
 # Network Momentum across Asset Classes
 
-The latest [held-valuation repair](docs/WFO_VALUATION_REPAIRS.md) recovers 60 of
+Start with the latest [continuous equity and performance report](outputs/continuous_wfo/README.md):
+**1,760 sessions, 84 months, one equity path without resets.** It applies an
+explicit conservative contingent-right accounting scenario to the two remaining
+merger dates: long rights are marked zero and short obligations at their payout
+cap. Subsequent rights cash flows and reserve releases are excluded. The report
+flags both assumptions and shows alternative event marks. Conditional GMOM
+CAGR is 5.65%, maximum drawdown -16.05% and Sharpe 0.733, before costs. All 75
+tests pass. [Policy, verification and limits](docs/CONTINUOUS_WFO_PERFORMANCE.md).
+
+The preceding [held-valuation repair](docs/WFO_VALUATION_REPAIRS.md) recovers 60 of
 62 unavailable original test outcomes. Blank portfolio days fall from 38 to 2,
 and complete months rise from 53/84 to 82/84. Review the
 [repaired results and charts](outputs/valuation_repaired_wfo/README.md).

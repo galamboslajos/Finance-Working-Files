@@ -1,5 +1,9 @@
 # Additional walk-forward performance diagnostics
 
+For the current unbroken equity curve, see the [continuous accounting-scenario
+report](CONTINUOUS_WFO_PERFORMANCE.md). This earlier report preserves the two
+unobserved source marks and therefore still has two calculation gaps.
+
 These charts describe repaired held valuations on the frozen original WFO. Original observed returns and models are unchanged.
 
 Open the self-contained report at `data/walk_forward/valuation_performance_v2/performance_report.html`; the same folder contains a four-page `performance_charts.pdf`, PNG/SVG charts and CSV tables.

@@ -1,0 +1,79 @@
+{
+  "status": "complete",
+  "purpose": "Continuous accounting scenario on frozen original WFO",
+  "accounting_scenario": true,
+  "policy_id": "sp500-conservative-contingent-rights-scenario-v1",
+  "sessions": 1760,
+  "observed_or_recovered_portfolio_dates": 1758,
+  "dates_with_explicit_right_mark_assumptions": 2,
+  "unavailable_calculated_dates": 0,
+  "complete_months": 84,
+  "months": 84,
+  "equity_runs": 1,
+  "source_stock_labels_still_unobserved": 2,
+  "stock_labels_imputed": false,
+  "portfolio_zero_return_imputation": false,
+  "future_claim_pnl_credited": false,
+  "models_refitted": 0,
+  "forecasts_changed": 0,
+  "original_positions_changed": 0,
+  "scenario_is_observed_market_data": false,
+  "full_path_metrics_are_conditional_on_policy": true,
+  "source_result_directory": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/walk_forward/valuation_results_v1",
+  "source_result_manifest_sha256": "36d0fcf6ce37552c3ba868110623580d5594bcd768ea8bfa715297db6c1180b3",
+  "source_verification_sha256": "accbe18c7e7f5d08c7172d52cc2e23e28202510c90403bf762ba210c11453e37",
+  "config_sha256": "10207b891b5107008397d26afd1b54c24d21e4e3d5602320b5fccf53ae4695ca",
+  "script_sha256": "a73aa876a5652bb58ca12ea37aac2c934079c6b85f4c80a5bae7555d22aa160b",
+  "outputs": [
+    {
+      "path": "claim_mark_scenario_metrics.csv",
+      "sha256": "ff566bb99ffb2e7c30d0ac7cc402dbf29b56e95a9d8d4b27a36bf2ece7818d0d",
+      "size_bytes": 12134
+    },
+    {
+      "path": "claim_mark_sensitivity_envelope.csv",
+      "sha256": "03629b1c8c0a2335a9436d4fb10de22ed5d7b132d7c42375ea799fee6bea33e7",
+      "size_bytes": 1010922
+    },
+    {
+      "path": "claim_register.csv",
+      "sha256": "feb707b42ae321abce3dd4201aa61553ba447f543f5192f4adf1c3a584aac9d6",
+      "size_bytes": 5473
+    },
+    {
+      "path": "complete_segments.csv",
+      "sha256": "164cf323899a3c1028556648cc376e902e1916cf432ed565679577030f613e82",
+      "size_bytes": 85
+    },
+    {
+      "path": "daily_paper_proxy_returns.csv",
+      "sha256": "971294a23215aebf3394e727c0ecdb4676e228f27bbe22a8dfeebedfc890377e",
+      "size_bytes": 733480
+    },
+    {
+      "path": "equity_drawdown.csv",
+      "sha256": "f35f6205ac0ed5120d5d4c7c9321489ae24d8254891bcdfcfe79e5ac4e61297f",
+      "size_bytes": 687834
+    },
+    {
+      "path": "monthly_returns.csv",
+      "sha256": "d112c5aac11d769f11a7c1ddb7f467ab9c9cfec5835100ddecca7b7d4150b0b5",
+      "size_bytes": 13006
+    },
+    {
+      "path": "paper_proxy_metrics.csv",
+      "sha256": "a4d42dc3e6b34c51dea8ae358b3d4fee261adca0b2c39d27269d3f944107c872",
+      "size_bytes": 23352
+    },
+    {
+      "path": "policy.json",
+      "sha256": "e4ebe33df56c4f7b65f4d89e7f013d66154aaa3fb74191cdfd9e28fccaef381d",
+      "size_bytes": 1978
+    },
+    {
+      "path": "rolling_63_sessions.csv",
+      "sha256": "0cff163663ac08db7027e23bf9db3ad2dc24a3a42596c2666c01e3f391c2c3d9",
+      "size_bytes": 428852
+    }
+  ]
+}

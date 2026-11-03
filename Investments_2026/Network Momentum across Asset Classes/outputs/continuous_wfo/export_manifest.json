@@ -1,0 +1,134 @@
+{
+  "status": "complete",
+  "purpose": "Continuous WFO accounting-scenario review, with two explicit rights assumptions",
+  "accounting_scenario": true,
+  "source_stock_labels_still_unobserved": 2,
+  "source_result_manifest_sha256": "f2188d569a05ed93ba5da7a32640c0cb5454850e1c7564fae9508e32e1dba161",
+  "source_performance_manifest_sha256": "058abb4a88a6b547bd3dc8b8e9dbe108c2c33f34c378b9d466ae73c4e357288f",
+  "script_sha256": "3d978fc31535c14bd2fc6c78bbc48a08671f18239c23826f78d81ab5fdeba6c4",
+  "raw_data_included": false,
+  "stock_date_predictions_included": false,
+  "copied_outputs": [
+    {
+      "path": "results/claim_mark_scenario_metrics.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/claim_mark_scenario_metrics.csv",
+      "sha256": "ff566bb99ffb2e7c30d0ac7cc402dbf29b56e95a9d8d4b27a36bf2ece7818d0d",
+      "size_bytes": 12134
+    },
+    {
+      "path": "results/claim_mark_sensitivity_envelope.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/claim_mark_sensitivity_envelope.csv",
+      "sha256": "03629b1c8c0a2335a9436d4fb10de22ed5d7b132d7c42375ea799fee6bea33e7",
+      "size_bytes": 1010922
+    },
+    {
+      "path": "results/claim_register.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/claim_register.csv",
+      "sha256": "feb707b42ae321abce3dd4201aa61553ba447f543f5192f4adf1c3a584aac9d6",
+      "size_bytes": 5473
+    },
+    {
+      "path": "results/complete_segments.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/complete_segments.csv",
+      "sha256": "164cf323899a3c1028556648cc376e902e1916cf432ed565679577030f613e82",
+      "size_bytes": 85
+    },
+    {
+      "path": "results/daily_paper_proxy_returns.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/daily_paper_proxy_returns.csv",
+      "sha256": "971294a23215aebf3394e727c0ecdb4676e228f27bbe22a8dfeebedfc890377e",
+      "size_bytes": 733480
+    },
+    {
+      "path": "results/equity_drawdown.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/equity_drawdown.csv",
+      "sha256": "f35f6205ac0ed5120d5d4c7c9321489ae24d8254891bcdfcfe79e5ac4e61297f",
+      "size_bytes": 687834
+    },
+    {
+      "path": "results/monthly_returns.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/monthly_returns.csv",
+      "sha256": "d112c5aac11d769f11a7c1ddb7f467ab9c9cfec5835100ddecca7b7d4150b0b5",
+      "size_bytes": 13006
+    },
+    {
+      "path": "results/paper_proxy_metrics.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/paper_proxy_metrics.csv",
+      "sha256": "a4d42dc3e6b34c51dea8ae358b3d4fee261adca0b2c39d27269d3f944107c872",
+      "size_bytes": 23352
+    },
+    {
+      "path": "results/policy.json",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/policy.json",
+      "sha256": "e4ebe33df56c4f7b65f4d89e7f013d66154aaa3fb74191cdfd9e28fccaef381d",
+      "size_bytes": 1978
+    },
+    {
+      "path": "results/rolling_63_sessions.csv",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/rolling_63_sessions.csv",
+      "sha256": "0cff163663ac08db7027e23bf9db3ad2dc24a3a42596c2666c01e3f391c2c3d9",
+      "size_bytes": 428852
+    },
+    {
+      "path": "results/manifest.json",
+      "source_relative_path": "data/walk_forward/continuous_results_v1/manifest.json",
+      "sha256": "f2188d569a05ed93ba5da7a32640c0cb5454850e1c7564fae9508e32e1dba161",
+      "size_bytes": 2942
+    },
+    {
+      "path": "performance/equity_drawdown.png",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/equity_drawdown.png",
+      "sha256": "241fa35179c337f6c94fe0317922a080393d33abccd5a851bc87fc1f90d99869",
+      "size_bytes": 411343
+    },
+    {
+      "path": "performance/equity_drawdown.svg",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/equity_drawdown.svg",
+      "sha256": "96f37b116476ae9fa469d7ceebf55725f5c3a301aeb56e63e34374032ed6a337",
+      "size_bytes": 607647
+    },
+    {
+      "path": "performance/performance_charts.pdf",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/performance_charts.pdf",
+      "sha256": "829a096320c89cd127be5aa98b9dc1c0ddef07a89157121e8a1d8ed5e9a0d900",
+      "size_bytes": 314028
+    },
+    {
+      "path": "performance/performance_overview.png",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/performance_overview.png",
+      "sha256": "129574664bb9fca27f40ca49cb021e0dfdedf1ab550a4cd7b2279b88ab8f09ce",
+      "size_bytes": 410310
+    },
+    {
+      "path": "performance/performance_overview.svg",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/performance_overview.svg",
+      "sha256": "d747b06e87105df7b7363b19ad4f77af7803162c83873ecac171d88a1bde55be",
+      "size_bytes": 342971
+    },
+    {
+      "path": "performance/performance_report.html",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/performance_report.html",
+      "sha256": "3ed2b0427316ea8ff9fc59c33c0ae669001b27445bef797e83e68acf7bbec659",
+      "size_bytes": 1102744
+    },
+    {
+      "path": "performance/manifest.json",
+      "source_relative_path": "data/walk_forward/continuous_performance_v2/manifest.json",
+      "sha256": "058abb4a88a6b547bd3dc8b8e9dbe108c2c33f34c378b9d466ae73c4e357288f",
+      "size_bytes": 1603
+    },
+    {
+      "path": "verification/report.json",
+      "source_relative_path": "data/walk_forward/continuous_verification_v1/report.json",
+      "sha256": "dc9e3ec0758a6292774b5d8d89d041eb773d3c025d59f3085cfa50812b5f4727",
+      "size_bytes": 841
+    },
+    {
+      "path": "evidence/contingent_rights_policy_v1.json",
+      "source_relative_path": "configs/contingent_rights_policy_v1.json",
+      "sha256": "10207b891b5107008397d26afd1b54c24d21e4e3d5602320b5fccf53ae4695ca",
+      "size_bytes": 1888
+    }
+  ],
+  "readme_sha256": "ec905227dc432e459d3506325c20315e64625112ab3d8a6f6008c0269635f02c"
+}

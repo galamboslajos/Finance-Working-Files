@@ -1,0 +1,50 @@
+{
+  "status": "complete",
+  "purpose": "Continuous accounting-scenario equity and drawdown; no observed data fabrication",
+  "results_manifest_sha256": "f2188d569a05ed93ba5da7a32640c0cb5454850e1c7564fae9508e32e1dba161",
+  "verification_sha256": "dc9e3ec0758a6292774b5d8d89d041eb773d3c025d59f3085cfa50812b5f4727",
+  "script_sha256": "a87f16f2421b9abc18f82d78febf43efffe0d12ed70d11c7c952bc41f68f0271",
+  "sessions": 1760,
+  "calculated_months": 84,
+  "equity_runs": 1,
+  "assumption_dates": [
+    "2022-12-22",
+    "2025-08-28"
+  ],
+  "plots": [
+    "equity_drawdown",
+    "performance_overview"
+  ],
+  "outputs": [
+    {
+      "path": "equity_drawdown.png",
+      "sha256": "241fa35179c337f6c94fe0317922a080393d33abccd5a851bc87fc1f90d99869",
+      "size_bytes": 411343
+    },
+    {
+      "path": "equity_drawdown.svg",
+      "sha256": "96f37b116476ae9fa469d7ceebf55725f5c3a301aeb56e63e34374032ed6a337",
+      "size_bytes": 607647
+    },
+    {
+      "path": "performance_charts.pdf",
+      "sha256": "829a096320c89cd127be5aa98b9dc1c0ddef07a89157121e8a1d8ed5e9a0d900",
+      "size_bytes": 314028
+    },
+    {
+      "path": "performance_overview.png",
+      "sha256": "129574664bb9fca27f40ca49cb021e0dfdedf1ab550a4cd7b2279b88ab8f09ce",
+      "size_bytes": 410310
+    },
+    {
+      "path": "performance_overview.svg",
+      "sha256": "d747b06e87105df7b7363b19ad4f77af7803162c83873ecac171d88a1bde55be",
+      "size_bytes": 342971
+    },
+    {
+      "path": "performance_report.html",
+      "sha256": "3ed2b0427316ea8ff9fc59c33c0ae669001b27445bef797e83e68acf7bbec659",
+      "size_bytes": 1102744
+    }
+  ]
+}
