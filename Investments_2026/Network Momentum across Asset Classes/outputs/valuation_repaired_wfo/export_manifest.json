@@ -1,0 +1,181 @@
+{
+  "status": "complete",
+  "purpose": "Compact review of retrospective held-valuation corrections",
+  "source_result_manifest_sha256": "36d0fcf6ce37552c3ba868110623580d5594bcd768ea8bfa715297db6c1180b3",
+  "source_performance_manifest_sha256": "40a88f7163fe825949f8f9a36a737dcdd3d1ed2d4075b40be9d3b9e3e58f0b70",
+  "export_script_sha256": "da8b1fb83e26157e81de9e60ec9d3c9bef83b0722278c4bf81fa103a26beaf26",
+  "forecasts_changed": false,
+  "raw_data_included": false,
+  "large_prediction_tables_included": false,
+  "copied_outputs": [
+    {
+      "path": "results/contingent_claim_sensitivity.csv",
+      "source_relative_path": "data/walk_forward/valuation_results_v1/contingent_claim_sensitivity.csv",
+      "sha256": "7bfd8f4dc14953ca5d11c24e26bd809545a9e1a46697ad1353b4643845e6b636",
+      "size_bytes": 3376
+    },
+    {
+      "path": "results/daily_paper_proxy_returns.csv",
+      "source_relative_path": "data/walk_forward/valuation_results_v1/daily_paper_proxy_returns.csv",
+      "sha256": "7be4f8a5f58c960bbb79b3a868e9dc68702c16a902927e07886d12a43380a5c9",
+      "size_bytes": 708349
+    },
+    {
+      "path": "results/paper_proxy_metrics.csv",
+      "source_relative_path": "data/walk_forward/valuation_results_v1/paper_proxy_metrics.csv",
+      "sha256": "6a66336dc2d2924e3a40e3448da97cec70ff8c6c1f79676cd5bc7f9fc00b43e9",
+      "size_bytes": 5775
+    },
+    {
+      "path": "results/policy.json",
+      "source_relative_path": "data/walk_forward/valuation_results_v1/policy.json",
+      "sha256": "440bf4c850de048f65f7fc23f856f03105e6b05333b50ba01c565c14aeb26ed1",
+      "size_bytes": 1702
+    },
+    {
+      "path": "results/valuation_ledger.csv",
+      "source_relative_path": "data/walk_forward/valuation_results_v1/valuation_ledger.csv",
+      "sha256": "45d7f051f4370c6426d3fc6120bc8b12218d6539bd1a3f5ece53e528448f592e",
+      "size_bytes": 29269
+    },
+    {
+      "path": "results/manifest.json",
+      "source_relative_path": "data/walk_forward/valuation_results_v1/manifest.json",
+      "sha256": "36d0fcf6ce37552c3ba868110623580d5594bcd768ea8bfa715297db6c1180b3",
+      "size_bytes": 4205
+    },
+    {
+      "path": "performance/complete_segments.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/complete_segments.csv",
+      "sha256": "8b6df1b6520da047e7c40e4ad166117d443975efa65dec6ff58856a091d66311",
+      "size_bytes": 162
+    },
+    {
+      "path": "performance/equity_drawdown_segments.png",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/equity_drawdown_segments.png",
+      "sha256": "f7c061104faffd07eede903a60ac939413943a5c001548faf37584c200534322",
+      "size_bytes": 387040
+    },
+    {
+      "path": "performance/equity_drawdown_segments.svg",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/equity_drawdown_segments.svg",
+      "sha256": "423d23e5144a625ec1ca43e5e15e0deec704024e932e4e75c518fd907f88da83",
+      "size_bytes": 347359
+    },
+    {
+      "path": "performance/extended_metrics.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/extended_metrics.csv",
+      "sha256": "4b6fb96e548765dfd01c7f19133b572b4e20074bf80370425ad5300462a606b6",
+      "size_bytes": 20741
+    },
+    {
+      "path": "performance/longest_complete_interval_metrics.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/longest_complete_interval_metrics.csv",
+      "sha256": "e1ea8a283b8acd6f02cd65224072ae37208a2ef400cc8a9a4a8da9ef65cf3651",
+      "size_bytes": 3354
+    },
+    {
+      "path": "performance/longest_complete_period.png",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/longest_complete_period.png",
+      "sha256": "82d85a7f67b43b2bb12c8be84c96dcc4d0f83c799d7797d690bc4f8e2b2b0ab0",
+      "size_bytes": 365355
+    },
+    {
+      "path": "performance/longest_complete_period.svg",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/longest_complete_period.svg",
+      "sha256": "244c12c025be06247d10aecee2373c020faae9df01be3348d4ed2ea249be2fd5",
+      "size_bytes": 231704
+    },
+    {
+      "path": "performance/monthly_returns.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/monthly_returns.csv",
+      "sha256": "be09e3647b2b1e31d909166af317eb76ff36d4f3940548774c126930a1465399",
+      "size_bytes": 12764
+    },
+    {
+      "path": "performance/performance_charts.pdf",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/performance_charts.pdf",
+      "sha256": "2011134da48939cee12eb2c4d25dd42f7fd1ca719db7ecf7b5d4f39c450eca67",
+      "size_bytes": 320968
+    },
+    {
+      "path": "performance/performance_overview.png",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/performance_overview.png",
+      "sha256": "989df91d128db87d592998431a7ce32d3dc0ebe2190d73eecc06a9d6b6714423",
+      "size_bytes": 286269
+    },
+    {
+      "path": "performance/performance_overview.svg",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/performance_overview.svg",
+      "sha256": "1beb9267b58f3abc07b00cd50424b6c46e5f49f4c1ca672754723730b2585a07",
+      "size_bytes": 204816
+    },
+    {
+      "path": "performance/performance_report.html",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/performance_report.html",
+      "sha256": "f38dcaf932f85d9f60f349255f2258f59a6143e0c7214a5a5a3fceb812db17df",
+      "size_bytes": 2040046
+    },
+    {
+      "path": "performance/return_correlations.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/return_correlations.csv",
+      "sha256": "48cfde028ac91f0c55932265c91bcf1d088b2d1398d0e1a8628b38b574c0cf4a",
+      "size_bytes": 703
+    },
+    {
+      "path": "performance/rolling_63_sessions.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/rolling_63_sessions.csv",
+      "sha256": "8b09b4cdb7c6b59a79ce07078aff34c9ca747736d5ac5ffcddc8f494fecc71cb",
+      "size_bytes": 400600
+    },
+    {
+      "path": "performance/rolling_risk_and_exposure.png",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/rolling_risk_and_exposure.png",
+      "sha256": "8874621a5e897c0577900a32af643f60552752bacc1c5f74ff660420dcae6d10",
+      "size_bytes": 485168
+    },
+    {
+      "path": "performance/rolling_risk_and_exposure.svg",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/rolling_risk_and_exposure.svg",
+      "sha256": "0294bef901125a39684f815cb37795b248ca07f79f06e820a05857a950d2e025",
+      "size_bytes": 386739
+    },
+    {
+      "path": "performance/segment_curves.csv",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/segment_curves.csv",
+      "sha256": "ed98329963998ee0e9d48202286a3bae310c7f4b0011f024527d7aadabe11efe",
+      "size_bytes": 685535
+    },
+    {
+      "path": "performance/manifest.json",
+      "source_relative_path": "data/walk_forward/valuation_performance_v2/manifest.json",
+      "sha256": "40a88f7163fe825949f8f9a36a737dcdd3d1ed2d4075b40be9d3b9e3e58f0b70",
+      "size_bytes": 3740
+    },
+    {
+      "path": "verification/valuation_report.json",
+      "source_relative_path": "data/walk_forward/valuation_verification_v1/report.json",
+      "sha256": "accbe18c7e7f5d08c7172d52cc2e23e28202510c90403bf762ba210c11453e37",
+      "size_bytes": 750
+    },
+    {
+      "path": "verification/evidence_reconstruction.json",
+      "source_relative_path": "data/performance_gap_audit/v1/reconstruction_verification.json",
+      "sha256": "323ee088b98716d910b6a48266bda8c9a0c6272ebb37178997fd001f4c44bab3",
+      "size_bytes": 344
+    },
+    {
+      "path": "evidence/valuation_events_v1.json",
+      "source_relative_path": "configs/valuation_events_v1.json",
+      "sha256": "5aab37507da018c9832b65b3d2fa66a0865bafeab5011e3bcf7c19346d5e035d",
+      "size_bytes": 8088
+    },
+    {
+      "path": "evidence/valuation_manual_quotes_v1.json",
+      "source_relative_path": "configs/valuation_manual_quotes_v1.json",
+      "sha256": "58c6c5a5ad3f2bfbdd8f85351f298a3feb5eea29391e7d0b931326e82f00c532",
+      "size_bytes": 2036
+    }
+  ],
+  "readme_sha256": "71f61c3ad3efa4da6220224277ab81c60bb380f585d0a5e57ac898e181407c05"
+}

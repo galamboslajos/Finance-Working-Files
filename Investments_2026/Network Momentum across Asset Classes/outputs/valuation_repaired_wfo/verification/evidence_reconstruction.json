@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "prepared_context_rows_reconstructed": 159148,
+  "original_price_records_matched": 9564,
+  "method": "Re-read SHA-verified prepared price objects and full pinned Intrinio source; compare every reconstructed field",
+  "reconstruction_script_sha256": "c91cf070fa6a94109dd7e34562f9607832b693466735764340e98507688bf832"
+}

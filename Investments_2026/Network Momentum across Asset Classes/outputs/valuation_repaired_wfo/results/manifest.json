@@ -1,0 +1,105 @@
+{
+  "status": "complete",
+  "purpose": "Corrected held valuations on frozen original forecasts; unresolved rights preserved",
+  "valuation_overlay": true,
+  "models_refitted": 0,
+  "forecasts_changed": 0,
+  "original_observed_labels_changed": 0,
+  "original_result_directory": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/walk_forward/annual_results_v1",
+  "original_result_manifest_sha256": "7fad2053eec5e87556e0930a7610ffd8156e8d103b1e72222a0827ddacb80f63",
+  "original_portfolio_dates": 1760,
+  "original_missing_stock_labels": 62,
+  "original_unavailable_portfolio_dates": 38,
+  "repaired_stock_labels": 60,
+  "remaining_unavailable_stock_labels": 2,
+  "complete_portfolio_dates": 1758,
+  "unavailable_portfolio_dates": 2,
+  "repair_methods": [
+    {
+      "method": "independent_sip_raw_close",
+      "status": "repaired",
+      "rows": 30
+    },
+    {
+      "method": "mandatory_merger_entitlement",
+      "status": "repaired",
+      "rows": 27
+    },
+    {
+      "method": "reviewed_predecessor_quote",
+      "status": "repaired",
+      "rows": 3
+    },
+    {
+      "method": "mandatory_merger_entitlement",
+      "status": "unresolved_contingent_right",
+      "rows": 2
+    }
+  ],
+  "independent_object": {
+    "uri": "gs://quant-research-trusty-agility-492109-v0/dataset-platform/curated/equity_us/sp_composite1500_market_daily/v1/tables/daily_bars/part-00000.parquet",
+    "generation": "1783344954247444",
+    "sha256": "4a4919d48128d5c573ddbca64649d8cc78783f7bbb818219a3ad5f34728e38a0",
+    "whole_object_verified": true,
+    "raw_provider_response_bodies_reauthenticated": false
+  },
+  "inputs": [
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/configs/valuation_events_v1.json",
+      "sha256": "5aab37507da018c9832b65b3d2fa66a0865bafeab5011e3bcf7c19346d5e035d"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/configs/valuation_manual_quotes_v1.json",
+      "sha256": "58c6c5a5ad3f2bfbdd8f85351f298a3feb5eea29391e7d0b931326e82f00c532"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/wfo_availability/source_triage_v1/missing_label_source_triage.csv",
+      "sha256": "8b05354b76806f691b82bffe6a946175d82a2d92496b27a7f6a33f04dd2847d2"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/performance_gap_audit/v1/original_native_context.parquet",
+      "sha256": "fae7022e775d0e2c34c63df0efa5cddaf862e90042e189482820c8b69413a185"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/performance_gap_audit/v1/event_date_source_prices.parquet",
+      "sha256": "b8ff7c5c4d7f4568813d41eaba7d6eb3268715bfa842a79c4283a54a1b26bf84"
+    },
+    {
+      "path": "/Users/lajosgalambos/Documents/ChatGPT/Network Momentum across Asset Classes/data/performance_gap_audit/v1/source_provenance.json",
+      "sha256": "f4742b637d29db1d7d590a7a7d0541f5bd6e31fddf8db86de970ea48e6ec740c"
+    }
+  ],
+  "script_sha256": "0b9ff82cb990728cf9193d80e4edce30ee512a402d4ea04ea95c5f22d20f14ef",
+  "outputs": [
+    {
+      "path": "contingent_claim_sensitivity.csv",
+      "sha256": "7bfd8f4dc14953ca5d11c24e26bd809545a9e1a46697ad1353b4643845e6b636",
+      "size_bytes": 3376
+    },
+    {
+      "path": "daily_paper_proxy_returns.csv",
+      "sha256": "7be4f8a5f58c960bbb79b3a868e9dc68702c16a902927e07886d12a43380a5c9",
+      "size_bytes": 708349
+    },
+    {
+      "path": "paper_proxy_metrics.csv",
+      "sha256": "6a66336dc2d2924e3a40e3448da97cec70ff8c6c1f79676cd5bc7f9fc00b43e9",
+      "size_bytes": 5775
+    },
+    {
+      "path": "policy.json",
+      "sha256": "440bf4c850de048f65f7fc23f856f03105e6b05333b50ba01c565c14aeb26ed1",
+      "size_bytes": 1702
+    },
+    {
+      "path": "valuation_ledger.csv",
+      "sha256": "45d7f051f4370c6426d3fc6120bc8b12218d6539bd1a3f5ece53e528448f592e",
+      "size_bytes": 29269
+    },
+    {
+      "path": "valuation_ledger.parquet",
+      "sha256": "124efbaad4518cf7069546402da119814526073b14847b6997da803b11c4d43b",
+      "size_bytes": 41121
+    }
+  ]
+}

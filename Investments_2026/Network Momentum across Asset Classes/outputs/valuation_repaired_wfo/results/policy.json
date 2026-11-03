@@ -1,0 +1,16 @@
+{
+  "id": "sp500-frozen-wfo-held-valuation-v1",
+  "scope": "62 unavailable OOS realized labels; frozen original 2019-2025 forecasts",
+  "ordinary_quote_rule": "Exact independent raw quote, accepted entry quote and matching raw controls; existing recorded action metadata or unchanged rounded adjustment-scale bracket required.",
+  "merger_rule": "(USD cash + fixed share ratio * exact label-date acquirer raw close) / old raw entry close - 1.",
+  "claim_rule": "Unquoted non-tradeable contingent rights remain unresolved; no zero, face-value, or ex-post realized payout is silently substituted.",
+  "source_policy": "Alpaca whole-object checksum; existing Intrinio accepted source records; three reviewed predecessor-quote transcriptions with four prior raw controls and dated identity evidence.",
+  "limitations": [
+    "Valuation-only retrospective repair: original features, models, validation selection and eligibility remain frozen, including their original gaps.",
+    "Raw source data and original WFO artifacts are never overwritten. This does not certify a fully corrected training dataset.",
+    "Adjustment continuity across absent bars is a reviewed bracket assumption, not a complete independent corporate-action feed.",
+    "Merger marks assume frictionless cash/share receivables valued at par or market; settlement delays, fractional-share cash, tax, borrow and costs are not modeled.",
+    "An original close on a completion day may be stale or untradeable; these fixed-forecast corrections do not establish executable entries.",
+    "Contingent-right sensitivity covers the one-day mark only, not subsequent rights value, payouts or a continuous realized strategy wealth path."
+  ]
+}

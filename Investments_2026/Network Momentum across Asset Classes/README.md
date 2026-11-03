@@ -1,7 +1,16 @@
 # Network Momentum across Asset Classes
 
+The latest [held-valuation repair](docs/WFO_VALUATION_REPAIRS.md) recovers 60 of
+62 unavailable original test outcomes. Blank portfolio days fall from 38 to 2,
+and complete months rise from 53/84 to 82/84. Review the
+[repaired results and charts](outputs/valuation_repaired_wfo/README.md).
+The remaining ABMD and WBA dates include non-tradeable contingent rights;
+their mark sensitivity is explicit. Models and forecasts remain frozen, and
+the original raw prices and output bundle remain unchanged. This is a
+valuation correction, not a rebuilt feature history. All 69 tests pass.
+
 Start with the [saved original WFO results and charts](outputs/original_wfo/README.md)
-to review the completed experiment directly on GitHub.
+to review the earlier uncorrected experiment directly on GitHub.
 
 The paper's equations, training procedure, equity adaptation and replication
 tests are recorded in [Network Momentum methodology and S&P 500 replication](docs/NETWORK_MOMENTUM_REPLICATION.md).

@@ -1,0 +1,12 @@
+{
+  "reviewed_on": "2026-11-03",
+  "capture_method": "Numeric observations transcribed from web-tool-readable tables. Direct HTTP downloads returned 403; these records are reviewed transcriptions, not archived raw responses.",
+  "quotes": [
+    {"ticker":"WBD","date":"2022-04-04","symbol":"DISCA","native":"sec_Xnq2jn","close":25.8,"source":"https://ir.wbd.com/stock-information/stock-quote-and-chart/default.aspx","source_type":"issuer historical quote table","identity_source":"https://www.nasdaqtrader.com/TraderNews.aspx?id=ECA2022-63","prior_controls":{"2022-03-29":26.25,"2022-03-30":25.7,"2022-03-31":24.92,"2022-04-01":25.02},"note":"Discovery SERIES A predecessor, not the Series C DISCK quote or the WBDWV when-issued line."},
+    {"ticker":"ELV","date":"2022-06-27","symbol":"ANTM","native":"sec_XO8Y0b","close":482.58,"open":469.53,"high":485.75,"low":466.29,"source":"https://www.historicalstockprice.com/antm-historical-stock-prices/","source_type":"BNK Invest price table, attributed to Ticker Technologies/Mergent","identity_source":"https://www.elevancehealth.com/newsroom/elevance-health-rings-in-rebrand-with-nyse-opening-bell","prior_controls":{"2022-06-21":460.76,"2022-06-22":465.75,"2022-06-23":472.34,"2022-06-24":469.87},"note":"Raw predecessor close. ANTM traded through June 27; ELV began June 28."},
+    {"ticker":"RVTY","date":"2023-05-15","symbol":"PKI","native":"sec_XLnKjw","close":115.24,"open":115.98,"high":117.21,"low":114.67,"source":"https://www.historicalstockprice.com/pki-historical-stock-prices/","source_type":"BNK Invest price table, attributed to Ticker Technologies/Mergent","identity_source":"https://www.sec.gov/Archives/edgar/data/31791/000003179123000011/pki-20230702.htm","prior_controls":{"2023-05-09":124.82,"2023-05-10":124.55,"2023-05-11":118.37,"2023-05-12":116.3},"note":"Raw predecessor close. PKI traded through May 15; RVTY began May 16."}
+  ],
+  "continuity_evidence": {
+    "PSA":"https://www.sec.gov/Archives/edgar/data/1393311/000119312523211436/d542893d8k12b.htm"
+  }
+}

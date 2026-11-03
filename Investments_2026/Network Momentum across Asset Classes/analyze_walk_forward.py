@@ -104,7 +104,7 @@ def rolling_statistics(frame, window=63):
     return out
 
 
-def save_charts(frame, metrics, curves, segments, monthly, rolling, correlations, output):
+def save_charts(frame, metrics, curves, segments, monthly, rolling, correlations, output, valuation_overlay=False):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -120,7 +120,9 @@ def save_charts(frame, metrics, curves, segments, monthly, rolling, correlations
     def finish(fig, name, title, subtitle):
         fig.suptitle(title, x=.08, y=.985, ha="left", fontsize=19, fontweight="bold")
         fig.text(.08, .945, subtitle, fontsize=10, color="#505d70")
-        fig.text(.08, .018, "2019–2025 annual expanding WFO • zero-cost close-to-close research proxy • no executable-fill or terminal-cash accounting", fontsize=8, color="#667286")
+        footer = ("2019–2025 frozen WFO • repaired held valuations • contingent rights unresolved • zero-cost research proxy; executable fills excluded"
+                  if valuation_overlay else "2019–2025 annual expanding WFO • zero-cost close-to-close research proxy • no executable-fill or terminal-cash accounting")
+        fig.text(.08, .018, footer, fontsize=8, color="#667286")
         fig.subplots_adjust(top=.88, bottom=.09, left=.08, right=.97, hspace=.48, wspace=.3)
         for ax in fig.axes:
             if ax.get_label() != "<colorbar>":
@@ -157,7 +159,7 @@ def save_charts(frame, metrics, curves, segments, monthly, rolling, correlations
     for i in range(len(ARMS)):
         for j in range(len(ARMS)):
             axes[1, 1].text(j, i, f"{correlations.iloc[i,j]:.2f}", ha="center", va="center", fontsize=8)
-    finish(fig, "performance_overview", "Walk-forward performance diagnostics", "1,722 / 1,760 complete dates. Monthly returns require every session; missing months stay unavailable.")
+    finish(fig, "performance_overview", "Walk-forward performance diagnostics", f"{int(frame.complete.sum()):,} / {len(frame):,} complete dates. Monthly returns require every session; missing months stay unavailable.")
 
     fig, axes = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
     for arm in PRIMARY:
@@ -211,7 +213,7 @@ def save_charts(frame, metrics, curves, segments, monthly, rolling, correlations
     return [name for name, _ in figures]
 
 
-def render_report(metrics, longest_metrics, segments, monthly, charts, output):
+def render_report(metrics, longest_metrics, segments, monthly, charts, output, valuation_overlay=False, sensitivity=None):
     overall = metrics.loc[metrics.period.eq("all")].set_index("strategy")
     summary = overall[["annualized_mean", "annualized_volatility", "sharpe_complete_dates", "sortino_zero_threshold",
                        "positive_day_fraction", "mean_worst_5pct_days", "worst_day", "best_day"]].copy()
@@ -224,17 +226,38 @@ def render_report(metrics, longest_metrics, segments, monthly, charts, output):
     longest = segments.sort_values(["sessions", "start"], ascending=[False, True]).iloc[0]
     lp = longest_metrics.set_index("strategy")[["total_return", "maximum_drawdown", "positive_day_fraction"]].map(lambda x: f"{100*x:.2f}%")
     lp.columns = ["Interval return", "Interval max drawdown", "Positive days"]
+    complete, expected = int(overall.complete_dates.iloc[0]), int(overall.expected_dates.iloc[0])
+    unavailable = expected - complete
     notes = [
-        "*Complete-date statistics describe 1,722 observed dates out of 1,760, conditional on availability. They are not a continuous seven-year performance record.",
-        "The 38 incomplete dates and all forecasts remain saved. No missing return is filled or reweighted away. Equity and drawdown restart at each uninterrupted run; cross-gap CAGR, total return, maximum drawdown, Calmar and recovery duration remain withheld.",
+        f"*Complete-date statistics describe {complete:,} observed dates out of {expected:,}, conditional on availability. They are not a continuous seven-year performance record.",
+        f"The {unavailable} incomplete dates and all forecasts remain saved. No missing return is filled or reweighted away. Equity and drawdown restart at each uninterrupted run; cross-gap CAGR, total return, maximum drawdown, Calmar and recovery duration remain withheld.",
         "Sortino = sqrt(252) × mean daily return / sqrt(mean(min(return, 0)²)); zero threshold. Sharpe uses sample daily volatility and zero risk-free rate. Annualized mean = 252 × daily arithmetic mean, not CAGR.",
         "Positive-day fraction includes zero-return days in its denominator. Worst 5% mean averages the worst ceil(0.05 × observed days) returns. These are portfolio-day statistics, not trade win rates or trade profit factors.",
         "Monthly compounded returns require every scheduled session to be observed. Rolling 63-session statistics require all 63 returns and stay unavailable across gaps. Intended exposures use all signal dates, including unavailable valuation dates.",
         "LongOnly is an inverse-volatility-sized matched cohort, not the capital-weighted S&P 500. Trading costs, financing, borrow, executable fills and complete terminal/corporate-action cash flows are not included.",
-        "No models, hyperparameters, membership rules, prices or saved returns were changed for these diagnostics. No model selection uses these test results.",
     ]
+    if valuation_overlay:
+        notes += [
+            "This report uses a retrospective realized-label overlay on frozen original forecasts. Sixty unavailable stock/date valuations were recovered: 30 SIP quotes, three predecessor-symbol quotes, and 27 fixed cash/share merger entitlements. Raw prices and original WFO outputs remain unchanged.",
+            "ABMD on 2022-12-22 and WBA on 2025-08-28 remain unavailable because their consideration includes non-tradeable contingent rights. Their face-value versus zero-mark sensitivity is saved separately; neither assumption is substituted into these primary returns.",
+            "Models, networks, scalers, hyperparameters, positions, cohorts, and original observed labels are unchanged. Original feature/eligibility gaps and training-label limitations are retained; this is an accounting correction of the saved experiment, not a refitted clean-data backtest.",
+            "Merger entitlements use contemporaneous raw USD acquirer closes and final closing terms. Cash/share receivables are marked without settlement friction. Source close-to-close entries may be stale or untradeable around completion; executable trading and subsequent contingent-right accounting remain unmodeled.",
+            "Three predecessor quotes were transcribed from source tables with matching controls. Unchanged adjustment-scale brackets on absent bars are a reviewed continuity assumption, not a separately complete corporate-action feed.",
+        ]
+    else:
+        notes.append("No models, hyperparameters, membership rules, prices or saved returns were changed for these diagnostics. No model selection uses these test results.")
     body = "<h1>Walk-forward performance</h1><p class='lead'>S&P 500 network momentum · annual expanding WFO · 2019–2025</p>"
-    body += "<div class='warning'><strong>Research proxy with 38 unavailable portfolio dates.</strong> Equity and drawdown stop at each gap and restart at 100. A continuous seven-year equity curve and full-period maximum drawdown remain unavailable.</div>"
+    body += f"<div class='warning'><strong>Research proxy with {unavailable} unavailable portfolio dates.</strong> Equity and drawdown stop at each gap and restart at 100. A continuous seven-year equity curve and full-period maximum drawdown remain unavailable.</div>"
+    if valuation_overlay:
+        body += f"<p><strong>Held-valuation repair:</strong> {complete:,} of {expected:,} days and {int(monthly.complete.sum())} of {len(monthly)} months are complete. Forecasts and models are frozen. The remaining unavailable dates involve non-tradeable contingent rights.</p>"
+        if sensitivity is not None:
+            table = sensitivity.loc[sensitivity.strategy.eq("GMOM"), ["ticker", "return_date", "one_day_return_lower", "one_day_return_upper", "return_range_basis_points"]].copy()
+            table["return_date"] = table.return_date.astype(str)
+            for column in ("one_day_return_lower", "one_day_return_upper"):
+                table[column] = table[column].map(lambda value: f"{100 * value:.5f}%")
+            table["return_range_basis_points"] = table.return_range_basis_points.map(lambda value: f"{value:.3f}")
+            table.columns = ["Stock", "Unresolved date", "GMOM lower one-day mark", "GMOM upper one-day mark", "Range (portfolio bps)"]
+            body += "<h2>Remaining contingent-right sensitivity</h2><p>The ranges below vary the rights mark from zero to the contractual maximum, accounting for the position's sign. They are hypothetical one-day valuations, with no assumed sale or subsequent rights accounting. They do not certify continuous wealth or realized liquidation.</p>" + table.to_html(index=False, border=0)
     body += "<h2>Daily performance statistics</h2>" + text.to_html(border=0)
     for name in charts:
         encoded = base64.b64encode((output / f"{name}.png").read_bytes()).decode()
@@ -244,8 +267,11 @@ def render_report(metrics, longest_metrics, segments, monthly, charts, output):
     body += "<h2>Definitions and interpretation</h2><ul>" + "".join(f"<li>{html.escape(note)}</li>" for note in notes) + "</ul>"
     document = "<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>Network Momentum WFO performance</title><style>body{font:16px/1.55 system-ui,sans-serif;color:#202b39;background:#f7f8fa;max-width:1300px;margin:40px auto;padding:0 28px}h1{font-size:38px;margin-bottom:4px}h2{margin-top:30px}.lead{color:#596480}.warning{background:#fff3d8;padding:18px;border-left:4px solid #ba7c10;margin:24px 0}table{width:100%;border-collapse:collapse;background:white;font-size:13px}th,td{text-align:right;padding:10px;border-bottom:1px solid #e5e8ef}th:first-child{text-align:left}img{width:100%;height:auto;margin:28px 0 5px}li{margin:12px 0}@media(max-width:800px){body{padding:0 10px}table{font-size:10px}th,td{padding:5px}}</style><main>" + body + "</main></html>"
     (output / "performance_report.html").write_text(document)
-    lines = ["# Additional walk-forward performance diagnostics", "", "These charts extend the completed WFO without changing its models or returns.", "",
-        "Open the self-contained report at `data/walk_forward/performance_v1/performance_report.html`; the same folder contains a four-page `performance_charts.pdf`, PNG/SVG charts and CSV tables.", "",
+    relative = output.relative_to(ROOT).as_posix() if output.is_relative_to(ROOT) else str(output)
+    intro = ("These charts describe repaired held valuations on the frozen original WFO. Original observed returns and models are unchanged."
+             if valuation_overlay else "These charts extend the completed WFO without changing its models or returns.")
+    lines = ["# Additional walk-forward performance diagnostics", "", intro, "",
+        f"Open the self-contained report at `{relative}/performance_report.html`; the same folder contains a four-page `performance_charts.pdf`, PNG/SVG charts and CSV tables.", "",
         "| Strategy | Annualized mean* | Annualized vol* | Sharpe* | Sortino* | Positive days* | Worst 5% mean* |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: |"]
     for arm in ARMS:
         row = text.loc[arm]
@@ -256,10 +282,13 @@ def render_report(metrics, longest_metrics, segments, monthly, charts, output):
         lines.append(f"| {arm} | {lp.loc[arm].iloc[0]} | {lp.loc[arm].iloc[1]} |")
     lines += ["", f"There are {len(segments)} uninterrupted complete runs and {int(monthly.complete.sum())}/{len(monthly)} fully observed months. "
         "The equity and drawdown charts reset independently at each run, including initial capital in the drawdown high-water mark.", "",
-        *[note + "\n" for note in notes], "## Reproduce", "", "```bash", "python analyze_walk_forward.py", "```", "",
+        *[note + "\n" for note in notes], "## Reproduce", "", "```bash",
+        ("python analyze_walk_forward.py --results data/walk_forward/valuation_results_v1 --verification data/walk_forward/valuation_verification_v1/report.json --output data/walk_forward/valuation_performance_v1"
+         if valuation_overlay else "python analyze_walk_forward.py"), "```", "",
         "The analysis verifies the result/verification hashes first and refuses to overwrite an existing output directory. "
         "Use `--output` for a fresh version. Matplotlib is a reporting dependency; the core WFO evaluation is unchanged.", ""]
-    (ROOT / "docs/ANNUAL_WALK_FORWARD_PERFORMANCE.md").write_text("\n".join(lines))
+    documentation = "WFO_VALUATION_REPAIR_PERFORMANCE.md" if valuation_overlay else "ANNUAL_WALK_FORWARD_PERFORMANCE.md"
+    (ROOT / "docs" / documentation).write_text("\n".join(lines))
 
 
 def analyze(results, verification, output):
@@ -292,8 +321,14 @@ def analyze(results, verification, output):
                         ("longest_complete_interval_metrics", longest_metrics), ("monthly_returns", monthly), ("rolling_63_sessions", rolling)]:
         table.to_csv(output / f"{name}.csv", index=False)
     correlations.to_csv(output / "return_correlations.csv")
-    charts = save_charts(frame, metrics, curves, segments, monthly, rolling, correlations, output)
-    render_report(metrics, longest_metrics, segments, monthly, charts, output)
+    valuation_overlay = bool(manifest.get("valuation_overlay", False))
+    sensitivity = None
+    if valuation_overlay:
+        sensitivity_path = results / "contingent_claim_sensitivity.csv"
+        require(file_hash(sensitivity_path) == objects[sensitivity_path.name]["sha256"], "Contingent sensitivity changed")
+        sensitivity = pd.read_csv(sensitivity_path)
+    charts = save_charts(frame, metrics, curves, segments, monthly, rolling, correlations, output, valuation_overlay)
+    render_report(metrics, longest_metrics, segments, monthly, charts, output, valuation_overlay, sensitivity)
     require(file_hash(manifest_path) == checks["result_manifest_sha256"] and file_hash(daily_path) == objects[daily_path.name]["sha256"], "Original results changed during reporting")
     record = {"status": "complete", "purpose": "Additional descriptive diagnostics; no model or strategy changes",
         "results_manifest_sha256": file_hash(manifest_path), "daily_returns_sha256": file_hash(daily_path),
