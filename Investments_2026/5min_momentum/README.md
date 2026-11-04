@@ -25,6 +25,21 @@ ln -s /absolute/path/to/existing/private/data data
 
 The `data` directory, its symlink, virtual environment, credentials, caches and Parquet files are excluded from Git. This public repository contains source code and documentation. Licensed vendor data stays in Galambos Capital's private storage and local workspace.
 
+## First notebook: loading and coverage
+
+Open `01_load_sp500_5min.ipynb` using the project's `.venv` kernel. It loads the historical S&P 500 five-minute prices and both membership tables, audits the full available raw history by default, checks exchange-calendar coverage and missing bars, and displays a bounded OHLCV sample with price/volume charts. Change the first cell to choose another date range, adjustment or sample ticker.
+
+Install notebook dependencies and run the full audit:
+
+```sh
+.venv/bin/python -m pip install -r requirements-notebook.txt
+.venv/bin/python scripts/run_coverage_notebook.py
+```
+
+The runner preserves the output-free source notebook and writes `data/reports/01_load_sp500_5min/01_load_sp500_5min.executed.ipynb`. That private directory also contains `SUMMARY.json`, coverage tables, quality totals, exact missing-slot examples, the sample and charts. Report files are replaced on rerun; the JSON records the selected parameters. Keep notebook outputs containing licensed data in this ignored directory.
+
+The expected grid uses the XNYS regular-session calendar, including early closes, with start-labelled five-minute slots. The notebook separates unresolved membership identities, whole days without daily prices, absent intraday bars and present five-minute buckets containing fewer than five source minutes. No prices or gaps are filled.
+
 ## Published data
 
 Pinned five-minute release:

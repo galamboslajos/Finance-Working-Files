@@ -12,3 +12,7 @@ __pycache__/
 *.duckdb.wal
 credentials*.json
 *service-account*.json
+
+.ipynb_checkpoints/
+*.executed.ipynb
+*.failed.ipynb
