@@ -1,8 +1,10 @@
 # 5min_momentum
 
 Five-minute Alpaca bars, historical S&P 500 membership, and next-session
-open-to-close long/short momentum research. The current phase is workspace and
-methodology review. No new strategy fit is part of the cleanup.
+open-to-close long/short momentum research. Current work: review completed RET tuning, the corrected pairwise ranker,
+and protective-stop/cost experiments on the 42-feature panel. ML experiments
+retain 100-member ensembles, 12/3 WFO and N=2/3. Network and one-minute work remain
+deferred. Historical completed model and feature releases are immutable.
 
 Canonical source: `Finance-Working-Files/Investments_2026/5min_momentum`.
 Local `data/` and `.venv/` point to private storage under
@@ -30,6 +32,11 @@ python3.14 -m venv .venv
 | `notebooks/06_build_volume_and_overnight_features.ipynb` | Inspect pinned inputs; no automatic rebuild |
 | `notebooks/07_train_xgb_ret_volume_overnight.ipynb` | Completed N=2/3 results, importance and explained variance |
 | `notebooks/09_train_xgb_ret_joint.ipynb` | Joint original/network momentum + volume + overnight experiment and comparison |
+| `notebooks/10_train_xgb_ret_rich_path.ipynb` | Joint30 vs 42-input five-minute path model; N=2/3, importance and explained variance |
+| `notebooks/11_ret_tuning_and_ranker.ipynb` | Tuned RET and untuned ranker on 42 frozen inputs, with historical RET42 reference |
+| `notebooks/12_ranker_portfolio.ipynb` | Completed ranker with corrected top/bottom selector and equal-N portfolio stopping |
+| `notebooks/13_stop_overlays.ipynb` | ATR, opening-gap and hybrid stops; standard 10bp per entry/exit side on frozen policies |
+| `notebooks/14_stop_cost_recalibration.ipynb` | Stops recalibrated separately at 5/10/20bp per side; N=2/3 and frozen-policy comparison |
 
 One runner replaces seven separate runners:
 
@@ -50,8 +57,14 @@ five-minute bars; 06/07 inspect derived artifacts. No one-minute work is added.
 | `network_paper_features.py`, `build_network_paper_features.py` | Eight individual momentum inputs; no graph/OLS |
 | `volume_features.py`, `build_volume_overnight_features.py` | Six relative-volume inputs and opening gap |
 | `joint_features.py` | Join the two frozen feature blocks; remove exact duplicates without outcome-based selection |
+| `rich_5min_features.py` | Twelve prior-close path features, dense clocks, strict causal references and exact cohort preservation |
 | `ret_backtest.py` | Labels, folds, class payoffs and portfolio accounting; no fitting entry point |
-| `train_xgb_ret_ensemble.py`, `xgb_validation_stopping.py` | Shared 100-member engine with explicit momentum8/combined15 contracts |
+| `train_xgb_ret_ensemble.py`, `xgb_validation_stopping.py` | Shared 100-member engine with explicit momentum8/combined15/joint30/path42 contracts |
+| `learner_experiments.py` | Parallel 24-setting RET tuning and fixed pairwise ranking protocol; shared CPU scheduler and result inspection |
+| `train_ranker_portfolio.py`, `portfolio_stopping.py` | Corrected full-candidate, fixed-date portfolio validation and shared selector |
+| `stop_loss_math.py`, `backtest_stop_overlays.py` | Prior-year ATR/gap/hybrid calibration, first-touch replay and exact coverage ledgers |
+| `trading_costs.py`, `report_stop_costs.py` | Standard 10bp per executed side, actual exit-notional costs and frozen-fill reports |
+| `recalibrate_stop_costs.py` | Cost-specific 12/3 stop calibration and comparison against original frozen stops |
 | `research_checks.py`, `audit_research.py` | Strict guards and independent frozen-run inspection |
 | `analyze_volume_overnight_results.py` | All-model gain and held-out return-fit figures |
 | `download_published_5min.py`, `prepare_published_sp500.py`, `gcs_readonly.py` | Pinned read-only ingestion and selection |
@@ -65,6 +78,22 @@ automatically executes notebook 09, including importance and explained variance.
 
 The shared trainer exposes `--help`. A new implementation requires a new private
 run directory; old checkpoints/configurations cannot be silently mixed with it.
+
+The new run uses `--experiment path42`, no start gate, the same ten workers,
+zero available-memory threshold and no round/RAM/runtime ceilings. Validation
+patience is thirty. Its feature release is `data/features/10_rich_5min_path_v1`;
+its private run is `data/models/10_xgb_ret_rich_path100_v1`. Completion automatically
+executes notebook 10. Inspection with `scripts/run_notebook.py 10` never fits or
+rebuilds absent releases. The original joint30 panel, models and reports remain
+unchanged.
+
+The two-stream experiment uses `train_xgb_ret_ensemble.py --mode comparison`
+with private run directory `data/models/11_ret_ranker_parallel_v1`. It evaluates
+2,880 past-only tuning fits and 8,000 final members across the two experiments.
+Ten CPU workers are shared, without fixed RAM/round/time ceilings. Final RET
+member row splits remain unchanged; ranker splits use whole dates. This
+validation difference is explicit in notebook 11. Its source stays output-free;
+completion writes the private comparison and importance/RET-EV plots automatically.
 
 ## Private data and history
 
@@ -89,4 +118,35 @@ retained. Refactoring does not relabel old results as outputs of new code.
 
 Licensed data, models, executed outputs, credentials and `.venv` remain excluded
 from Git. Cloud operations are read/download only. Notify before downloads over
-50 GB. No upload or GitHub publication is part of this cleanup.
+50 GB. GitHub publication contains reviewed source and output-free notebooks only.
+
+Notebook 12 inspects the corrected portfolio-stopped ranker (same learner/features/100-member 12/3 WFO). Its fixed complete-outcome validation date policy and full trace ledger are specified in docs/RESEARCH_CONTRACT.md. Existing RET runs use pinned sources and continue independently.
+
+
+## Completed experiments and cost reporting
+
+RET tuning and both ranking protocols have completed their original schedules.
+The corrected ranker has 100 members for each of forty quarters. Inspection
+reports, stopping traces, importance plots and comparison audits remain private.
+No learner parameters, seed/split schedules or completed releases were changed
+by the stop and transaction-cost experiments.
+
+Performance standard: **10bp per executed entry/exit side**. Entry and actual
+exit dollar notionals both pay the cost, including stopped exits. At 100% gross,
+a flat round trip costs approximately 20bp of equity. Five/ten/twenty-bp
+sensitivities and cost-specific stop calibrations retain the original signals,
+weights, WFO dates and conditional observation masks. Notebook 13 keeps the
+original 1bp stop calibration; notebook 14 recalibrates at each scenario's cost.
+Neither inspection notebook starts fits or rebuilds missing releases.
+
+```sh
+.venv/bin/python -B scripts/run_notebook.py 12
+.venv/bin/python -B scripts/run_notebook.py 13
+.venv/bin/python -B scripts/run_notebook.py 14
+```
+
+Stop outputs are versioned under `data/backtests/13_stop_overlays_v1` and
+`data/backtests/14_stop_cost_recalibration_v1`; cost reports and private executed
+notebooks are under `data/reports`. See the research contract for calibration,
+unknown-outcome, warm-up and date-mask rules. Aggregate assumed costs do not
+certify opening/stop fills, complete tradability, PIT membership or borrow.
