@@ -5,7 +5,7 @@ module has no training entry point and does not mutate feature specifications.
 """
 from __future__ import annotations
 from pathlib import Path
-import json, os, resource, sys, signal, time, hashlib
+import json, os, resource, sys, signal, time, hashlib, subprocess
 import duckdb
 import numpy as np
 import pandas as pd
@@ -96,6 +96,23 @@ def class_payoffs(training, expected_dates=None):
         raise ValueError("Undefined class payoffs.")
     return mu,daily,complete
 
+def select_portfolio_indices(scores,security_ids,n):
+    """One outcome-blind selector for fitting diagnostics and final accounting."""
+    if n not in (2,3):
+        raise ValueError("The approved portfolios use 2 or 3 stocks per side.")
+    scores=np.asarray(scores,dtype=float)
+    ids=np.asarray(security_ids)
+    if scores.ndim!=1 or ids.ndim!=1 or len(scores)!=len(ids) or len(scores)<2*n:
+        raise ValueError("Invalid portfolio candidates or insufficient forecasts.")
+    if not np.isfinite(scores).all() or pd.isna(ids).any():
+        raise ValueError("Finite scores and security IDs are required.")
+    ids=ids.astype(str)
+    if len(np.unique(ids))!=len(ids):
+        raise ValueError("Duplicate security IDs within a trading date.")
+    order=np.lexsort((ids,-scores))
+    return order[:n],order[-n:]
+
+
 def portfolio_days(predictions,calendar,n):
     """Select using scores only, then attach outcomes; never replace missing exits."""
     if n not in (2,3):
@@ -112,9 +129,9 @@ def portfolio_days(predictions,calendar,n):
             daily.append(dict(trade_date=date,n_per_side=n,pnl_status="cash_insufficient_forecasts",
                 gross_return=0.0,trade_notional=0.0,selected_positions=0,missing_positions=0))
             continue
-        ranked=frame.sort_values(["ret_score","security_id"],ascending=[False,True])
-        long=ranked.iloc[:n].copy()
-        short=ranked.iloc[-n:].copy()
+        li,si=select_portfolio_indices(frame.ret_score,frame.security_id,n)
+        long=frame.iloc[li].copy()
+        short=frame.iloc[si].copy()
         long["weight"]=0.5/n
         short["weight"]=-0.5/n
         chosen=pd.concat([long,short],ignore_index=True)
@@ -146,7 +163,9 @@ def performance(returns):
         annual_compound=float(equity[-1]**(252/len(values))-1) if equity[-1]>0 else None,
         max_drawdown=float(np.max(1-equity/peak)),win_fraction=float((values>0).mean()))
 
-def summarize(run):
+def summarize(run, *, score_type="ret"):
+    if score_type not in ("ret","ranking"):
+        raise ValueError("Declare RET return probabilities or uncalibrated ranking scores.")
     paths=[run/"folds"/f["fold_id"]/"predictions.parquet" for f in folds()]
     predictions=pd.concat([pd.read_parquet(p) for p in paths],ignore_index=True)
     if predictions.duplicated(["security_id","trade_date"]).any():
@@ -196,18 +215,24 @@ def summarize(run):
             rec.update(performance(book.loc[known,"net_return_5bps"]))
         fold_metrics.append(rec)
     observed=predictions[predictions.realized_class.notna()].copy()
-    y=observed.realized_class.astype(int).to_numpy()-1
-    probs=observed[[f"p_class_{k}" for k in range(1,11)]].to_numpy()
-    logloss=float(-np.log(np.maximum(probs[np.arange(len(y)),y],1e-12)).mean())
-    brier=float(np.mean(np.sum((probs-np.eye(10)[y])**2,axis=1)))
+    if score_type=="ret":
+        y=observed.realized_class.astype(int).to_numpy()-1
+        probs=observed[[f"p_class_{k}" for k in range(1,11)]].to_numpy()
+        logloss=float(-np.log(np.maximum(probs[np.arange(len(y)),y],1e-12)).mean())
+        brier=float(np.mean(np.sum((probs-np.eye(10)[y])**2,axis=1)))
+        accuracy=float((probs.argmax(axis=1)==y).mean())
+    else:
+        if "ranking_score" not in predictions or not np.array_equal(predictions.ret_score,predictions.ranking_score):
+            raise ValueError("Ranking scores must be explicitly marked; legacy ret_score is an accounting alias, not a return forecast.")
+        logloss=brier=accuracy=None
     daily_ic=[]
     for date,frame in predictions[predictions.future_oc_return.notna()].groupby("trade_date"):
         if frame.ret_score.nunique()>1 and frame.future_oc_return.nunique()>1:
             daily_ic.append(dict(trade_date=date,rank_ic=frame.ret_score.corr(frame.future_oc_return,method="spearman")))
     ic_frame=pd.DataFrame(daily_ic,columns=["trade_date","rank_ic"])
     classification=dict(predictions=len(predictions),labelled_predictions=len(observed),
-        logloss=logloss,uniform_probability_logloss=float(np.log(10)),brier=brier,
-        accuracy=float((probs.argmax(axis=1)==y).mean()),
+        logloss=logloss,uniform_probability_logloss=float(np.log(10)) if score_type=="ret" else None,brier=brier,
+        accuracy=accuracy,
         mean_daily_rank_ic=float(ic_frame.rank_ic.mean()) if len(ic_frame) else None)
     predictions.to_parquet(run/"predictions.parquet",index=False)
     positions.to_parquet(run/"positions.parquet",index=False)
@@ -215,7 +240,7 @@ def summarize(run):
     metrics.to_parquet(run/"portfolio_comparison.parquet",index=False)
     pd.DataFrame(fold_metrics).to_parquet(run/"portfolio_by_quarter.parquet",index=False)
     ic_frame.to_parquet(run/"daily_rank_ic.parquet",index=False)
-    save_json(run/"RESULTS.json",dict(status="complete",classification=classification,
+    save_json(run/"RESULTS.json",dict(status="complete",classification=classification,score_type=score_type,
         evaluation_start=EVALUATION_START,evaluation_end_exclusive=EVALUATION_END,
         comparison=metrics.to_dict("records"),
         limitations=[

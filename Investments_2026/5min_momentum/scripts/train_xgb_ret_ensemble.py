@@ -31,8 +31,10 @@ from build_volume_overnight_features import MODEL_FEATURES as COMBINED_FEATURES
 from build_network_paper_features import MODEL_FEATURES as NETWORK_FEATURES
 from build_momentum_features import session_calendar
 from joint_features import MODEL_FEATURES as JOINT_FEATURES
+from rich_5min_features import MODEL_FEATURES as PATH_MODEL_FEATURES, PATH_FEATURES
 from xgb_validation_stopping import train_until_validation_stops
 EXPERIMENTS = {
+    "path42": dict(features=tuple(PATH_MODEL_FEATURES),feature_directory="10_rich_5min_path_v1",version="xgb_ret_rich_5min_path_100_v1"),
     "joint30": dict(features=tuple(JOINT_FEATURES),feature_directory="09_joint_momentum_volume_gap_v1",version="xgb_ret_joint_unique_100_v1"),
     "momentum8": dict(features=tuple(NETWORK_FEATURES), feature_directory="05_network_individual_8_v1", version="xgb_ret_shared_network8_v3"),
     "combined15": dict(features=tuple(COMBINED_FEATURES), feature_directory="06_momentum_volume_overnight_v1", version="xgb_ret_shared_combined15_v2"),
@@ -59,6 +61,8 @@ def wait_for_start(run, config):
     require_start_time(config)
     base.save_json(run/"TRAINING_STARTED.json",dict(started_at_utc=datetime.now(timezone.utc).isoformat(),
         not_before_utc=config.get("not_before_utc"),controller_pid=os.getpid()))
+    base.save_json(run/"RUN_STATUS.json",dict(status="running",completed_members=sum(inventory(run).values()),
+        target_members=4000,workers_alive=0,controller_pid=os.getpid(),updated_at_utc=datetime.now(timezone.utc).isoformat()))
 
 
 @contextmanager
@@ -79,7 +83,8 @@ def validate_matrix(values, features):
     if values.ndim!=2 or values.shape[1]!=len(features) or np.isinf(values).any():
         raise ValueError("Wrong feature matrix shape or infinite input.")
     for i, name in enumerate(features):
-        if name!="overnight_gap" and not np.isfinite(values[:,i]).all():
+        missing_allowed = name=="overnight_gap" or (tuple(features)==tuple(PATH_MODEL_FEATURES) and name in PATH_FEATURES)
+        if not missing_allowed and not np.isfinite(values[:,i]).all():
             raise ValueError("Unexpected missing input: "+name)
 
 
@@ -120,7 +125,8 @@ def checkpoint_complete(run,fold_id,member):
     value=json.loads(metadata.read_text())
     if value["member"]!=member or value["fold_id"]!=fold_id:
         raise ValueError("Checkpoint identity mismatch.")
-    for suffix,key in [(".ubj","model_sha256"),(".npz","probabilities_sha256")]:
+    prediction_key="prediction_sha256" if "prediction_sha256" in value else "probabilities_sha256"
+    for suffix,key in [(".ubj","model_sha256"),(".npz",prediction_key)]:
         path=prefix.with_suffix(suffix)
         if not path.exists() or base.fingerprint(path)!=value[key]:
             raise ValueError(f"Incomplete/corrupt checkpoint: {path}")
@@ -350,6 +356,7 @@ def run_tasks(run,tasks,config):
                     completed_by_fold=counts,workers_alive=len(active),
                     peak_combined_rss_gib=peak,updated_at_utc=datetime.now(timezone.utc).isoformat())
                 base.save_json(run/"PROGRESS.json",status)
+                base.save_json(run/"RUN_STATUS.json",status)
                 print(f"PROGRESS {complete}/4000 members; "
                       f"{status['complete_member_sets']}/40 complete quarters; "
                       f"{len(active)} workers; {rss/1024**3:.2f} GiB RSS",flush=True)
@@ -477,13 +484,47 @@ def snapshot_source(run):
         shutil.copyfile(path,destination/path.name)
 
 
+def prepare_path_panel(project,run):
+    release=project/"data/features/10_rich_5min_path_v1"
+    manifest=json.loads((release/"MANIFEST.json").read_text())
+    source=release/"supervised_panel.parquet"
+    if (manifest["model_features"]!=PATH_MODEL_FEATURES or len(PATH_MODEL_FEATURES)!=42
+        or not manifest["summary"]["cohort_labels_outcomes_identical"]
+        or not manifest["summary"]["source_features_bitwise_preserved"]
+        or manifest["summary"]["exact_duplicate_features_removed"]):
+        raise ValueError("Rich five-minute feature contract failed preservation checks.")
+    source_hash=base.fingerprint(source)
+    if source_hash!=manifest["output_sha256"]["supervised_panel.parquet"]:
+        raise ValueError("Rich path panel changed after release.")
+    if (run/"PANEL.json").exists():
+        prior=json.loads((run/"PANEL.json").read_text())
+        if (prior["path_panel_sha256"]!=source_hash
+            or prior["feature_manifest_sha256"]!=base.fingerprint(release/"MANIFEST.json")
+            or base.fingerprint(run/"supervised_panel.parquet")!=source_hash):
+            raise ValueError("Prepared rich path panel differs from its immutable release.")
+        return
+    original=project/"data/models/09_xgb_ret_joint100_v1"
+    if base.fingerprint(original/"supervised_panel.parquet")!=manifest["input_hashes"]["baseline_panel_sha256"]:
+        raise ValueError("Comparison baseline panel differs from pinned joint30 source.")
+    shutil.copyfile(source,run/"supervised_panel.parquet")
+    for name in ("wfo_calendar.parquet","label_coverage.parquet","outcome_status_counts.parquet"):
+        shutil.copyfile(original/name,run/name)
+    info=json.loads((original/"PANEL.json").read_text())
+    info.update(feature_manifest_sha256=base.fingerprint(release/"MANIFEST.json"),
+        path_panel_sha256=source_hash,rows=manifest["summary"]["rows"],model_features=PATH_MODEL_FEATURES,
+        forecast_cohort_identical=True,labels_and_outcomes="Copied unchanged from completed joint30.",
+        missing_policy=manifest["missing_policy"],one_minute_data_used=False)
+    base.save_json(run/"PANEL.json",info)
+    snapshot_source(run)
+
+
 
 
 def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="combined15",not_before=None,minimum_available_memory_gib=None):
     spec=EXPERIMENTS[experiment]
     features=list(spec["features"])
     if minimum_available_memory_gib is None:
-        minimum_available_memory_gib=0.0 if experiment=="joint30" else 2.0
+        minimum_available_memory_gib=0.0 if experiment in ("joint30","path42") else 2.0
     if minimum_available_memory_gib<0:
         raise ValueError("Available-memory threshold must be nonnegative.")
     if not_before is not None and datetime.fromisoformat(not_before).tzinfo is None:
@@ -507,7 +548,8 @@ def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="com
         memory_limit_gib=None,minimum_available_memory_gib=minimum_available_memory_gib,hard_stop_utc=hard_stop,not_before_utc=not_before,
         model_features=features,n_per_side=[2,3],gross_exposure=1.0,
         information_cutoff=("Previous completed close" if experiment=="momentum8" else "Current opening event; optimistic same-price fill"),
-        missing_policy="Finite historical inputs; native missing handling for opening gap only.",
+        missing_policy=("Original 29 historical inputs finite; native NaN for twelve added path inputs and opening gap. No row filtering or price filling."
+            if experiment=="path42" else "Finite historical inputs; native missing handling for opening gap only."),
         payoff_policy="Common full 12-month historical true-class daily means, frozen per outer quarter.",
         feature_manifest_sha256=base.fingerprint(project/"data/features"/spec["feature_directory"]/"MANIFEST.json"),
         stopping_code_sha256=base.fingerprint(Path(__file__).with_name("xgb_validation_stopping.py")),
@@ -532,7 +574,7 @@ def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="com
     signal.signal(signal.SIGTERM,terminate_run)
     records=[]
     try:
-        {"combined15":prepare_combined_panel,"momentum8":prepare_network_panel,"joint30":prepare_joint_panel}[experiment](project,run)
+        {"combined15":prepare_combined_panel,"momentum8":prepare_network_panel,"joint30":prepare_joint_panel,"path42":prepare_path_panel}[experiment](project,run)
         wait_for_start(run,config)
         started=time.monotonic()
         if not (run/"BENCHMARK.json").exists():
@@ -585,6 +627,8 @@ def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="com
                 resume_command="Rerun with the same run directory; --hard-stop-utc is optional and has no default cutoff."))
             print("CHECKPOINTED",(run/"RUN_STATUS.json").read_text(),flush=True)
             return
+        base.save_json(run/"RUN_STATUS.json",dict(status="finalizing",completed_members=4000,
+            target_members=4000,workers_alive=0,updated_at_utc=datetime.now(timezone.utc).isoformat()))
         for fold in base.folds():
             if not (run/"folds"/fold["fold_id"]/"FOLD.json").exists():
                 finalize_fold(run,fold)
@@ -595,6 +639,8 @@ def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="com
         results["total_member_models"]=4000
         results["limitations"]=[s for s in results["limitations"] if "Single-seed" not in s]
         results["limitations"].append(("Eight prior-close momentum inputs." if experiment=="momentum8" else "Different momentum normalizations, volume and current opening-gap inputs. Joint30 adds the original fifteen features without duplicate-valued columns. Same-opening-price signal and fill are optimistic research; no one-minute data are used."))
+        if experiment=="path42":
+            results["limitations"].append("Twelve added prior-close five-minute path inputs; unchanged joint30 cohort and learner. Stricter references yield native NaNs rather than excluded forecasts. Comparison uses repeatedly viewed development history.")
         base.save_json(run/"RESULTS.json",results)
         base.save_json(run/"RUN_STATUS.json",dict(status="complete",completed_members=4000,
             target_members=4000,ensemble_members_per_quarter=100,workers_alive=0,
@@ -618,7 +664,7 @@ if __name__=="__main__":
     parser.add_argument("--experiment",choices=sorted(EXPERIMENTS),default="combined15")
     parser.add_argument("--project",type=Path,default=Path(__file__).resolve().parents[1])
     parser.add_argument("--run-dir",type=Path,required=True)
-    parser.add_argument("--mode",choices=["run","batch"],default="run")
+    parser.add_argument("--mode",choices=["run","batch","comparison","variant_batch","tune","variant_finalize"],default="run")
     parser.add_argument("--fold-id",default="2017Q1")
     parser.add_argument("--members",default="0,1")
     parser.add_argument("--workers",type=int,default=WORKERS)
@@ -626,7 +672,10 @@ if __name__=="__main__":
     parser.add_argument("--minimum-available-memory-gib",type=float,default=None,help="0 disables the memory-headroom launch restriction; this is not a model RAM ceiling.")
     parser.add_argument("--hard-stop-utc",default=HARD_STOP_UTC)
     args=parser.parse_args()
-    if args.mode=="batch":
+    if args.mode in ("comparison","variant_batch","tune","variant_finalize"):
+        import learner_experiments
+        learner_experiments.dispatch(args)
+    elif args.mode=="batch":
         batch_worker(args.run_dir,args.fold_id,[int(m) for m in args.members.split(",")])
     else:
         if not args.run_dir.resolve().is_relative_to((args.project/"data").resolve()):
@@ -634,6 +683,6 @@ if __name__=="__main__":
         with controller_lock(args.run_dir):
             full_run(args.project,args.run_dir,args.hard_stop_utc,args.workers,args.experiment,
                      args.not_before_utc,args.minimum_available_memory_gib)
-            if args.experiment=="joint30" and (args.run_dir/"RESULTS.json").exists():
+            if args.experiment in ("joint30","path42") and (args.run_dir/"RESULTS.json").exists():
                 subprocess.run([sys.executable,"-B",str(Path(__file__).with_name("run_notebook.py")),
-                    "09","--project",str(args.project)],check=True)
+                    "10" if args.experiment=="path42" else "09","--project",str(args.project)],check=True)

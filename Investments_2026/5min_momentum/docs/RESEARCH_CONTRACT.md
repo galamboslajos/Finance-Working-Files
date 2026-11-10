@@ -1,5 +1,155 @@
 # Research contract
 
+## Corrected ranker authorized 2026-11-10
+
+Run `data/models/12_ranker_portfolio100_v1` changes only validation selection and stopping relative to ranker v1. Keep all 42 inputs, labeled fitting pools, pairwise parameters and both LambdaRank normalizations, exact member seeds and whole-date split fingerprints, 100 members × 40 quarters, 12/3 WFO, and 30-round patience. No round, RAM, headroom or wall-clock ceilings. No one-minute work or ranker tuning. Existing RET remains uninterrupted under its pinned source/configuration.
+
+Validation and final portfolios share `select_portfolio_indices`: descending score, ascending security ID, first/last N, disjoint equal-weight legs with 50% exposure each. For each authorized validation date, predict the full forecast candidate cohort, including unknown-outcome candidates. Before fitting, fix the primary metric date set to dates where every candidate outcome is observed and finite. Exclude incomplete dates only from the conditional validation statistic; preserve all predictions, unknown selected outcomes, fixed date exclusions and exact candidate ledgers. Unknown labels remain excluded from fitting, as before. The metric never changes its date mask with the model score, selected names or boosting round.
+
+For N=2/3, R_N = 0.5 × mean(long returns) − 0.5 × mean(short returns). Maximize the equal-day mean of (R_2 + R_3)/2 in decimal gross-return units. Neither N is preferred. Costs at 1 bp/side and unknown-exit counts are secondary diagnostics. Keep random whole-date validation, not a silently substituted chronological split. Save every metric round, including the full patience interval, per-date returns and coverage.
+
+Two lower-priority one-thread workers run independently alongside RET’s existing ten. This is CPU scheduling only; there are no memory/time ceilings. Completed member and trace checksums are committed last and resume without refitting. Source notebook 12 is output-free and inspection cannot train. Completion automatically generates common-observed-date comparisons against original ranker and historical RET42, feature gain and stopping diagnostics. Return EV/R² is undefined for uncalibrated rank scores. All prior execution, membership and reused-history qualifications remain.
+
+## Ranker v1 audit — 2026-11-10 (no experiment change)
+
+The completed run-11 ranker remains an immutable generic baseline. Its stopping
+loop is correct, but its short-score tie selection differs from shared portfolio
+accounting, and discounted ordinal NDCG@3 does not match equal-weight N=2/3
+portfolio utility. Full evidence is in
+`data/reports/11_ranker_objective_audit_20261110/AUDIT_REPORT.html`.
+
+Before ranker tuning, use a new explicitly versioned protocol with one shared
+security-ID-aware selector and declare a symmetric N=2/3 stopping metric. A
+return-based metric must score the full validation forecast cohort before
+attaching outcomes and explicitly handle unknown selected exits and consistent
+observation sets. The old labeled-pool validation frame cannot silently serve
+as a complete economic evaluation universe. Keep original split seeds, 100
+members, 12/3 WFO and 30-round patience unless explicitly authorized otherwise.
+Record per-round paths, including the full patience interval. Isolate metric
+corrections from objective changes and hyperparameter search; do not infer from
+these diagnostics that increasing training length improves outer returns.
+The RET experiment continues under its pinned sources and configuration.
+
+## Parallel RET tuning and ranking baseline authorized 2026-11-09
+
+Two streams only, on the immutable completed 42-feature panel:
+`data/models/11_ret_ranker_parallel_v1/ret_tuned` and `ranker`. No new network
+inputs, feature construction, price downloads or one-minute work. Each final
+experiment has 100 members × 40 quarters, unchanged 12/3-month WFO, N=2/3,
+50% long/50% short exposure, target outcomes, forecast cohort and missing exits.
+
+The RET search is the complete 24-setting grid: depth {2,3,4}, min_child_weight
+{10,20}, lambda {1,10}, colsample_bytree {0.8,1}. Eta .05, subsample .8, max_bin
+64 and the ten-class objective stay fixed. The original setting is included.
+Each setting uses three fixed independent 80/20 whole-date inner splits within
+the past 12-month training window; choose the lowest mean best validation
+mlogloss, with deterministic first-candidate ties. All outer-quarter outcomes
+are excluded from selection. This gives **2,880 exploratory fits**, separately
+reported from the **4,000 final ensemble members**. Each fit has 30-round
+validation patience and no boosting-round ceiling. Search validation scores
+are selection statistics, not an unbiased holdout assessment.
+
+The final tuned RET ensembles retain the completed RET42 run's exact random
+80/20 stock-row member splits and booster seeds. No full-pool refit follows
+early stopping. All 100 probability vectors are averaged before the original
+full-training quarterly class-payoff mapping. The report checks all 4,000
+seed/split/forecast-key fingerprints and forty payoff vectors against RET42.
+
+The untuned ranker uses `rank:pairwise`, the baseline tree settings, mean pair
+sampling with eight pairs per sample, and both native lambda normalizations.
+Training labels are dense ascending ranks of observed future open-to-close
+returns within each training date, keeping exact ties together. Queries are
+complete dates; every member has a fresh random 80/20 **whole-date** split.
+Unknown target outcomes cannot train and never remove forecast candidates.
+Validation maximizes the equal-date average of linear-gain top-three NDCG and
+reversed-score bottom-three NDCG, stopping after 30 non-improving rounds.
+All-tied outcome queries score zero. No ranker hyperparameters are tuned here.
+
+Ranker members output margins. Convert each member's margins to within-date
+percentiles with average ties, then average all 100 members and select N=2/3.
+The saved `ranking_score` is also stored as legacy `ret_score` solely for shared
+portfolio sorting. It is **not a return forecast**. Do not calculate return
+EV/R² or fake class probabilities/log loss/accuracy from uncalibrated scores.
+Observed-date rank IC, selected P&L and loss-based training gain remain valid
+diagnostics. Gain shares from ranking and classification use different losses.
+If a ranker member has no splits, it uses no features and contributes zero gain
+shares; the number of constant members is reported explicitly, without retuning.
+
+The ranker changes both objective and inner validation protocol relative to RET.
+No extra untuned grouped-RET control was requested. The existing RET42 run is a
+historical reference; this is not a fully isolated objective-only comparison.
+
+One shared ten-worker CPU scheduler alternates between both streams; completed
+tuning for a quarter releases its 100 final RET fits. Free slots go to remaining
+work. Ten workers match this machine's ten CPU cores. There are no fixed RAM,
+available-memory, boosting-round or wall-clock ceilings. Every completed member
+and tuning trial is checkpointed; stopped work resumes without changing config.
+Tuning settings/scores are committed per quarter. Sources, inputs and configs
+are pinned before workers start; completed releases remain untouched.
+
+Output-free notebook 11 inspects only. On completion it compares all three
+models × both N values on the same observed dates, with omitted/cash dates
+recorded. RET EV uses matched observed stock-days; ranker return EV is undefined.
+Same-opening knowledge/fill, retrospective membership/vintages, unknown exits
+and repeatedly viewed development history remain unresolved limitations.
+
+## Rich five-minute path experiment authorized 2026-11-09
+
+`path42` adds twelve dimensionless prior-close inputs to all thirty frozen
+`joint30` inputs. Use the same five-minute member-day download, raw adjustment
+for intraday ratios and dollar activity. No one-minute data, new downloads,
+cohort changes, duplicate-valued columns or target-based feature selection.
+All original columns, labels, outcomes and clocks are copied exactly.
+
+Let r be log(first-bar close / first-bar open), then log(close / preceding
+scheduled close). This excludes overnight moves. Let V = sum(r²), N be the
+actual session's scheduled slot count, and L be its last twelve slots.
+
+| Added feature | Definition |
+| --- | --- |
+| `path_rv_relative_10d` | sqrt(V/N) / median sqrt(V/N) in preceding ten scheduled sessions |
+| `path_downside_variance_share` | sum(min(r,0)²) / V |
+| `path_signed_efficiency` | sum(r) / sum(abs(r)) |
+| `path_late_variance_concentration` | sum over L of r² / V × N/12 |
+| `path_late_vs_early_return` | (last twelve increments − first twelve increments) / sqrt(V) |
+| `path_max_drawdown_scaled` | Maximum log drawdown in initial-open/observed-close path / sqrt(V); no inferred high/low ordering inside a candle |
+| `path_vwap_above_fraction` | Fraction of closes above cumulative raw share-weighted VWAP through that slot |
+| `path_return_autocorr_1` | Pearson correlation of adjacent scheduled intraday return pairs |
+| `path_extrema_time_balance` | (Mean index of maximum-high slots − mean index of minimum-low slots) / (N−1); average ties, no intrabar sequencing |
+| `path_return_volume_alignment` | Pearson correlation of r and log(1+q), where q is stock/slot-relative dollar activity |
+| `path_late_relative_activity` | sum over L of q / sum all q × N/12 |
+| `path_signed_late_relative_activity` | sum over L of sign(r)q / sum over L of q |
+
+Dollar activity is raw VWAP × shares. Its q reference is the median for the
+same elapsed-from-open five-minute slot in the preceding ten **calendar
+exchange sessions**, excluding current. Every expected observation must be
+valid and source-matched. Afternoon slots structurally absent on early closes
+do not count as missing observations. The RMS reference requires ten valid
+source-matched sessions. These stricter references apply only to the additions;
+the old volume inputs retain their frozen historical values and policy.
+
+Missing scheduled slots, duplicate/invalid bars, incomparable provenance,
+zero denominators and undefined correlations produce native NaNs in affected
+new inputs. Missing whole days never pull older observations into the window.
+No new forecast eligibility gate, filling, epsilon denominator or tail clipping
+is introduced. Exact per-row flags and feature NaN masks remain in
+`daily_path_features.parquet`. Present five-minute buckets with 1–4 source
+minutes remain admitted, consistent with the fixed baseline cohort.
+
+Use `data/features/10_rich_5min_path_v1`, model run
+`data/models/10_xgb_ret_rich_path100_v1`, and output-free notebook 10. New release
+fingerprints pin the builder, calendar code, baseline, and every raw input file.
+The same learner parameters, seed/split schedule, 100 fresh members per quarter,
+40 quarters, 12/3 WFO, 30-round validation patience and N=2/3 equal-weight legs
+remain. No round, RAM, memory-headroom or wall-clock ceilings. No new start gate.
+
+Compare against completed joint30 on exact matched stock-days for return EV/R²
+and common observed dates across all four model/N portfolios, with omissions
+exported. Check all 4,000 seed/split/forecast-row fingerprints and forty payoff
+vectors. Gain is training importance; correlated features can share it. This
+experiment does not remedy retrospective membership, reused development
+history, unknown selected exits or optimistic same-opening information/fills.
+
 ## Joint experiment authorized 2026-11-06
 
 `joint30` combines all fifteen original momentum/state inputs with the eight
@@ -128,3 +278,32 @@ variance. Within-day demeaning is diagnostic only, never used to adjust a trade.
 fresh final holdout. Do not select features, N or filters on that history and
 then call it untouched final evaluation. Numerical invariants, design choices,
 source limitations and execution assumptions must be reported separately.
+
+
+## Three fixed protective-stop overlays authorized 2026-11-10
+
+New immutable private release `data/backtests/13_stop_overlays_v1` replays all ten completed position ledgers, without ML fits, new signals, replacement positions or one-minute data. Initial saved weights remain 50% long/50% short. Independent stops leave cash and can create net exposure.
+
+Three scales: prior ten-session ATR (simple mean true range), absolute opening gap, and max(ATR, absolute gap). Distance is k times the scale; long barrier is entry minus distance, short barrier entry plus distance. All prices use the same published `adjustment=all` basis as historical target anchors. This preserves adjustment-vintage and retrospective PIT qualifications; gap is an adjusted-return gap, not a certified contemporaneous unadjusted price gap. Dense scheduled XNYS sessions, full valid price references and homogeneous historical source tags are required; no fills or compressed dates. Today's H/L/C cannot enter today's distance.
+
+At each quarter start, calibrate k using only the preceding twelve calendar months of saved out-of-sample trades. Maximize equal-day mean net return at 1 bp/side, averaging N=2 and N=3 equally. Search all positive empirical first-touch adverse-extreme/bar-open breakpoints, with touch inclusive; no zero-width or machine-epsilon beyond-extreme candidates. No-stop is included and wins numerical ties; wider distances win other numerical ties. One k per family/model/quarter is shared by both N and both directions. Freeze for the next three months. First twelve months are explicitly calibration warm-up: 2017 for full-history releases, 2022 for the bounded validation-only release. This overlay calibration is a new exit policy, not a change to ML training/splits or a new untouched holdout.
+
+Fix each model's evaluation/calibration date cohort across all three scales, no-stop and both N before selecting k: every selected original exit observed, entire scheduled five-minute path valid, ATR positive, adjusted gap finite/nonzero, and no-stop return consistent with saved outcome. Original cash dates remain cash. Export all selected-row reasons and omitted comparison dates; never remove forecasts or replace selected stocks. This stronger execution cohort is a conditional comparison, not a full investable history or a fair cross-model common-date ranking.
+
+Protective stop is active from the optimistic opening entry, including the first five-minute bar. A touch fills at barrier; a bar opening beyond it fills at worse open. No take-profit or trailing order, re-entry, or extra slippage assumption. Costs use actual simulated exit notional. Missing/duplicate/invalid bars are unresolved for the primary cohort even if a tighter stop could appear to exit earlier. Partial 1–4 underlying-minute aggregations are admitted under the existing five-minute policy and flagged; path completeness refers to scheduled five-minute bars and cannot prove complete underlying trades. Opening delivery follows the assumed fill; no execution certification. Exposure duration is a bar-end approximation. Completed model/feature releases are never overwritten. Notebook 13 only reads completed results.
+
+
+## Standard performance costs authorized 2026-11-10
+
+New performance reporting uses `STANDARD_COST_BPS = 10` in `scripts/trading_costs.py`: 10 basis points per executed entry/exit dollar notional, for longs and shorts. Net return = gross return − 0.001 × total traded notional, where position notional = |initial weight| × (2 + raw entry-to-exit return). A flat round trip at 100% initial gross costs 20 basis points of equity. Costs scale with actual simulated exit prices, including stopped exits; cash is uncharged and unknown selected outcomes stay unresolved. This is an aggregate research allowance, not measured execution components or borrow.
+
+`scripts/report_stop_costs.py` writes a new immutable report `data/reports/13_stop_overlays_10bps_v1` from completed release 13, verifies its costs against saved 10bp sensitivities and position exits, and keeps the exact original observed-date masks. Notebook 13 now displays that report and explicit 10bp/side labels. Historical 1bp reports and source-calibrated stop policies remain unchanged; the stops were calibrated at 1bp/side and this update only reprices their saved fills. There are zero ML fits or stop recalibrations. Legacy pinned experiment modules retain their historical cost defaults; use the central 10bp standard explicitly in new reports. No new price data or one-minute access.
+
+
+## Cost-specific stop recalibration authorized 2026-11-10
+
+New release `data/backtests/14_stop_cost_recalibration_v1` recalibrates ATR, adjusted opening-gap and hybrid stops separately at 5, 10 and 20bp per entry/exit side. Each model/family/cost quarter maximizes the prior twelve calendar months' equal-day mean of N=2 and N=3 net returns, then freezes one multiplier shared by both N and both directions for the next three months. Positive empirical first-touch candidates, wider-distance ties, no-stop ties, first-year warm-up, five-minute fills, original cash dates and the fixed parent observation masks stay unchanged. No-stop means retain the original entry and hold to close, not skip trading. There is no new entry filter, replacement or re-entry.
+
+The completed 100-member ML models, predictions, selections, initial weights, random inner splits, 12/3 WFO and original source/price/eligibility rules remain untouched. Parent release 13's exact selected-row coverage and five-minute paths are fingerprinted; no new price construction or one-minute work. Affine cost conversion of gross first-touch responses is algebraically exact: net = gross × (1 − fee × direction) − 2 × fee × absolute weight. Dedicated tests compare it with direct cost-specific replay for both sides, test future perturbations and preserve original cash-date weighting. One-bp calibration controls must reproduce the parent policies before accepting new scenarios.
+
+Compare cost-specific stops against original 1bp-calibrated stops at the same evaluation cost and dates; report every approach and N without choosing a policy on outer-quarter outcomes. Preserve all original row/date exclusions and separately export the nine-model common-date comparison; the bounded validation-only run is separate. Recalibration changes exits through past calibration only, with zero ML fits. It cannot remove the entry and exit cost of each preserved position. Notebook 14 reads completed outputs only and never constructs missing releases.

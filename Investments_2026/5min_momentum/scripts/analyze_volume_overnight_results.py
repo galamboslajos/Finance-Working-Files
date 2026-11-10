@@ -40,11 +40,20 @@ LABELS = {
 for _h in ("1h","1d","3d","5d","10d"):
     for _kind,_label in [("z","Cross-sectional z"),("mean","Universe mean"),("std","Universe dispersion")]:
         LABELS[f"{_kind}_ret_{_h}"]=f"{_label}: {_h}"
-GROUP_COLORS = {"Original momentum":"#428577","Momentum": "#3674aa", "Volume": "#df8d31", "Opening gap": "#9962ad"}
+LABELS.update(dict(zip([
+    "path_rv_relative_10d", "path_downside_variance_share", "path_signed_efficiency",
+    "path_late_variance_concentration", "path_late_vs_early_return", "path_max_drawdown_scaled",
+    "path_vwap_above_fraction", "path_return_autocorr_1", "path_extrema_time_balance",
+    "path_return_volume_alignment", "path_late_relative_activity", "path_signed_late_relative_activity"], [
+    "Relative five-minute volatility", "Downside variance share", "Signed trend efficiency",
+    "Closing-hour variance concentration", "Late vs early return", "Scaled intraday drawdown",
+    "Time above cumulative VWAP", "Adjacent return correlation", "High vs low timing",
+    "Return/activity alignment", "Profile-relative closing activity", "Signed closing activity"])))
+GROUP_COLORS = {"Original momentum":"#428577","Momentum": "#3674aa", "Volume": "#df8d31", "Opening gap": "#9962ad", "Five-minute path":"#b85858"}
 
 
 def feature_group(name):
-    return "Momentum" if name.startswith("nm_") else "Volume" if name.startswith("vol_") else "Opening gap" if name=="overnight_gap" else "Original momentum"
+    return "Five-minute path" if name.startswith("path_") else "Momentum" if name.startswith("nm_") else "Volume" if name.startswith("vol_") else "Opening gap" if name=="overnight_gap" else "Original momentum"
 
 
 def score_returns(y, forecast):
@@ -62,7 +71,7 @@ def score_returns(y, forecast):
         rmse_bps=np.sqrt(np.mean(residual**2))*10000)
 
 
-def extract_importance(run, out):
+def extract_importance(run, out, *, allow_constant_models=False):
     import xgboost as xgb
     config = json.loads((run/"CONFIG.json").read_text())
     features = config["model_features"]
@@ -82,12 +91,12 @@ def extract_importance(run, out):
             assert model.feature_names == features
             gain, splits = model.get_score(importance_type="total_gain"), model.get_score(importance_type="weight")
             total_gain, total_splits = sum(gain.values()), sum(splits.values())
-            assert total_gain > 0 and total_splits > 0
+            assert (total_gain > 0 and total_splits > 0) or (allow_constant_models and total_gain==0 and total_splits==0)
             for name in features:
                 records.append(dict(fold_id=path.parents[1].name, member=path.stem,
                     feature=name, group=feature_group(name), total_gain=gain.get(name, 0),
-                    split_count=splits.get(name, 0), gain_share=gain.get(name, 0)/total_gain,
-                    split_share=splits.get(name, 0)/total_splits))
+                    split_count=splits.get(name, 0), gain_share=gain.get(name, 0)/total_gain if total_gain else 0.,
+                    split_share=splits.get(name, 0)/total_splits if total_splits else 0.))
             if i % 500 == 0 or i == 1:
                 print(f"Importance: {i}/4000 saved models; {time.monotonic()-started:.1f}s", flush=True)
         members = pd.DataFrame(records)
@@ -96,7 +105,11 @@ def extract_importance(run, out):
             definition="Normalize summed split gain within each saved best-iteration model; equal-weight all 4,000 models."), indent=2)+"\n")
     counts = members.groupby("fold_id").member.nunique()
     assert len(counts) == 40 and counts.eq(100).all()
-    assert np.allclose(members.groupby(["fold_id", "member"]).gain_share.sum(), 1)
+    shares=members.groupby(["fold_id", "member"]).gain_share.sum()
+    assert np.all(np.isclose(shares,1) | (allow_constant_models & np.isclose(shares,0)))
+    if allow_constant_models:
+        (out/"constant_models.json").write_text(json.dumps(dict(constant_models=int(np.isclose(shares,0).sum()),total_models=len(shares),
+            definition="A model with no splits uses no features and contributes zero to all gain shares. All 4,000 models retain equal weight."),indent=2)+"\n")
     quarterly = members.groupby(["fold_id", "feature", "group"], as_index=False)[["gain_share", "split_share"]].mean()
     summary = quarterly.groupby(["feature", "group"]).agg(
         mean_gain_share=("gain_share", "mean"), quarter_p10=("gain_share", lambda x:x.quantile(.1)),
@@ -207,7 +220,7 @@ def plot_results(importance, quarterly, metrics, annual, deciles, out):
 
     old_label,new_label=metrics.feature_set.drop_duplicates().tolist()
     colors = {old_label:"#8d9aa9",new_label:"#267ba7"}
-    labels = {name:{"momentum8":"Momentum 8","combined15":"Momentum + volume + gap (15)","joint30":"Joint momentum + volume + gap (30)"}[name] for name in colors}
+    labels = {name:{"momentum8":"Momentum 8","combined15":"Momentum + volume + gap (15)","joint30":"Joint momentum + volume + gap (30)","path42":"Joint + five-minute path (42)"}[name] for name in colors}
     fig, axes = plt.subplots(1, 2, figsize=(13, 5.1))
     for ax, scope in zip(axes, ["All observed stock-days", "Within-day cross-section"]):
         table = metrics[metrics.scope.eq(scope)].set_index("feature_set")
@@ -271,7 +284,12 @@ def plot_results(importance, quarterly, metrics, annual, deciles, out):
 
 def analyze(project,experiment="combined15"):
     project=Path(project).resolve()
-    if experiment=="joint30":
+    if experiment=="path42":
+        run=project/"data/models/10_xgb_ret_rich_path100_v1"
+        baseline=project/"data/models/09_xgb_ret_joint100_v1"
+        out=project/"data/reports/10_train_xgb_ret_rich_path/feature_diagnostics"
+        old_label,new_label="joint30","path42"
+    elif experiment=="joint30":
         run=project/"data/models/09_xgb_ret_joint100_v1"
         baseline=project/"data/models/07_xgb_ret_volume_overnight100_v1"
         out=project/"data/reports/09_train_xgb_ret_joint/feature_diagnostics"
@@ -305,7 +323,7 @@ def analyze(project,experiment="combined15"):
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--experiment",choices=["combined15","joint30"],default="combined15")
+    parser.add_argument("--experiment",choices=["combined15","joint30","path42"],default="combined15")
     parser.add_argument("--project",type=Path,default=Path(__file__).resolve().parents[1])
     args=parser.parse_args()
     analyze(args.project,args.experiment)
