@@ -1,8 +1,10 @@
 # 5min_momentum
 
 Five-minute Alpaca bars, historical S&P 500 membership, and next-session
-open-to-close long/short momentum research. Current work: review completed RET tuning, the corrected pairwise ranker,
-and protective-stop/cost experiments on the 42-feature panel. ML experiments
+open-to-close long/short momentum research. Current work: review the completed
+267-feature RET/corrected-ranker comparison against the 42-feature versions.
+The strict historical representation uses ten completed sessions and nine internal
+gaps. Earlier RET/ranker and cost experiments remain historical comparisons. ML experiments
 retain 100-member ensembles, 12/3 WFO and N=2/3. Network and one-minute work remain
 deferred. Historical completed model and feature releases are immutable.
 
@@ -37,6 +39,8 @@ python3.14 -m venv .venv
 | `notebooks/12_ranker_portfolio.ipynb` | Completed ranker with corrected top/bottom selector and equal-N portfolio stopping |
 | `notebooks/13_stop_overlays.ipynb` | ATR, opening-gap and hybrid stops; standard 10bp per entry/exit side on frozen policies |
 | `notebooks/14_stop_cost_recalibration.ipynb` | Stops recalibrated separately at 5/10/20bp per side; N=2/3 and frozen-policy comparison |
+| `notebooks/15_build_session_window_features.ipynb` | Strict ten-session / nine-gap feature panel; coverage, duplicates, units and lookahead audit before training |
+| `notebooks/16_train_session_window.ipynb` | Completed 267-feature RET/corrected-ranker comparison; N=2/3, 5/10/20bp costs, training gain and matched RET explained variance |
 
 One runner replaces seven separate runners:
 
@@ -150,3 +154,39 @@ Stop outputs are versioned under `data/backtests/13_stop_overlays_v1` and
 notebooks are under `data/reports`. See the research contract for calibration,
 unknown-outcome, warm-up and date-mask rules. Aggregate assumed costs do not
 certify opening/stop fills, complete tradability, PIT membership or borrow.
+
+
+## Strict ten-session input representation
+
+Notebook 15 inspects a new label-free feature release with 267 session-history
+columns. It uses exactly ten completed exchange sessions and nine internal gaps,
+including no price or smoothing state outside the block. Normalization uses
+only the completed block; activity references the other nine same-window days.
+Every resolved signal-day member is retained without a legacy/future-price gate.
+The independent audit and exact missing-reason ledger precede any training.
+
+```sh
+.venv/bin/python -B scripts/build_session_window_features.py
+.venv/bin/python -B scripts/audit_session_window_features.py
+.venv/bin/python -B scripts/run_notebook.py 15
+```
+
+These commands construct/audit inputs and inspect results; no ML fits occur.
+Source modules separate numerical definitions, input construction and independent
+inspection. Completed historical feature/model releases remain unchanged.
+
+
+Notebook 16 inspects the completed private run
+`16_session_window_ret_ranker100_v1`: 4,000 RET models and 4,000 corrected-ranker
+models. Both retain 100-member ensembles, 12/3 WFO, 30-round patience and fixed
+learner settings, with no tuning or arbitrary round/RAM/runtime ceilings.
+Reports cover N=2/3, 5/10/20bp per-side costs, conditional date masks, training
+gain and matched RET return EV/R². Inspection cannot train or rebuild.
+
+The 267-feature experiment excludes the trade-day opening gap. This was an
+assistant interpretation of the history constraint, rather than an explicit
+request to remove that existing input. Eligibility, normalization and
+cohort-conditioned labels also differ from the 42-feature versions. Restoring
+the opening gap as a separate 268th input is proposed and has not been
+implemented or fitted. See the clarification in `docs/AUDIT_FINDINGS.md`.
+Completed historical releases retain their original definitions.

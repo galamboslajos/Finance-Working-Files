@@ -33,7 +33,9 @@ from build_momentum_features import session_calendar
 from joint_features import MODEL_FEATURES as JOINT_FEATURES
 from rich_5min_features import MODEL_FEATURES as PATH_MODEL_FEATURES, PATH_FEATURES
 from xgb_validation_stopping import train_until_validation_stops
+from session_window_features import FEATURES as SESSION_FEATURES
 EXPERIMENTS = {
+    "session267": dict(features=tuple(SESSION_FEATURES),feature_directory="15_session_window_10_v1",version="session_window_ret100_v1"),
     "path42": dict(features=tuple(PATH_MODEL_FEATURES),feature_directory="10_rich_5min_path_v1",version="xgb_ret_rich_5min_path_100_v1"),
     "joint30": dict(features=tuple(JOINT_FEATURES),feature_directory="09_joint_momentum_volume_gap_v1",version="xgb_ret_joint_unique_100_v1"),
     "momentum8": dict(features=tuple(NETWORK_FEATURES), feature_directory="05_network_individual_8_v1", version="xgb_ret_shared_network8_v3"),
@@ -83,7 +85,7 @@ def validate_matrix(values, features):
     if values.ndim!=2 or values.shape[1]!=len(features) or np.isinf(values).any():
         raise ValueError("Wrong feature matrix shape or infinite input.")
     for i, name in enumerate(features):
-        missing_allowed = name=="overnight_gap" or (tuple(features)==tuple(PATH_MODEL_FEATURES) and name in PATH_FEATURES)
+        missing_allowed = tuple(features)==tuple(SESSION_FEATURES) or name=="overnight_gap" or (tuple(features)==tuple(PATH_MODEL_FEATURES) and name in PATH_FEATURES)
         if not missing_allowed and not np.isfinite(values[:,i]).all():
             raise ValueError("Unexpected missing input: "+name)
 
@@ -521,6 +523,8 @@ def prepare_path_panel(project,run):
 
 
 def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="combined15",not_before=None,minimum_available_memory_gib=None):
+    if experiment=="session267":
+        raise ValueError("Use the dedicated train_session_window controller for the new cohort.")
     spec=EXPERIMENTS[experiment]
     features=list(spec["features"])
     if minimum_available_memory_gib is None:
@@ -661,7 +665,7 @@ def full_run(project,run,hard_stop=HARD_STOP_UTC,workers=WORKERS,experiment="com
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--experiment",choices=sorted(EXPERIMENTS),default="combined15")
+    parser.add_argument("--experiment",choices=sorted(set(EXPERIMENTS)-{"session267"}),default="combined15")
     parser.add_argument("--project",type=Path,default=Path(__file__).resolve().parents[1])
     parser.add_argument("--run-dir",type=Path,required=True)
     parser.add_argument("--mode",choices=["run","batch","comparison","variant_batch","tune","variant_finalize"],default="run")

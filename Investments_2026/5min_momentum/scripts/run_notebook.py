@@ -7,14 +7,14 @@ from datetime import datetime,timezone
 
 REPORTS = {"01": "01_load_sp500_5min", "06": "06_build_volume_and_overnight_features",
            "07": "07_train_xgb_ret_volume_overnight", "09":"09_train_xgb_ret_joint",
-           "10":"10_train_xgb_ret_rich_path", "11":"11_ret_tuning_and_ranker", "12":"12_ranker_portfolio", "13":"13_stop_overlays_10bps_v1", "14":"14_stop_cost_recalibration"}
+           "10":"10_train_xgb_ret_rich_path", "11":"11_ret_tuning_and_ranker", "12":"12_ranker_portfolio", "13":"13_stop_overlays_10bps_v1", "14":"14_stop_cost_recalibration", "15":"15_build_session_window_features", "16":"16_train_session_window"}
 
 
 def run(project, number):
     project = Path(project).resolve()
     matches = list((project / "notebooks").glob(number + "_*.ipynb"))
     if len(matches) != 1 or number not in REPORTS:
-        raise ValueError("Select a single active notebook: 01, 06, 07, 09, 10, 11, 12, 13 or 14.")
+        raise ValueError("Select a single active notebook: 01, 06, 07, 09, 10, 11, 12, 13, 14, 15 or 16.")
     private = project / "data/reports" / REPORTS[number]
     private.mkdir(parents=True, exist_ok=True)
     for key, name in [("IPYTHONDIR", ".ipython"), ("MPLCONFIGDIR", ".matplotlib"),
