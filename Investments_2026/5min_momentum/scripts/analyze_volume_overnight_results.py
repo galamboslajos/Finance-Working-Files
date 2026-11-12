@@ -53,6 +53,8 @@ GROUP_COLORS = {"Original momentum":"#428577","Momentum": "#3674aa", "Volume": "
 
 
 def feature_group(name):
+    if name.startswith("lag") and name[3:5].isdigit():
+        return "Session-window descriptor"
     return "Five-minute path" if name.startswith("path_") else "Momentum" if name.startswith("nm_") else "Volume" if name.startswith("vol_") else "Opening gap" if name=="overnight_gap" else "Original momentum"
 
 
@@ -115,7 +117,7 @@ def extract_importance(run, out, *, allow_constant_models=False):
         mean_gain_share=("gain_share", "mean"), quarter_p10=("gain_share", lambda x:x.quantile(.1)),
         quarter_p90=("gain_share", lambda x:x.quantile(.9)),
         mean_split_share=("split_share", "mean")).reset_index().sort_values("mean_gain_share", ascending=False)
-    summary["label"] = summary.feature.map(LABELS)
+    summary["label"] = summary.feature.map(LABELS).fillna(summary.feature)
     quarterly.to_parquet(out/"quarterly_feature_importance.parquet", index=False)
     summary.to_parquet(out/"feature_importance.parquet", index=False)
     summary.to_csv(out/"feature_importance.csv", index=False)

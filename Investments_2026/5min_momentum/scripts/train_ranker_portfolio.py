@@ -123,21 +123,27 @@ def batch(run,fid,members):
     labels=previous.relevance(training)
     import xgboost as xgb
     dtest=xgb.DMatrix(xt,feature_names=features,nthread=1);row_hash=engine.row_key_hash(testing)
-    old=Path(config['ranker_v1_reference'])
+    new_cohort=config.get('version')=='session_window_ranker100_v1'
+    if new_cohort:
+        from session_window_features import FEATURES
+        if features!=FEATURES or config.get('historical_split_policy')!='same_seed_method_new_cohort':
+            raise ValueError('Undeclared cohort/split change.')
+    old=None if new_cohort else Path(config['ranker_v1_reference'])
     for member in members:
         if checkpoint_complete(run,fid,member):continue
         split_seed,booster_seed=engine.member_seeds(fid,member);ti,vi=previous.date_split(training,split_seed)
         valid_dates=training.iloc[vi].trade_date.unique();valid=full[full.trade_date.isin(valid_dates)].copy()
         if set(valid.trade_date)!=set(training.iloc[vi].trade_date):raise ValueError('Changed validation date split.')
-        old_meta=json.loads(engine.member_prefix(old,fid,member).with_suffix('.json').read_text())
+        old_meta=None if new_cohort else json.loads(engine.member_prefix(old,fid,member).with_suffix('.json').read_text())
         for key,value in [('split_train_index_sha256',previous.digest(ti)),('split_validation_index_sha256',previous.digest(vi)),('prediction_row_key_sha256',row_hash)]:
-            if old_meta[key]!=value:raise ValueError('Changed original split or forecast cohort: '+key)
+            if old_meta is not None and old_meta[key]!=value:raise ValueError('Changed original split or forecast cohort: '+key)
         xv=valid[features].to_numpy(np.float32);engine.validate_matrix(xv,features)
         dt=xgb.DMatrix(x[ti],label=labels[ti],feature_names=features,nthread=1);dt.set_group(previous.group_sizes(training.iloc[ti]))
         # Labels deliberately absent: validation includes unknown future returns.
         dv=xgb.DMatrix(xv,feature_names=features,nthread=1);dv.set_group(previous.group_sizes(valid))
         criterion=PortfolioStopping(valid);parameters=previous.ranking_parameters(booster_seed)
-        if parameters!=old_meta['parameters']:raise ValueError('Changed ranker parameters.')
+        expected=dict(config['parameters'],seed=booster_seed) if new_cohort else old_meta['parameters']
+        if parameters!=expected:raise ValueError('Changed ranker parameters.')
         started=time.monotonic();cpu=time.process_time();at=utcnow()
         model,history=train_until_validation_stops(parameters,dt,dv,30,metric=METRIC,maximize=True,score_function=criterion)
         best=model.best_iteration+1

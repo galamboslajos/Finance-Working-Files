@@ -170,3 +170,28 @@ Performance standard is now 10bp per executed entry/exit side, approximately 20b
 ## Cost-specific stop recalibration — 2026-11-10
 
 Release 14 changes the past stop objective and forward execution cost together to 5/10/20bp per side. Original ML models, 12/3 WFO, saved entries, equal-N objective, empirical candidate/tie rules, warm-up and conditional date masks remain fixed. Each preserved trade still pays one entry and one exit; changing a stop affects dollar fees through exit price, not by eliminating an execution. Calibration improvements need not improve subsequent quarters. Compare with original 1bp-calibrated stops charged at the same cost. Dedicated tests and original-policy controls are separate from the unchanged baseline numerical audit. All prior timing, first-bar fill, tiny-barrier, adjustment/PIT, history reuse and borrow findings remain.
+
+
+## Strict ten-session feature construction — 2026-11-11
+
+The new label-free panel contains 267 declared candidates from ten completed sessions and nine internal overnight gaps. It uses no pre-window price, older smoothing state, current trade-day input or inherited eligibility gate. Normalization is window-end context: all ten session volatilities, and the other nine same-window activity values for each historical day. This is causal for the next-day prediction; it is not claimed to have been known at each historical day's opening time.
+
+Coverage distinguishes invalid/missing source bars from legitimate undefined states (flat opening, zero path variance, zero gap or zero activity denominator). Every resolved member row remains, including incomplete price histories. Exact reason bytes, membership exceptions and legacy-key coverage are retained; complete-case counts are diagnostics, not a new training gate. Full-release duplicate checks are descriptive and do not prune columns with future data. No model is trained. Retrospective membership/adjustments, partial underlying-minute buckets and execution/borrow limitations remain separate from numerical construction checks.
+
+
+## Strict-window learner comparison authorized 2026-11-11
+
+Release `data/models/16_session_window_ret_ranker100_v1` trains unchanged baseline RET and the corrected portfolio-stopped ranker on the 267 audited release-15 features. Each has 100 models × 40 quarters, 12/3 WFO, unchanged seed schedule and learner parameters, and 30-round validation patience. There is no tuning or arbitrary round, RAM, memory-headroom or wall-clock ceiling. One shared ten-worker scheduler alternates learners. No one-minute data or current trade-day input is used.
+
+The declared historical-quality gate requires complete, source-consistent ten-session price and raw-activity histories (missing reason codes 1/2/7 excluded). Legitimate undefined states remain native NaNs; all-267-finite is not eligibility. Exact exclusions are retained before labels are attached. Unknown target outcomes cannot fit but remain forecasts and selected positions. Endpoint/status rules are unchanged and must agree with historical outcomes on overlapping keys. Ten-class tie-preserving labels and RET payoffs are recomputed within this new cohort. This changes historical eligibility/cohort, normalization, feature representation and current-opening information relative to legacy 42; it is not a controlled feature-only attribution.
+
+RET retains random 80/20 stock-row inner splits and probability averaging then past-only class payoffs. The corrected ranker retains random 80/20 whole-date splits, pairwise settings, full validation candidates, fixed complete-outcome date exclusions and mean N2/N3 gross-return stopping. The same seed/method schedule is retained; changed cohort means old row-index hashes/payoffs are not expected to match. Ranker percentiles are not return forecasts. All inputs, configs, sources and completed members are pinned and resumable. Inspection notebook 16 cannot fit or rebuild.
+
+Completion reports both N variants at gross and 5/10/20bp per executed side, with 10bp standard, eight-way common-date comparisons, per-model coverage, matched RET return EV/R² and separately labeled training gain by feature/descriptor/lag. No stop overlay is recalibrated in this run. Prior-close inputs remove current-opening knowledge from the signal; auction fills, retrospective PIT/adjustments, partial underlying minutes, borrow and reused development-history limitations remain.
+
+
+## Trade-day opening-gap clarification — 2026-11-12
+
+The completed 267-feature experiment excludes the current trade-day opening gap. The assistant interpreted the strict ten-completed-session/nine-internal-gap history as a previous-close-only decision cutoff. The user had not explicitly requested removing the existing entry-day gap; this should have been presented as a separate material design decision. Consequently, comparison against the 42-feature models changes information availability in addition to history, normalization, eligibility and cohort-conditioned labels/payoffs. The results cannot isolate the effect of feature count or attribute the performance difference to any single change.
+
+A proposed follow-up keeps the 267 historical inputs and restores the trade-day opening gap as a separate entry-time observation, using only the prior close and current open. This would have 268 inputs and retain the optimistic same-opening execution qualification. It has not been implemented or fitted. Completed feature/model releases and their pinned sources remain unchanged.
